@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+@theme {
+  --font-serif: "Playfair Display", "Noto Serif KR", serif;
+  --font-sans: "Plus Jakarta Sans", "Noto Sans KR", sans-serif;
+  --color-mythic-dark: #050505;
+  --color-mythic-card: #111111;
+  --color-mythic-red: #FF3B30;
+  --color-mythic-gold: #FFD60A;
+  --color-mythic-blue: #007AFF;
+  --color-mythic-green: #34C759;
+  --color-mythic-text: #F2F2F7;
+}
+
+@layer base {
+  body {
+    @apply bg-mythic-dark text-mythic-text font-sans overflow-x-hidden antialiased;
+  }
+}
+
+.mythic-grain {
+  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+  background-repeat: repeat;
+  opacity: 0.05;
+}
+
+.bento-card-refined {
+  @apply bg-[#111] border border-white/5 rounded-[32px] shadow-2xl transition-all hover:bg-[#161616] hover:border-white/10;
+}
+
+.obangsaek-circle {
+  @apply w-12 h-12 rounded-full flex items-center justify-center text-black font-extrabold text-lg shadow-lg;
+}
+
+.text-editorial {
+  @apply font-serif italic tracking-tight;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}

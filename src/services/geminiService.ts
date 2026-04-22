@@ -1,11 +1,17 @@
 import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
 
-const apiKey = process.env.GEMINI_API_KEY;
-if (!apiKey) {
-  throw new Error("GEMINI_API_KEY is not defined");
-}
+let genAI: GoogleGenAI | null = null;
 
-const genAI = new GoogleGenAI({ apiKey });
+function getGenAI() {
+  if (!genAI) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is required");
+    }
+    genAI = new GoogleGenAI({ apiKey });
+  }
+  return genAI;
+}
 
 export interface FortuneSection {
   title: string;
@@ -50,7 +56,8 @@ export async function getFortune(userData: {
 `;
 
   try {
-    const response = await genAI.models.generateContent({
+    const ai = getGenAI();
+    const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview", 
       contents: prompt,
       config: {
@@ -108,7 +115,8 @@ ${question}
 `;
 
   try {
-    const response = await genAI.models.generateContent({
+    const ai = getGenAI();
+    const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
       config: {

@@ -49,7 +49,7 @@ export default function FortuneResultView({ fortune, onReset, userData }: Fortun
       case 0: return "col-span-12 md:col-span-8 row-span-2";
       case 1: return "col-span-12 md:col-span-4 row-span-2 bg-[#1a1a1a]";
       case 2: return "col-span-12 md:col-span-6 row-span-2";
-      case 3: return "col-span-12 md:col-span-6 row-span-2 bg-white text-black";
+      case 3: return "col-span-12 md:col-span-6 row-span-2 bg-[#1a1a1a] text-white";
       case 4: return "col-span-12 md:col-span-4 row-span-2 bg-mythic-red text-white";
       case 5: return "col-span-12 md:col-span-8 row-span-2";
       default: return "col-span-12 md:col-span-4 row-span-2";
@@ -109,7 +109,7 @@ export default function FortuneResultView({ fortune, onReset, userData }: Fortun
                 </h3>
               </div>
 
-              <div className={`text-sm md:text-base font-sans tracking-tight leading-relaxed line-clamp-6 ${isSpecial ? "opacity-90" : "text-white/60"}`}>
+              <div className={`text-sm md:text-base font-sans tracking-tight leading-relaxed ${isSpecial ? "opacity-90" : "text-white/60"}`}>
                 {section.content}
               </div>
             </motion.div>
@@ -197,11 +197,35 @@ export default function FortuneResultView({ fortune, onReset, userData }: Fortun
         </div>
       </div>
 
+      {/* Ko-fi Donation Link */}
+      <div className="mt-24 flex flex-col items-center justify-center p-8 border border-white/5 rounded-[40px] bg-white/[0.02] relative z-10">
+        <p className="text-white/40 text-xs font-sans tracking-[0.3em] uppercase mb-6">마음에 드셨다면 할멈에게 복채를 주시게나</p>
+        <a 
+          href="https://ko-fi.com/patiencendiligence" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-4 px-8 py-4 bg-mythic-gold text-black font-sans font-black text-[10px] uppercase tracking-[0.4em] rounded-full hover:scale-105 active:scale-95 transition-all shadow-lg shadow-mythic-gold/20"
+        >
+          <img src="https://ko-fi.com/img/cup-border.png" alt="Ko-fi" className="w-5 h-5 invert" referrerPolicy="no-referrer" />
+          Give a Ko-fi
+        </a>
+      </div>
+
       {/* Footer Navigation */}
-      <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40">
-        <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
-          <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> New Reading
-        </button>
+      <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10">
+        <div className="flex flex-col items-center md:items-start gap-4">
+          <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
+            <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> New Reading
+          </button>
+          {/* Visitor Counter Badge */}
+          <div className="mt-4 opacity-50 grayscale hover:grayscale-0 transition-all">
+            <img 
+              src={`https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=${encodeURIComponent(window.location.origin)}&count_bg=%23D4AF37&title_bg=%231A1A1A&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false`} 
+              alt="Visitors" 
+              referrerPolicy="no-referrer"
+            />
+          </div>
+        </div>
         <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">
           © 2024 YONG-SIN GRANDMOTHER. AUTHENTIC KOREAN ORACLE.
         </div>

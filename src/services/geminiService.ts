@@ -51,10 +51,9 @@ const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION;
 const TIME_LOGIC = process.env.TIME_LOGIC;
 
 const FREE_MODELS = [
-  "gemini-3-flash-preview",
-  "gemini-2.0-flash-exp",
   "gemini-1.5-flash",
-  "gemini-1.5-flash-8b"
+  "gemini-1.5-flash-8b",
+  "gemini-2.0-flash"
 ];
 
 async function callWithFallback(

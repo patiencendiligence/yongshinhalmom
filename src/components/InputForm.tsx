@@ -64,12 +64,12 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-mythic-red flex items-center justify-center text-[10px] text-white font-black">02</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.birthPlace}</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">{t.birthPlace}</label>
             </div>
             <input
               type="text"
               placeholder={t.placePlaceholder}
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-mythic-red transition-all font-serif text-2xl text-white placeholder:text-white/5"
+              className="w-full bg-transparent border-b border-white/30 px-0 py-4 outline-none focus:border-mythic-red transition-all font-serif text-2xl text-white placeholder:text-white/5"
               value={formData.birthPlace}
               onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
             />
@@ -80,11 +80,11 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[10px] text-black font-black">03</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.birthDate}</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/30 font-bold">{t.birthDate}</label>
             </div>
             <input
               type="date"
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-white transition-all font-serif text-2xl text-white invert h-[65px]"
+              className="w-full bg-transparent border-b border-white/30 px-0 py-4 outline-none focus:border-white transition-all font-serif text-2xl text-white/30 h-[65px]"
               value={formData.birthDate}
               onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
             />
@@ -96,7 +96,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
             </div>
             <input
               type="time"
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-mythic-blue transition-all font-serif text-2xl text-white invert h-[65px]"
+              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-mythic-blue transition-all font-serif text-2xl text-white/30 h-[65px]"
               value={formData.birthTime}
               onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
             />
@@ -118,7 +118,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                   className={`flex-1 py-4 border transition-all text-xs font-bold tracking-widest uppercase ${
                     formData.isLunar === opt.value 
                     ? "bg-white text-black border-white" 
-                    : "bg-transparent text-white/20 border-white/5 hover:border-white/20 hover:text-white"
+                    : "bg-transparent text-white/30 border-white/5 hover:border-white/20 hover:text-white"
                   }`}
                 >
                   {opt. kr} <span className="opacity-40 ml-1">{opt.label}</span>
@@ -141,7 +141,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                   className={`flex-1 py-4 border transition-all text-xs font-bold tracking-widest uppercase ${
                     formData.gender === opt.value 
                     ? "bg-mythic-red text-white border-mythic-red" 
-                    : "bg-transparent text-white/20 border-white/5 hover:border-white/20 hover:text-white"
+                    : "bg-transparent text-white/30 border-white/5 hover:border-white/20 hover:text-white"
                   }`}
                 >
                   {opt.kr} <span className="opacity-40 ml-1">{opt.label}</span>

@@ -116,14 +116,6 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         Destiny
       </div>
 
-      {/* Visitor Count Badge */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 opacity-20 grayscale hover:opacity-100 hover:grayscale-0 transition-all">
-        <img 
-          src={`https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fpatiencendiligence.github.io%2Fyongshinhalmom&count_bg=%23D4AF37&title_bg=%231A1A1A&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false`} 
-          alt="Visitors" 
-          referrerPolicy="no-referrer"
-        />
-      </div>
     </div>
   );
 }

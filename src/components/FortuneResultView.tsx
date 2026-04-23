@@ -27,20 +27,25 @@ interface FortuneResultViewProps {
   lang: Language;
 }
 
-const Illustration = ({ type }: { type: FortuneResult["illustrationType"] }) => {
-  const iconProps = { className: "w-16 h-16 text-mythic-gold/40" };
+const Illustration = ({ zodiac }: { zodiac: number }) => {
+  // zodiac: 0-5 (Row 1), 6-11 (Row 2)
+  // Sheet is 6 cols x 2 rows
+  const col = zodiac % 6;
+  const row = Math.floor(zodiac / 6);
   
-  switch (type) {
-    case "SUN": return <Sun {...iconProps} />;
-    case "MOON": return <Moon {...iconProps} />;
-    case "CANDLE": return <Flame {...iconProps} />;
-    case "TREE": return <Trees {...iconProps} />;
-    case "WATER": return <Waves {...iconProps} />;
-    case "MOUNTAIN": return <Mountain {...iconProps} />;
-    case "BELLS": return <Bell {...iconProps} />;
-    case "DRAGON": return <Zap {...iconProps} />; // Representing dragon energy
-    default: return <Sun {...iconProps} />;
-  }
+  return (
+    <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-black/20">
+      <div 
+        className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
+        style={{
+          backgroundImage: 'url("/zodiac_guardians.png")',
+          backgroundSize: '600% 200%',
+          backgroundPosition: `${(col / 5) * 100}% ${(row / 1) * 100}%`,
+          backgroundRepeat: 'no-repeat'
+        }}
+      />
+    </div>
+  );
 };
 
 export default function FortuneResultView({ fortune, onReset, userData, lang }: FortuneResultViewProps) {
@@ -94,11 +99,6 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
       {/* Header Section */}
       <header className="pt-20 pb-16 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-white/5 mb-16 relative z-10">
         <div className="max-w-2xl mb-8 md:mb-0">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="obangsaek-circle bg-mythic-gold">01</div>
-            <div className="obangsaek-circle bg-mythic-red text-white">02</div>
-            <div className="obangsaek-circle bg-white">03</div>
-          </div>
           <h1 className="text-6xl md:text-8xl font-serif font-black tracking-tighter text-white italic leading-none mb-6">
             {t.oracleHasSpoken.split('Oracle')[0]} <span className="text-mythic-gold">Oracle</span> <br/>
             {t.oracleHasSpoken.split('Oracle')[1]}
@@ -133,9 +133,9 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5, type: "spring" }}
-            className="p-4 border border-white/5 rounded-2xl bg-white/[0.02]"
+            className="p-1 border border-white/5 rounded-xl bg-white/[0.02]"
           >
-            <Illustration type={fortune.illustrationType} />
+            <Illustration zodiac={fortune.zodiac} />
           </motion.div>
         </div>
       </header>
@@ -269,6 +269,19 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
         </a>
       </div>
 
+      {/* Feedback / Contact */}
+      <div className="mt-24 text-center opacity-30 relative z-10">
+        <p className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase mb-2">
+          {lang === "ko" ? "오류 제보 및 문의" : "Bug Reports & Inquiries"}
+        </p>
+        <a 
+          href="mailto:patiencendiligence@gmail.com" 
+          className="text-xs font-serif italic hover:text-mythic-gold transition-all"
+        >
+          patiencendiligence@gmail.com
+        </a>
+      </div>
+
       {/* Footer Navigation */}
       <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10">
         <div className="flex flex-col items-center md:items-start gap-4">
@@ -277,14 +290,6 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
           <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
             <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> {t.backToHome}
           </button>
-          {/* Visitor Counter Badge */}
-          <div className="mt-4 opacity-50 grayscale hover:grayscale-0 transition-all">
-            <img 
-              src={`https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fpatiencendiligence.github.io%2Fyongshinhalmom&count_bg=%23D4AF37&title_bg=%231A1A1A&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false`} 
-              alt="Visitors" 
-              referrerPolicy="no-referrer"
-            />
-          </div>
         </div>
         <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">
           © 2026 YONG-SIN HALMOM. AUTHENTIC KOREAN ORACLE.

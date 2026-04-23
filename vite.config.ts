@@ -6,12 +6,12 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: '/yongshinhalmom/',
+    base: '/',
     plugins: [react(), tailwindcss()],
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'process.env.SYSTEM_INSTRUCTION' : JSON.stringify(env.SYSTEM_INSTRUCTION),
-      'process.env.TIME_LOGIC': JSON.stringify(env.TIME_LOGIC)
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY || ''),
+      'process.env.SYSTEM_INSTRUCTION' : JSON.stringify(env.SYSTEM_INSTRUCTION || ''),
+      'process.env.TIME_LOGIC': JSON.stringify(env.TIME_LOGIC || '')
     },
     resolve: {
       alias: {

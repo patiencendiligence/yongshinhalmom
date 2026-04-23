@@ -76,8 +76,11 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
       `;
       const answer = await askAdditionalQuestion(`${userDataStr}\n${flatFortune}`, currentQuestion, lang);
       setChatHistory((prev) => [...prev, { role: "halmeom", text: answer }]);
-    } catch (error) {
-      setChatHistory((prev) => [...prev, { role: "halmeom", text: t.errorMessage }]);
+    } catch (error: any) {
+      console.error("Chat error:", error);
+      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
+      const msg = isQuota ? (translations[lang] as any).quotaExceeded : t.errorMessage;
+      setChatHistory((prev) => [...prev, { role: "halmeom", text: msg }]);
     } finally {
       setIsAsking(false);
     }
@@ -227,8 +230,8 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
                     <div className="text-[10px] uppercase tracking-widest font-sans font-black opacity-30 mb-2">
                       {msg.role === "user" ? (lang === "ko" ? "의뢰인" : "Client") : (lang === "ko" ? "할멈" : "Oracle")}
                     </div>
-                    <div className={`text-lg md:text-xl font-serif italic ${msg.role === "user" ? "text-mythic-gold" : "text-white/80"}`}>
-                      {msg.text}
+                    <div className={`text-lg md:text-xl font-serif italic whitespace-pre-wrap ${msg.role === "user" ? "text-mythic-gold" : "text-white/80"}`}>
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
                     </div>
                   </div>
                 </div>

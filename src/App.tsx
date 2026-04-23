@@ -16,7 +16,6 @@ import InputForm from "./components/InputForm";
 import FortuneResultView from "./components/FortuneResultView";
 import ProfileModal from "./components/ProfileModal";
 import InfoModal from "./components/InfoModal";
-import ReportModal from "./components/ReportModal";
 import { getFortune, FortuneResult } from "./services/geminiService";
 import { storageService, UserProfile } from "./services/storageService";
 import { Language, translations } from "./lib/translations";
@@ -30,7 +29,6 @@ export default function App() {
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [preFilledData, setPreFilledData] = useState<any>(null);
   const [lang, setLang] = useState<Language>(() => {
     const saved = localStorage.getItem("yongshin_lang");
@@ -78,9 +76,11 @@ export default function App() {
       const result = await getFortune(data, lang);
       setFortune(result);
       setState("RESULT");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert(t.errorMessage);
+      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
+      const msg = isQuota ? (translations[lang] as any).quotaExceeded : t.errorMessage;
+      alert(msg);
       setState("INPUT");
     }
   };
@@ -216,17 +216,9 @@ export default function App() {
         isOpen={isInfoModalOpen}
         onClose={() => setIsInfoModalOpen(false)}
         onOpenReport={() => {
-          setIsInfoModalOpen(false);
-          setIsReportModalOpen(true);
+          window.location.href = "mailto:patiencendiligence@gmail.com";
         }}
         lang={lang}
-      />
-
-      <ReportModal 
-        isOpen={isReportModalOpen}
-        onClose={() => setIsReportModalOpen(false)}
-        lang={lang}
-        userData={userData}
       />
 
       {/* Decorative Ornaments */}

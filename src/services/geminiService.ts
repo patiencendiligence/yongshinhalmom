@@ -51,9 +51,10 @@ const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION;
 const TIME_LOGIC = process.env.TIME_LOGIC;
 
 const FREE_MODELS = [
-  "gemini-1.5-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-2.0-flash"
+  "gemini-3-flash-preview",
+  "gemini-3.1-flash-lite-preview",
+  "gemini-flash-latest",
+  "gemini-3.1-pro-preview"
 ];
 
 async function callWithFallback(
@@ -73,8 +74,13 @@ async function callWithFallback(
         JSON.stringify(error).includes("429") ||
         error?.message?.includes("RESOURCE_EXHAUSTED");
       
-      if (isQuota) {
-        console.warn(`Model ${modelName} exhausted. Trying next fallback...`);
+      const isNotFound =
+        error?.message?.includes("404") ||
+        error?.status === 404 ||
+        JSON.stringify(error).includes("NOT_FOUND");
+      
+      if (isQuota || isNotFound) {
+        console.warn(`Model ${modelName} ${isQuota ? 'exhausted' : 'not found'}. Trying next fallback...`);
         continue;
       }
       throw error;

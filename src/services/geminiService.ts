@@ -68,16 +68,20 @@ async function callWithFallback(
       return await operation(modelName);
     } catch (error: any) {
       lastError = error;
+      const errorStr = typeof error === 'string' ? error : JSON.stringify(error);
       const isQuota = 
         error?.message?.includes("429") || 
         error?.status === 429 || 
-        JSON.stringify(error).includes("429") ||
-        error?.message?.includes("RESOURCE_EXHAUSTED");
+        error?.error?.code === 429 ||
+        errorStr.includes("429") ||
+        errorStr.includes("RESOURCE_EXHAUSTED");
       
       const isNotFound =
         error?.message?.includes("404") ||
         error?.status === 404 ||
-        JSON.stringify(error).includes("NOT_FOUND");
+        error?.error?.code === 404 ||
+        errorStr.includes("404") ||
+        errorStr.includes("NOT_FOUND");
       
       if (isQuota || isNotFound) {
         console.warn(`Model ${modelName} ${isQuota ? 'exhausted' : 'not found'}. Trying next fallback...`);

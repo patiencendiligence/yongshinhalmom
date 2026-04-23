@@ -1,5 +1,4 @@
-import { GoogleGenAI, Type, ThinkingLevel } from "@google/genai";
-
+import { GoogleGenAI, Type } from "@google/genai";
 import { Language } from "../lib/translations";
 
 let genAI: GoogleGenAI | null = null;
@@ -36,7 +35,41 @@ export interface FortuneResult {
 }
 
 const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION;
-const TIME_LOGIC = process.env.TIME_LOGIC
+const TIME_LOGIC = process.env.TIME_LOGIC;
+
+const FREE_MODELS = [
+  "gemini-3-flash-preview",
+  "gemini-2.0-flash-exp",
+  "gemini-1.5-flash",
+  "gemini-1.5-flash-8b"
+];
+
+async function callWithFallback(
+  operation: (modelName: string) => Promise<any>
+) {
+  let lastError: any = null;
+  
+  for (const modelName of FREE_MODELS) {
+    try {
+      return await operation(modelName);
+    } catch (error: any) {
+      lastError = error;
+      const isQuota = 
+        error?.message?.includes("429") || 
+        error?.status === 429 || 
+        JSON.stringify(error).includes("429") ||
+        error?.message?.includes("RESOURCE_EXHAUSTED");
+      
+      if (isQuota) {
+        console.warn(`Model ${modelName} exhausted. Trying next fallback...`);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw lastError;
+}
+
 export async function getFortune(userData: {
   name: string;
   birthDate: string;
@@ -83,10 +116,10 @@ ${TIME_LOGIC}
 반드시 할멈의 말투를 유지하며, 위 계산 기준을 어기면 할멈의 꾸지람을 면치 못할 것이야!
 `;
 
-  try {
+  return callWithFallback(async (modelName) => {
     const ai = getGenAI();
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview", 
+      model: modelName, 
       contents: prompt,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
@@ -130,10 +163,7 @@ ${TIME_LOGIC}
     });
 
     return JSON.parse(response.text || "{}");
-  } catch (error) {
-    console.error("Error fetching fortune:", error);
-    throw error;
-  }
+  });
 }
 
 export async function askAdditionalQuestion(
@@ -164,17 +194,18 @@ ${question}
 `;
 
   try {
-    const ai = getGenAI();
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: prompt,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
-      },
-    });
+    return await callWithFallback(async (modelName) => {
+      const ai = getGenAI();
+      const response = await ai.models.generateContent({
+        model: modelName,
+        contents: prompt,
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+        },
+      });
 
-    return response.text || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+      return response.text || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+    });
   } catch (error) {
     console.error("Error in additional question:", error);
     return lang === "ko" ? "할멈 기운이 다했으니 나중에 다시 오게." : "My energy is spent, come back later.";

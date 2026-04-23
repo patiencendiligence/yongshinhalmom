@@ -2,24 +2,29 @@ import React, { useState } from "react";
 import { motion } from "motion/react";
 import { User, Calendar, Clock, MapPin, CheckCircle2, ArrowRight } from "lucide-react";
 
+import { Language, translations } from "../lib/translations";
+
 interface InputFormProps {
   onSubmit: (data: any) => void;
+  initialData?: any;
+  lang: Language;
 }
 
-export default function InputForm({ onSubmit }: InputFormProps) {
+export default function InputForm({ onSubmit, initialData, lang }: InputFormProps) {
+  const t = translations[lang];
   const [formData, setFormData] = useState({
-    name: "",
-    birthDate: "",
-    birthTime: "",
-    isLunar: false,
-    gender: "female",
-    birthPlace: "",
+    name: initialData?.name || "",
+    birthDate: initialData?.birthDate || "",
+    birthTime: initialData?.birthTime || "",
+    isLunar: initialData?.isLunar ?? false,
+    gender: initialData?.gender || "female",
+    birthPlace: initialData?.birthPlace || "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.birthDate || !formData.birthPlace) {
-      alert("할멈이 다 보고 있네. 빠짐없이 적게나.");
+      alert(t.missingFields);
       return;
     }
     onSubmit(formData);
@@ -31,11 +36,11 @@ export default function InputForm({ onSubmit }: InputFormProps) {
 
       <header className="mb-16 text-center">
         <h2 className="text-4xl font-serif font-black text-white italic mb-4 tracking-tighter">
-          Registry <span className="text-mythic-red">of</span> Fate
+          {t.registryTitle}
         </h2>
         <div className="flex items-center justify-center gap-2">
           <div className="w-1 h-1 rounded-full bg-mythic-gold" />
-          <p className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-sans font-bold">점사를 위한 개인 정보 기록</p>
+          <p className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-sans font-bold">{t.registrySubtitle}</p>
           <div className="w-1 h-1 rounded-full bg-mythic-gold" />
         </div>
       </header>
@@ -45,11 +50,11 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-mythic-gold flex items-center justify-center text-[10px] text-black font-black">01</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">의뢰인 성명</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.clientName}</label>
             </div>
             <input
               type="text"
-              placeholder="이름을 입력하게"
+              placeholder={t.namePlaceholder}
               className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-mythic-gold transition-all font-serif text-2xl text-white placeholder:text-white/20"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -59,11 +64,11 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-mythic-red flex items-center justify-center text-[10px] text-white font-black">02</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">출생지</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.birthPlace}</label>
             </div>
             <input
               type="text"
-              placeholder="예: 서울, 부산"
+              placeholder={t.placePlaceholder}
               className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-mythic-red transition-all font-serif text-2xl text-white placeholder:text-white/5"
               value={formData.birthPlace}
               onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
@@ -75,7 +80,7 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center text-[10px] text-black font-black">03</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">생년월일</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.birthDate}</label>
             </div>
             <input
               type="date"
@@ -87,7 +92,7 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-6 h-6 rounded-full bg-mythic-blue flex items-center justify-center text-[10px] text-white font-black">04</div>
-              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">출생시각</label>
+              <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.birthTime}</label>
             </div>
             <input
               type="time"
@@ -100,11 +105,11 @@ export default function InputForm({ onSubmit }: InputFormProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">역구분</label>
+            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.calendarType}</label>
             <div className="flex gap-4">
               {[
-                { value: false, label: "Solar", kr: "양력" },
-                { value: true, label: "Lunar", kr: "음력" }
+                { value: false, label: "Solar", kr: t.solar },
+                { value: true, label: "Lunar", kr: t.lunar }
               ].map((opt) => (
                 <button
                   key={opt.label}
@@ -123,11 +128,11 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           </div>
 
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">성별</label>
+            <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.gender}</label>
             <div className="flex gap-4">
               {[
-                { value: "female", label: "Female", kr: "여성" },
-                { value: "male", label: "Male", kr: "남성" }
+                { value: "female", label: "Female", kr: t.female },
+                { value: "male", label: "Male", kr: t.male }
               ].map((opt) => (
                 <button
                   key={opt.label}
@@ -152,7 +157,7 @@ export default function InputForm({ onSubmit }: InputFormProps) {
           type="submit"
           className="w-full py-8 mt-12 bg-mythic-gold text-black font-sans font-black text-sm uppercase tracking-[0.5em] transition-all flex items-center justify-center gap-4 group"
         >
-          Check Destiny <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+          {t.checkDestiny} <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
         </motion.button>
       </form>
     </div>

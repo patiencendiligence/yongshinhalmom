@@ -38,7 +38,7 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
       <div 
         className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
         style={{
-          backgroundImage: 'url("/zodiac_guardians.png")',
+          backgroundImage: 'url("zodiac_guardians.png")',
           backgroundSize: '600% 200%',
           backgroundPosition: `${(col / 5) * 100}% ${(row / 1) * 100}%`,
           backgroundRepeat: 'no-repeat'
@@ -64,11 +64,17 @@ export default function FortuneResultView({ fortune, onReset, userData, lang }: 
     setIsAsking(true);
 
     try {
-      const flatFortune = `
-        Summary: ${fortune.summary}
-        ${fortune.sections.map(s => `${s.title}: ${s.content}`).join("\n")}
+      const userDataStr = `
+        의뢰인 이름: ${userData.name}
+        생년월일: ${userData.birthDate}
+        성별: ${userData.gender}
+        역구분: ${userData.isLunar ? "음력" : "양력"}
       `;
-      const answer = await askAdditionalQuestion(flatFortune, currentQuestion, lang);
+      const flatFortune = `
+        [이전 점사 요약]: ${fortune.summary}
+        [상세 내용]: ${fortune.sections.map(s => `${s.title}: ${s.content}`).join("\n")}
+      `;
+      const answer = await askAdditionalQuestion(`${userDataStr}\n${flatFortune}`, currentQuestion, lang);
       setChatHistory((prev) => [...prev, { role: "halmeom", text: answer }]);
     } catch (error) {
       setChatHistory((prev) => [...prev, { role: "halmeom", text: t.errorMessage }]);

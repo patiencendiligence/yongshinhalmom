@@ -1,7 +1,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import OpenAI from "openai";
 import { Language } from "../lib/translations";
 
 let genAI: GoogleGenAI | null = null;
+let openaiClient: OpenAI | null = null;
 
 function getGenAI() {
   if (!genAI) {
@@ -12,6 +14,17 @@ function getGenAI() {
     genAI = new GoogleGenAI({ apiKey });
   }
   return genAI;
+}
+
+function getOpenAI() {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY environment variable is required for fallback");
+    }
+    openaiClient = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  }
+  return openaiClient;
 }
 
 export interface FortuneSection {
@@ -45,7 +58,8 @@ const FREE_MODELS = [
 ];
 
 async function callWithFallback(
-  operation: (modelName: string) => Promise<any>
+  operation: (modelName: string) => Promise<any>,
+  openaiFallback?: () => Promise<any>
 ) {
   let lastError: any = null;
   
@@ -67,6 +81,18 @@ async function callWithFallback(
       throw error;
     }
   }
+
+  // Try OpenAI as last resort
+  if (openaiFallback) {
+    try {
+      console.warn("All Gemini models exhausted. Trying OpenAI fallback...");
+      return await openaiFallback();
+    } catch (error) {
+      console.error("OpenAI Fallback failed:", error);
+      throw lastError; // Prefer showing the original quota error or the final error
+    }
+  }
+
   throw lastError;
 }
 
@@ -116,54 +142,68 @@ ${TIME_LOGIC}
 반드시 할멈의 말투를 유지하며, 위 계산 기준을 어기면 할멈의 꾸지람을 면치 못할 것이야!
 `;
 
-  return callWithFallback(async (modelName) => {
-    const ai = getGenAI();
-    const response = await ai.models.generateContent({
-      model: modelName, 
-      contents: prompt,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            summary: { type: Type.STRING },
-            zodiac: { type: Type.INTEGER, description: "Calculated zodiac index based on birth year (0:Rat, 1:Ox, 2:Tiger, 3:Rabbit, 4:Dragon, 5:Snake, 6:Horse, 7:Sheep, 8:Monkey, 9:Rooster, 10:Dog, 11:Pig) based on Ipchun." },
-            illustrationType: { 
-              type: Type.STRING, 
-              enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
-            },
-            sections: {
-              type: Type.ARRAY,
-              items: {
+  return callWithFallback(
+    async (modelName) => {
+      const ai = getGenAI();
+      const response = await ai.models.generateContent({
+        model: modelName, 
+        contents: prompt,
+        config: {
+          systemInstruction: SYSTEM_INSTRUCTION,
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: Type.OBJECT,
+            properties: {
+              summary: { type: Type.STRING },
+              zodiac: { type: Type.INTEGER, description: "Calculated zodiac index based on birth year (0:Rat, 1:Ox, 2:Tiger, 3:Rabbit, 4:Dragon, 5:Snake, 6:Horse, 7:Sheep, 8:Monkey, 9:Rooster, 10:Dog, 11:Pig) based on Ipchun." },
+              illustrationType: { 
+                type: Type.STRING, 
+                enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
+              },
+              sections: {
+                type: Type.ARRAY,
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    title: { type: Type.STRING },
+                    content: { type: Type.STRING },
+                  },
+                  required: ["title", "content"],
+                },
+              },
+              luckInfo: {
                 type: Type.OBJECT,
                 properties: {
-                  title: { type: Type.STRING },
-                  content: { type: Type.STRING },
+                  color: { type: Type.STRING },
+                  item: { type: Type.STRING },
+                  food: { type: Type.STRING },
                 },
-                required: ["title", "content"],
+                required: ["color", "item", "food"],
               },
+              medicalAdvice: { type: Type.STRING },
+              isAbuse: { type: Type.BOOLEAN },
+              abuseMessage: { type: Type.STRING },
             },
-            luckInfo: {
-              type: Type.OBJECT,
-              properties: {
-                color: { type: Type.STRING },
-                item: { type: Type.STRING },
-                food: { type: Type.STRING },
-              },
-              required: ["color", "item", "food"],
-            },
-            medicalAdvice: { type: Type.STRING },
-            isAbuse: { type: Type.BOOLEAN },
-            abuseMessage: { type: Type.STRING },
+            required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
           },
-          required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
         },
-      },
-    });
+      });
 
-    return JSON.parse(response.text || "{}");
-  });
+      return JSON.parse(response.text || "{}");
+    },
+    async () => {
+      const openai = getOpenAI();
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: SYSTEM_INSTRUCTION || "" },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" }
+      });
+      return JSON.parse(response.choices[0].message.content || "{}");
+    }
+  );
 }
 
 export async function askAdditionalQuestion(
@@ -194,18 +234,31 @@ ${question}
 `;
 
   try {
-    return await callWithFallback(async (modelName) => {
-      const ai = getGenAI();
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-        },
-      });
+    return await callWithFallback(
+      async (modelName) => {
+        const ai = getGenAI();
+        const response = await ai.models.generateContent({
+          model: modelName,
+          contents: prompt,
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+          },
+        });
 
-      return response.text || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
-    });
+        return response.text || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+      },
+      async () => {
+        const openai = getOpenAI();
+        const response = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [
+            { role: "system", content: SYSTEM_INSTRUCTION || "" },
+            { role: "user", content: prompt }
+          ]
+        });
+        return response.choices[0].message.content || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+      }
+    );
   } catch (error) {
     console.error("Error in additional question:", error);
     return lang === "ko" ? "할멈 기운이 다했으니 나중에 다시 오게." : "My energy is spent, come back later.";

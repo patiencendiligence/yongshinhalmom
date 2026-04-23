@@ -52,3 +52,20 @@
 .animate-float {
   animation: float 4s ease-in-out infinite;
 }
+
+.markdown-container strong {
+  @apply text-mythic-gold font-black;
+}
+
+.markdown-container p {
+  @apply mb-4 last:mb-0;
+}
+
+.markdown-container ul {
+  @apply list-disc list-inside mb-4;
+}
+
+.bg-[#1a1a1a] .markdown-container strong,
+.bg-mythic-red .markdown-container strong {
+  @apply text-white border-b border-white/30;
+}

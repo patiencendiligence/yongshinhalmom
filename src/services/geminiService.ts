@@ -148,6 +148,10 @@ export async function askAdditionalQuestion(
 [STRICT LANGUAGE INSTRUCTION]
 The response MUST be written strictly in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 
+[STRICT FORMAT INSTRUCTION]
+DO NOT use JSON format. DO NOT use markdown code blocks like \`\`\`json.
+Reply ONLY with a natural, conversational response in the voice of a traditional Korean oracle (Halmeom).
+
 현재 시각: ${currentDate} (병오년)
 
 이전 점사 내용:

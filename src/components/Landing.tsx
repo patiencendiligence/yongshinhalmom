@@ -14,43 +14,50 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
   const t = translations[lang];
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden">
-      {/* Texture Layer */}
-      <div className="absolute inset-0 mythic-grain pointer-events-none" />
-      
-      {/* Sophisticated Accents */}
-      <div className="absolute top-[20%] right-[-5%] w-[300px] h-[300px] rounded-full bg-mythic-red/5 blur-[100px]" />
-      <div className="absolute bottom-[20%] left-[-5%] w-[300px] h-[300px] rounded-full bg-mythic-gold/5 blur-[100px]" />
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden dragon-pattern">
+      {/* Decorative Accents Inspired by Image 1 */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2 }}
+          className="absolute -top-20 -left-20 w-[60vw] h-[60vw] rounded-full bg-holo-cyan/5 blur-[120px]" 
+        />
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 2, delay: 0.5 }}
+          className="absolute -bottom-20 -right-20 w-[60vw] h-[60vw] rounded-full bg-holo-pink/5 blur-[120px]" 
+        />
+      </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="mb-12"
+        className="relative z-20 mb-8"
       >
-        <div className="inline-flex items-center gap-6 px-6 py-2 border border-white/10 rounded-full bg-white/5 backdrop-blur-sm">
-          <span className="text-[10px] font-sans font-bold tracking-[0.3em] uppercase text-white/40">{t.since}</span>
-          <div className="w-1 h-1 rounded-full bg-mythic-gold" />
-          <span className="text-[10px] font-sans font-bold tracking-[0.3em] uppercase text-white/40">{t.traditionalWisdom}</span>
+        <div className="inline-block px-4 py-1 border border-white/10 rounded-none bg-black backdrop-blur-sm">
+          <span className="text-[9px] font-sans font-black tracking-[0.5em] uppercase text-white/40 italic">{t.traditionalWisdom}</span>
         </div>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
+        initial={{ opacity: 0, scale: 0.98 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 1, ease: "easeOut" }}
+        transition={{ delay: 0.4, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10"
       >
-        <h1 className="flex flex-col items-center mb-10">
-          <span className="text-[12px] font-sans font-black tracking-[0.6em] uppercase text-mythic-gold mb-4 opacity-80">{t.ancientOracle}</span>
-          <span className="text-8xl md:text-11xl font-serif font-black tracking-tighter leading-none mb-4 italic text-white whitespace-nowrap">
-            {t.title === "Lifestyle Insights" ? (
-              <span className="text-4xl md:text-6xl uppercase tracking-[0.2em]">{t.title}</span>
-            ) : (
-              <>{t.title}</>
-            )}
-          </span>
-          <span className="text-lg md:text-xl font-serif text-white/30 italic tracking-[0.2em]">{t.grandmother}</span>
+        <h1 className="flex flex-col items-center mb-12">
+          <span className="text-[11px] font-sans font-black tracking-[0.8em] uppercase mythic-gradient-text mb-6">{t.ancientOracle}</span>
+          <div className="flex flex-col items-center">
+            <span className="text-6xl md:text-[10rem] font-serif font-black italic tracking-tighter leading-[0.85] text-white">
+              {t.title}
+            </span>
+            <span className="text-2xl md:text-3xl font-serif text-white/20 italic tracking-[0.4em] mt-4 uppercase">
+              {t.grandmother}
+            </span>
+          </div>
         </h1>
       </motion.div>
 
@@ -58,64 +65,44 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="max-w-xl mx-auto mb-16"
+        className="max-w-xl mx-auto mb-16 relative z-10"
       >
-        <p className="text-white/40 text-base md:text-lg font-sans leading-relaxed tracking-tight whitespace-pre-line">
-          "{t.landingQuote}"
+        <p className="text-white/60 text-sm md:text-base font-sans leading-relaxed tracking-tight max-w-sm">
+          {t.landingQuote}
         </p>
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.8 }}
-        className="flex flex-col items-center gap-8"
+        className="flex flex-col items-center gap-10 relative z-20"
       >
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-6">
           <button
             onClick={onStart}
-            className="group relative px-20 py-6 bg-white text-black font-sans font-black text-xs uppercase tracking-[0.4em] transition-all overflow-hidden hover:scale-105 active:scale-95"
+            className="holo-button group px-16 py-5 min-w-[280px] bg-white text-white/50 font-sans font-black text-[11px] uppercase tracking-[0.5em] flex items-center justify-center gap-4"
           >
-            <div className="absolute inset-0 bg-mythic-gold transform -translate-x-full group-hover:translate-x-0 transition-transform duration-500" />
-            <span className="relative z-10 flex items-center gap-4 whitespace-nowrap">
-              {t.enterOracle} <Sparkles className="w-4 h-4" />
-            </span>
+            {t.enterOracle} <Sparkles className="w-3.5 h-3.5" />
           </button>
 
           {hasProfiles && (
             <button
               onClick={onOpenProfiles}
-              className="px-12 py-6 border border-white/10 bg-white/5 text-white/60 font-sans font-black text-[10px] uppercase tracking-[0.4em] transition-all hover:bg-white/10 hover:text-white"
+              className="px-10 py-5 border border-white/10 bg-black text-white/50 font-sans font-black text-[10px] uppercase tracking-[0.5em] transition-all hover:text-white hover:border-white/30"
             >
               {t.loadProfiles}
             </button>
           )}
         </div>
-        
-        <div className="flex gap-4 items-center mt-4">
-          {[
-            { color: 'bg-mythic-red', label: '火' },
-            { color: 'bg-mythic-gold', label: '土' },
-            { color: 'bg-white', label: '金' },
-            { color: 'bg-mythic-blue', label: '水' },
-            { color: 'bg-mythic-green', label: '木' },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 0.4, scale: 1 }}
-              transition={{ delay: 1 + i * 0.1 }}
-              className={`w-2 h-2 rounded-full ${item.color}`}
-            />
-          ))}
-        </div>
       </motion.div>
 
-      {/* Background Decorative Letters */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[30vw] font-serif font-black text-white/[0.02] pointer-events-none select-none uppercase tracking-tighter">
-        Destiny
+      <div className="absolute top-1/2 left-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
+        Ancient Wisdom • Modern Tech
       </div>
-
+      <div className="absolute top-1/2 right-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
+        Dragon Soul • Divine Pattern
+      </div>
     </div>
   );
 }

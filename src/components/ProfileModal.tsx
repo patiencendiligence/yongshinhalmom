@@ -18,46 +18,46 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 1.05, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="w-full max-w-lg bg-[#111] border border-white/10 rounded-[40px] overflow-hidden shadow-2xl"
+          exit={{ opacity: 0, scale: 1.05, y: 10 }}
+          className="w-full max-w-lg bg-black border border-white/20 rounded-none overflow-hidden shadow-[0_0_100px_rgba(255,255,255,0.05)] dragon-pattern relative"
         >
-          <div className="p-8 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+          <div className="p-10 border-b border-white/10 flex justify-between items-center bg-white/[0.02] relative z-10">
             <div>
-              <h2 className="text-2xl font-serif font-black italic text-white">{t.storedProfiles}</h2>
-              <p className="text-xs text-white/30 tracking-widest uppercase mt-1">{t.storedKnowledge}</p>
+              <h2 className="text-3xl font-serif font-black italic text-white tracking-tight">{t.storedProfiles}</h2>
+              <p className="text-[10px] text-white/30 tracking-[0.6em] uppercase mt-2 font-black">{t.storedKnowledge}</p>
             </div>
-            <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-all">
-              <X className="w-6 h-6 text-white/40" />
+            <button onClick={onClose} className="p-3 hover:bg-white/10 transition-all border border-white/10">
+              <X className="w-6 h-6 text-white" />
             </button>
           </div>
 
-          <div className="max-h-[400px] overflow-y-auto p-6 space-y-4 no-scrollbar">
+          <div className="max-h-[50vh] overflow-y-auto p-8 space-y-6 no-scrollbar relative z-10">
             {profiles.length === 0 ? (
-              <div className="py-20 text-center text-white/20 italic font-serif">
+              <div className="py-24 text-center text-white/10 italic font-serif text-2xl">
                 {t.noProfiles}
               </div>
             ) : (
               profiles.map((profile) => (
                 <div
                   key={profile.id}
-                  className="group relative flex items-center justify-between p-6 bg-white/[0.03] border border-white/5 rounded-3xl hover:bg-white/[0.06] hover:border-mythic-gold/30 transition-all cursor-pointer"
+                  className="group relative flex items-center justify-between p-8 bg-white/[0.02] border border-white/10 rounded-none hover:bg-white/[0.05] hover:border-white/30 transition-all cursor-pointer"
                   onClick={() => onSelect(profile)}
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="w-12 h-12 bg-mythic-gold/10 rounded-full flex items-center justify-center">
-                      <User className="w-6 h-6 text-mythic-gold" />
+                  <div className="flex items-center gap-8">
+                    <div className="w-14 h-14 bg-white/5 border border-white/10 flex items-center justify-center text-white/40 group-hover:text-white transition-colors">
+                      <User className="w-7 h-7" />
                     </div>
                     <div>
-                      <div className="text-xl font-serif font-black text-white group-hover:text-mythic-gold transition-colors">
+                      <div className="text-2xl font-serif font-black italic text-white group-hover:text-white transition-colors">
                         {profile.name}
                       </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-white/40">
-                        <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {profile.birthDate} ({profile.isLunar ? t.lunar : t.solar})</span>
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {profile.birthPlace}</span>
+                      <div className="flex flex-col gap-1 mt-2 text-[10px] text-white/30 font-black uppercase tracking-widest">
+                        <span className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {profile.birthDate} ({profile.isLunar ? t.lunar : t.solar})</span>
+                        <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> {profile.birthPlace}</span>
                       </div>
                     </div>
                   </div>
@@ -67,17 +67,17 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                       e.stopPropagation();
                       onDelete(profile.id);
                     }}
-                    className="p-3 text-white/20 hover:text-mythic-red hover:bg-mythic-red/10 rounded-2xl transition-all"
+                    className="p-4 text-white/10 hover:text-white hover:bg-white/10 transition-all opacity-0 group-hover:opacity-100"
                   >
-                    <Trash2 className="w-5 h-5" />
+                    <Trash2 className="w-6 h-6" />
                   </button>
                 </div>
               ))
             )}
           </div>
 
-          <div className="p-6 bg-black/40 text-center">
-            <p className="text-[10px] text-white/20 uppercase tracking-[0.2em]">
+          <div className="p-8 bg-white/[0.01] border-t border-white/10 text-center relative z-10">
+            <p className="text-[10px] text-white/10 uppercase tracking-[0.4em] font-black">
               {t.browserStorageNote}
             </p>
           </div>

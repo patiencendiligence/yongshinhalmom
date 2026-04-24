@@ -27,16 +27,16 @@ function getOpenAI() {
   return openaiClient;
 }
 
-export interface FortuneSection {
+export interface ReportSection {
   title: string;
   content: string;
 }
 
-export interface FortuneResult {
+export interface ReportResult {
   summary: string;
   zodiac: number; // 0-11: 쥐, 소, 호랑이, 토끼, 용, 뱀, 말, 양, 원숭이, 닭, 개, 돼지
   illustrationType: "SUN" | "MOON" | "TREE" | "CANDLE" | "DRAGON" | "WATER" | "MOUNTAIN" | "BELLS";
-  sections: FortuneSection[];
+  sections: ReportSection[];
   luckInfo: {
     color: string;
     item: string;
@@ -105,50 +105,63 @@ async function callWithFallback(
   throw lastError;
 }
 
-export async function getFortune(userData: {
+export async function getReport(userData: {
   name: string;
   birthDate: string;
   birthTime: string;
   isLunar: boolean;
   gender: string;
   birthPlace: string;
-}, lang: Language = "ko"): Promise<FortuneResult> {
+}, lang: Language = "ko"): Promise<ReportResult> {
   const now = new Date();
   const currentDate = now.toISOString().split('T')[0];
   const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
+  
+  const currentYear = now.getFullYear();
   
   const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}. This is critical.
 
-현재 시각(서버 시간): ${currentDate} ${currentTime} (올해는 2026년 병오년(丙午年)임에 유의하게)
+현재 시각(서버 시간): ${currentDate} ${currentTime} (올해는 ${currentYear}년임에 유의하게)
 
 응답 언어: ${lang === "ko" ? "한국어 (Korean)" : "영어 (English)"}
 
 의뢰인 정보:
 - 성명: ${userData.name}
-- 생년월일: ${userData.birthDate} (ISO 형식)
-- 출생시각: ${userData.birthTime}
-- 역구분: ${userData.isLunar ? "음력" : "양력"}
-- 성별: ${userData.gender}
-- 출생지: ${userData.birthPlace}
-
-위 정보를 바탕으로 '만세력(萬歲曆)'을 계산하되, 아래 [계산 기준]을 엄격히 준수하여 사주팔자의 간지(干支)를 도출하게. **특히 년주(年柱, 띠)의 시작은 반드시 입춘(立春, 보통 양력 2월 4~5일경) 시각을 기준**으로 해야 함을 절대 잊지 말게나. 양력 1월 1일이나 음력 설날 기준이 아니네! 현대 사주명리학의 관점에서 매서운 점사를 내려주게.
+- 생년월일: ${userData.birthDate} (ISO 형식) 위 정보를 바탕으로 분석 알고리즘을 적용하여 사용자의 고유 패턴을 도출하게. **특히 각 시점의 변화는 입춘(立春, 보통 양력 2월 4~5일경)을 기준으로 분석해야 함을 절대 잊지 말게나.** 현대인의 데이터와 패턴을 분석하여 생산성 향상과 심리적 안정을 돕는 정밀 리포트를 작성해주게.
 
 [계산 기준 (매우 중요)]
 ${TIME_LOGIC}
 
 [상세 지침]
-1. 현대 사주명리학 관점: 단순한 길흉화복보다는 심리적 기제, 현대적 직업 적성, 자아 실현의 도구로서 사주를 풀이해주게나.
-2. ALL CONTENT, including summary, titles, item names, and advice, MUST be written strictly in ${lang === "ko" ? "Korean" : "English"}.
-3. 섹션 구성:
-   - 섹션 1 (대운 및 전체 사주 풀이): 타고난 성정(性情), 대운의 흐름, 초/중/장/노년의 운세를 현대적 관점에서 매우 상세히 기술하게.
-   - 섹션 2 (2026년 병오년 총운): 올해의 흐름.
-   - 섹션 3 (오늘의 운세): 접속일(${currentDate}) 기준 사주, 대명, 역술, 별자리, 띠를 종합한 운세.
-   - 섹션 4 (월별 세부 운세): 양력 기준 1~12월 기술. **각 월별 운세는 반드시 글머리 기호(Markdown Bullet Points)나 2번의 줄바꿈(Double Newline)을 사용하여 하나씩 명확하게 구분**할 것이며, 가독성을 최우선으로 하게. 중요한 달은 **키워드** 볼드 처리하게.
-   - 섹션 5~8: 건강, 애정, 직업/재물, 그리고 할멈의 비책.
+1. 분석 관점: 단순한 길흉화복보다는 심리적 기제, 현대적 직업 적성, 자아 실현의 도구로서 라이프스타일 패턴을 풀이해주게나. "~할 것이다"와 같은 단정적 예언보다는 "~한 경향이 있다", "~할 가능성이 높다"와 같은 분석적 표현을 사용하게.
+2. 말투: 엄격하면서도 부드러운 할머니의 말투("하게"체와 "해라"체)를 사용하게나.
+3. ALL CONTENT, including summary, titles, item names, and advice, MUST be written strictly in ${lang === "ko" ? "Korean" : "English"}.
+4. 섹션 구성:
+   - 섹션 1 (기초 패턴 및 성향 분석): 타고난 기저 성향, 환경적 변화의 흐름, 생애 주기별 패턴을 분석하여 기술하게. **반드시 글의 마지막에 아래 형식을 빌려 '리포트 요약'을 포함시킬 것.** 가독성을 위해 줄바꿈을 충분히 사용하게나.
+     예시 형식:
+     [한 줄 요약]
+     
+     분석 근거: [패턴 설명]
 
-반드시 할멈의 말투를 유지하며, 위 계산 기준을 어기면 할멈의 꾸지람을 면치 못할 것이야!
+     주요 흐름: [기간별 경향성]
+     
+     * 핵심 인사이트
+     [분석 포인트 1]
+
+     [분석 포인트 2]
+     
+     [분석 포인트 3]
+     
+     더 나은 일상을 위한 가이드가 되길 바라네.
+
+   - 섹션 2 (${currentYear}년 타임라인 분석): 올해의 주요 에너지 흐름.
+   - 섹션 3 (데일리 체크): 접속일(${currentDate}) 기준 환경적 요인과 개인 패턴을 결합한 분석.
+   - 섹션 4 (월별 세부 인사이트): 양력 기준 1~12월 기술. **각 월별 분석은 반드시 글머리 기호(Markdown Bullet Points)와 줄바꿈(Newline)을 사용하여 하나씩 명확하게 구분**할 것이며, 가독성을 최우선으로 하게. 유의미한 기간은 **키워드** 볼드 처리하게.
+   - 섹션 5~8: 웰니스, 대인관계, 커리어/생산성, 그리고 할머니의 특별한 제언.
+
+신뢰감 있고 무게감 있는 할머니의 말투를 유지하며, 분석 기준을 엄격히 따라주게나.
 `;
 
   return callWithFallback(
@@ -216,7 +229,7 @@ ${TIME_LOGIC}
 }
 
 export async function askAdditionalQuestion(
-  previousFortune: string,
+  previousReport: string,
   question: string,
   lang: Language = "ko"
 ): Promise<string> {
@@ -229,17 +242,17 @@ The response MUST be written strictly in ${lang === "ko" ? "KOREAN" : "ENGLISH"}
 
 [STRICT FORMAT INSTRUCTION]
 DO NOT use JSON format. DO NOT use markdown code blocks like \`\`\`json.
-Reply ONLY with a natural, conversational response in the voice of a traditional Korean oracle (Halmeom).
+Reply ONLY with a natural, conversational response in the voice of a traditional Korean grandmother (Halmeom), using grandmotherly tone ("하게" and "해라").
 
-현재 시각: ${currentDate} (병오년)
+현재 시각: ${currentDate}
 
-이전 점사 내용:
-${previousFortune}
+이전 리포트 내용:
+${previousReport}
 
 사용자의 추가 질문:
 ${question}
 
-이 질문에 대해 위 사주 분석에 기반하여 할멈의 말투로 대답해주게. 반드시 지정된 언어(${lang})로 작성해야 하네.
+이 질문에 대해 위 분석에 기반하여 할머니의 말투로 대답해주게. 반드시 지정된 언어(${lang})로 작성해야 하네.
 `;
 
   try {
@@ -254,7 +267,7 @@ ${question}
           },
         });
 
-        return response.text || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+        return response.text || (lang === "ko" ? "할멈이 잠시 자리를 비웠나 보구나. 다시 물어보게나." : "I seem to have stepped out for a moment. Please ask again.");
       },
       async () => {
         const openai = getOpenAI();
@@ -265,7 +278,7 @@ ${question}
             { role: "user", content: prompt }
           ]
         });
-        return response.choices[0].message.content || (lang === "ko" ? "할멈이 잠시 신명이 나갔나 보구나. 다시 물어보게나." : "The spirit seems to have left me for a moment. Please ask again.");
+        return response.choices[0].message.content || (lang === "ko" ? "할멈이 잠시 자리를 비웠나 보구나. 다시 물어보게나." : "I seem to have stepped out for a moment. Please ask again.");
       }
     );
   } catch (error) {

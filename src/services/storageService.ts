@@ -10,6 +10,14 @@ export interface UserProfile {
 }
 
 const STORAGE_KEY = "yongshin_profiles";
+const CACHE_KEY = "yongshin_report_cache";
+
+export interface ReportCacheEntry {
+  inputHash: string;
+  year: number;
+  date: string; // YYYY-MM-DD
+  result: any;
+}
 
 export const storageService = {
   getProfiles: (): UserProfile[] => {
@@ -39,5 +47,31 @@ export const storageService = {
   deleteProfile: (id: string) => {
     const profiles = storageService.getProfiles();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles.filter(p => p.id !== id)));
+  },
+
+  // Caching logic
+  getReportCache: (): ReportCacheEntry[] => {
+    const data = localStorage.getItem(CACHE_KEY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  setReportCache: (entry: ReportCacheEntry) => {
+    const cache = storageService.getReportCache();
+    const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year);
+    localStorage.setItem(CACHE_KEY, JSON.stringify([entry, ...filtered]));
+  },
+
+  findCachedReport: (data: any, year: number): any | null => {
+    const hash = JSON.stringify({
+      name: data.name,
+      birthDate: data.birthDate,
+      birthTime: data.birthTime,
+      isLunar: data.isLunar,
+      gender: data.gender
+    });
+    const today = new Date().toISOString().split('T')[0];
+    const cache = storageService.getReportCache();
+    const entry = cache.find(e => e.inputHash === hash && e.year === year && e.date === today);
+    return entry ? entry.result : null;
   }
 };

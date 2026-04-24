@@ -44,10 +44,10 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <h1 className="flex flex-col items-center mb-10">
           <span className="text-[12px] font-sans font-black tracking-[0.6em] uppercase text-mythic-gold mb-4 opacity-80">{t.ancientOracle}</span>
           <span className="text-8xl md:text-11xl font-serif font-black tracking-tighter leading-none mb-4 italic text-white whitespace-nowrap">
-            {t.subtitle === "용신할멈" ? (
-              <>龍神<span className="text-mythic-red">婆</span></>
+            {t.title === "Lifestyle Insights" ? (
+              <span className="text-4xl md:text-6xl uppercase tracking-[0.2em]">{t.title}</span>
             ) : (
-              <span className="text-4xl md:text-6xl uppercase tracking-[0.2em]">{t.subtitle}</span>
+              <>{t.title}</>
             )}
           </span>
           <span className="text-lg md:text-xl font-serif text-white/30 italic tracking-[0.2em]">{t.grandmother}</span>

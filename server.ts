@@ -29,7 +29,7 @@ app.post("/api/report-issue", async (req, res) => {
   }
 
   try {
-    const issueTitle = `[Fortune Report] ${userData?.name || "Anonymous"} - ${lang}`;
+    const issueTitle = `[Analysis Report] ${userData?.name || "Anonymous"} - ${lang}`;
     const issueBody = `
 **User Profile:**
 - Name: ${userData?.name}

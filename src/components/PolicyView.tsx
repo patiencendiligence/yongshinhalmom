@@ -52,76 +52,83 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
   };
 
   return (
-    <div className="container mx-auto px-6 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
+    <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
       <motion.button
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         onClick={onBack}
-        className="flex items-center gap-2 text-mythic-gold hover:opacity-70 transition-all mb-12 uppercase tracking-widest text-xs font-black"
+        className="flex items-center gap-3 text-white/40 hover:text-white transition-all mb-16 uppercase tracking-[0.5em] text-[10px] font-black group"
       >
-        <ArrowLeft className="w-4 h-4" />
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" />
         {t.back}
       </motion.button>
 
-      <div className="space-y-12 bg-white/5 border border-white/10 p-8 md:p-16 rounded-[40px] backdrop-blur-xl">
-        <section>
-          <h1 className="text-4xl font-serif font-black italic mb-6 text-white tracking-tight">{t.title}</h1>
-          <p className="text-lg text-white/60 mb-8">
+      <div className="space-y-16 bg-black border border-white/20 p-8 md:p-20 relative overflow-hidden shadow-2xl dragon-pattern">
+        <section className="relative z-10">
+          <div className="text-[10px] uppercase font-sans font-black tracking-[0.8em] text-white/30 mb-6 italic">
+            Legal Document — {lang === 'ko' ? "고시" : "PUBLIC NOTICE"}
+          </div>
+          <h1 className="text-4xl md:text-7xl font-serif font-black italic mb-8 text-white tracking-tighter leading-[0.85]">{t.title}</h1>
+          <p className="text-xl text-white/50 mb-12 font-serif italic max-w-2xl leading-relaxed">
             {t.intro}
           </p>
-          <div className="bg-white/5 p-6 rounded-2xl border border-white/10 space-y-4">
-            <strong className="text-mythic-gold uppercase text-xs tracking-[0.2em]">{t.whatYouGet}</strong>
-            <ul className="list-disc list-inside space-y-2 text-white/70">
+          <div className="bg-white/5 p-8 border-l-4 border-white/20 space-y-6">
+            <strong className="text-white uppercase text-xs tracking-[0.4em] font-black">{t.whatYouGet}</strong>
+            <ul className="space-y-4 text-white/70 font-sans">
               {t.items.map((item, i) => (
-                <li key={i}>{item}</li>
+                <li key={i} className="flex items-center gap-4">
+                  <div className="w-1.5 h-1.5 bg-white/20" />
+                  {item}
+                </li>
               ))}
             </ul>
           </div>
         </section>
 
-        <p className="text-sm italic text-white/40 border-l-2 border-mythic-gold pl-4 py-2">
+        <p className="text-sm italic text-white/40 border-l-[1px] border-white/10 pl-6 py-4 font-serif relative z-10">
           {t.disclaimer}
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 relative z-10">
           <section>
-            <h2 className="text-xl font-serif font-black italic mb-4 text-mythic-gold">{t.support}</h2>
-            <div className="space-y-1 text-sm">
-               <p>Email: <span className="text-white">patiencendiligence@gmail.com</span></p>
-               <p>{t.responseTime}</p>
+            <h2 className="text-xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.support}</h2>
+            <div className="space-y-2 text-sm font-sans tracking-tight">
+               <p className="text-white/40 uppercase text-[10px] tracking-widest">Inquiry Line</p>
+               <p className="text-white text-lg font-serif italic">patiencendiligence@gmail.com</p>
+               <p className="text-white/40 mt-2">{t.responseTime}</p>
             </div>
           </section>
 
           <section>
-            <h2 className="text-xl font-serif font-black italic mb-4 text-mythic-gold">{t.refundTitle}</h2>
-            <p className="text-sm text-white/60">
+            <h2 className="text-xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.refundTitle}</h2>
+            <p className="text-sm text-white/50 leading-relaxed">
               {t.refundText}
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-serif font-black italic mb-4 text-mythic-gold">{t.cancelTitle}</h2>
-            <p className="text-sm text-white/60">
+            <h2 className="text-xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.cancelTitle}</h2>
+            <p className="text-sm text-white/50 leading-relaxed">
               {t.cancelText}
             </p>
           </section>
 
           <section>
-            <h2 className="text-xl font-serif font-black italic mb-4 text-mythic-gold">{t.legalTitle}</h2>
-            <p className="text-sm text-white/60">
+            <h2 className="text-xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.legalTitle}</h2>
+            <p className="text-sm text-white/50 leading-relaxed">
               {t.legalText}
             </p>
           </section>
         </div>
 
-        <section className="pt-12 border-t border-white/10">
-          <h2 className="text-xl font-serif font-black italic mb-4 text-white">{t.termsTitle}</h2>
-          <p className="text-sm text-white/60">
+        <section className="pt-16 border-t border-white/10 relative z-10">
+          <h2 className="text-2xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.termsTitle}</h2>
+          <p className="text-sm text-white/50 leading-relaxed max-w-3xl">
             {t.termsText}
           </p>
         </section>
 
-        <footer className="text-[10px] uppercase tracking-[0.3em] font-sans text-white/20 text-center pt-8">
+        <footer className="text-[10px] uppercase tracking-[0.5em] font-sans text-white/10 text-center pt-16 relative z-10">
           © {new Date().getFullYear()} Yongshinhalmom. All rights reserved.
         </footer>
       </div>

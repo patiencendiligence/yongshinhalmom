@@ -64,7 +64,7 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsInfoModalOpen(true)}
-        className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all backdrop-blur-md text-mythic-gold"
+        className="p-3 bg-white/5 border border-white/10 rounded-none hover:bg-white/10 transition-all backdrop-blur-md text-white/40"
       >
         <HelpCircle className="w-5 h-5" />
       </motion.button>
@@ -74,9 +74,9 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={toggleLang}
-        className="flex items-center gap-3 px-5 py-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all backdrop-blur-md"
+        className="flex items-center gap-3 px-5 py-3 bg-white/5 border border-white/10 rounded-none hover:bg-white/10 transition-all backdrop-blur-md"
       >
-        <Languages className="w-5 h-5 text-mythic-gold" />
+        <Languages className="w-5 h-5 text-white/40" />
         <span className="text-[10px] font-black uppercase tracking-widest text-white/80">
           {lang === "ko" ? "ENG" : "KOR"}
         </span>
@@ -245,15 +245,16 @@ function MainApp() {
         )}
 
         {state === "LOADING" && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-12">
-            <div className="relative w-64 h-64 flex items-center justify-center">
-              <div className="absolute inset-0 border-[1px] border-white/10 rounded-full animate-[spin_10s_linear_infinite]" />
-              <div className="absolute inset-4 border-[1px] border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-              <div className="text-7xl font-serif font-black italic mythic-gradient-text animate-pulse">?</div>
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-16">
+            <div className="relative w-72 h-72 flex items-center justify-center border border-white/5 shadow-[0_0_100px_rgba(255,255,255,0.03)] dragon-pattern">
+              <div className="absolute inset-0 border-[0.5px] border-white/10 animate-[spin_20s_linear_infinite]" />
+              <div className="absolute inset-8 border-[0.5px] border-white/5 animate-[spin_30s_linear_infinite_reverse]" />
+              <div className="text-8xl font-serif font-black italic text-white/10 animate-pulse tracking-tighter">Halmom</div>
             </div>
-            <div className="flex flex-col items-center gap-4 text-center">
-              <h2 className="text-4xl font-serif font-black italic text-white tracking-tighter">{t.loadingSummary}</h2>
-              <p className="text-white/20 font-sans uppercase tracking-[0.6em] text-[10px] font-black italic">{t.loadingSummary}</p>
+            <div className="flex flex-col items-center gap-6 text-center max-w-sm">
+              <h2 className="text-3xl md:text-5xl font-serif font-black italic text-white leading-none tracking-tighter">{t.loadingSummary}</h2>
+              <div className="w-16 h-0.5 bg-white/10" />
+              <p className="text-white/20 font-sans uppercase tracking-[0.8em] text-[9px] font-black italic">{lang === 'ko' ? "명운의 실타래를 읽는 중" : "READING THE THREADS OF DESTINY"}</p>
             </div>
           </motion.div>
         )}

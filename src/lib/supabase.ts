@@ -1,0 +1,95 @@
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+
+let supabaseInstance: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient | null {
+  if (supabaseInstance) return supabaseInstance;
+
+  const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  try {
+    supabaseInstance = createClient(supabaseUrl, supabaseAnonKey);
+    return supabaseInstance;
+  } catch (error) {
+    console.error("Failed to initialize Supabase:", error);
+    return null;
+  }
+}
+
+export const supabase = new Proxy({} as SupabaseClient, {
+  get: (target, prop) => {
+    const client = getSupabase();
+    if (!client) {
+      throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your secrets.");
+    }
+    return (client as any)[prop];
+  }
+});
+
+export async function signInWithGoogle() {
+  const client = getSupabase();
+  if (!client) throw new Error("Supabase is not configured.");
+  
+  const { data, error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin,
+      queryParams: {
+        prompt: 'select_account'
+      }
+    }
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function signOut() {
+  const client = getSupabase();
+  if (!client) return;
+  
+  const { error } = await client.auth.signOut();
+  if (error) throw error;
+}
+
+export async function getPaymentStatus(userId: string) {
+  if (!userId) return false;
+  const client = getSupabase();
+  if (!client) return false;
+
+  const { data, error } = await client
+    .from('payments')
+    .select('is_premium')
+    .eq('user_id', userId)
+    .single();
+  
+  if (error && error.code !== 'PGRST116') {
+    console.error("Error fetching payment status:", error);
+  }
+  return data?.is_premium || false;
+}
+
+export async function updatePaymentStatus(userId: string, isPremium: boolean) {
+  const client = getSupabase();
+  if (!client) throw new Error("Supabase is not configured.");
+
+  /* 
+    Security Note: 403 Forbidden errors are often caused by missing RLS (Row Level Security) policies.
+    Ensure 'payments' table has policies:
+    - SELECT: allow users to select their own data (user_id = auth.uid())
+    - ALL (INSERT/UPDATE): allow users to upsert their own data
+    
+    SQL command to run in Supabase SQL Editor:
+    ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+    CREATE POLICY "Allow users to manage their own payments" ON public.payments FOR ALL USING (auth.uid() = user_id);
+  */
+  const { error } = await client
+    .from('payments')
+    .upsert({ user_id: userId, is_premium: isPremium, updated_at: new Date().toISOString() });
+  
+  if (error) throw error;
+}

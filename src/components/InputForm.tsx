@@ -12,6 +12,9 @@ interface InputFormProps {
 
 export default function InputForm({ onSubmit, initialData, lang }: InputFormProps) {
   const t = translations[lang];
+  const currentYear = new Date().getFullYear();
+  const nextYear = currentYear + 1;
+
   const [formData, setFormData] = useState({
     name: initialData?.name || "",
     birthDate: initialData?.birthDate || "",
@@ -19,6 +22,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
     isLunar: initialData?.isLunar ?? false,
     gender: initialData?.gender || "female",
     birthPlace: initialData?.birthPlace || "",
+    targetYear: currentYear
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -148,6 +152,29 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        <div className="space-y-6 pt-4">
+          <label className="text-[10px] uppercase tracking-widest text-white/40 font-bold">{t.selectYear}</label>
+          <div className="flex gap-4">
+            {[
+              { value: currentYear, kr: t.thisYear },
+              { value: nextYear, kr: t.nextYear }
+            ].map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setFormData({ ...formData, targetYear: opt.value })}
+                className={`flex-1 py-4 border transition-all text-xs font-bold tracking-widest uppercase rounded-lg ${
+                  formData.targetYear === opt.value 
+                  ? "bg-mythic-gold text-black border-mythic-gold" 
+                  : "bg-transparent text-white/30 border-white/5 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                {opt.kr}
+              </button>
+            ))}
           </div>
         </div>
 

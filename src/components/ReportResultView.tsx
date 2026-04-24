@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from 'react-markdown';
-import { getReport, ReportResult, askAdditionalQuestion } from "../services/geminiService";
+import { getReport, ReportResult } from "../services/geminiService";
 import { Language, translations } from "../lib/translations";
 import { useAuth } from "../lib/AuthContext";
-import { Lock, FileDown, AlertCircle, AlertTriangle, ArrowRight, RotateCcw } from "lucide-react";
+import { Lock, FileDown, AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
 import { getManseRyeok } from "../lib/manseRyeok";
 import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
@@ -13,6 +13,7 @@ import html2canvas from "html2canvas";
 interface ReportResultViewProps {
   report: ReportResult;
   onReset: () => void;
+  onOpenPolicy: () => void;
   userData: any;
   lang: Language;
 }
@@ -36,12 +37,9 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   );
 };
 
-export default function ReportResultView({ report, onReset, userData, lang }: ReportResultViewProps) {
+export default function ReportResultView({ report, onReset, onOpenPolicy, userData, lang }: ReportResultViewProps) {
   const t = (translations[lang] as any);
   const { user, profile, login, markAsPaid } = useAuth();
-  const [question, setQuestion] = useState("");
-  const [chatHistory, setChatHistory] = useState<{ role: "user" | "halmeom"; text: string }[]>([]);
-  const [isAsking, setIsAsking] = useState(false);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   const isPremium = profile?.isPremium === true;
@@ -159,39 +157,6 @@ export default function ReportResultView({ report, onReset, userData, lang }: Re
     }
   };
 
-  const handleAsk = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question.trim()) return;
-
-    const currentQuestion = question;
-    setQuestion("");
-    setChatHistory((prev) => [...prev, { role: "user", text: currentQuestion }]);
-    setIsAsking(true);
-
-    try {
-      const userDataStr = `
-        의뢰인 이름: ${userData.name}
-        생년월일: ${userData.birthDate}
-        성별: ${userData.gender}
-        역구분: ${userData.isLunar ? "음력" : "양력"}
-      `;
-      const flatReport = `
-        [기존 분석 요약]: ${report.summary}
-        [상세 내용]: ${report.sections.map(s => `${s.title}: ${s.content}`).join("\n")}
-        위 분석 내용을 바탕으로 사용자가 궁금해하는 질문에 대해 데이터 기반의 추가 인사이트를 제공하게. (전문적인 톤 유지)
-      `;
-      const answer = await askAdditionalQuestion(`${userDataStr}\n${flatReport}`, currentQuestion, lang);
-      setChatHistory((prev) => [...prev, { role: "halmeom", text: answer }]);
-    } catch (error: any) {
-      console.error("Chat error:", error);
-      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
-      const msg = isQuota ? (translations[lang] as any).quotaExceeded : t.errorMessage;
-      setChatHistory((prev) => [...prev, { role: "halmeom", text: msg }]);
-    } finally {
-      setIsAsking(false);
-    }
-  };
-
   const getSlotClass = (idx: number) => {
     // Swap 1 and 2 styles as well to maintain visual balance
     switch (idx) {
@@ -208,62 +173,53 @@ export default function ReportResultView({ report, onReset, userData, lang }: Re
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pb-32 relative">
-      <div className="absolute inset-0 mythic-grain pointer-events-none" />
-
+    <div className="max-w-7xl mx-auto px-4 pb-32 relative dragon-pattern min-h-screen">
       <div id="report-content">
-        {/* Header Section */}
-        <header className="pt-20 pb-16 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-white/5 mb-8 relative z-10">
-          <div className="max-w-2xl mb-8 md:mb-0">
-            <h1 className="text-6xl md:text-8xl font-serif font-black tracking-tighter text-white italic leading-none mb-6">
-              {t.oracleHasSpoken.split('Report')[0]} <span className="text-mythic-gold">Report</span> <br/>
+        {/* Editorial Header */}
+        <header className="pt-32 pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-white/10 mb-16 relative z-10">
+          <div className="max-w-3xl mb-12 md:mb-0">
+            <h1 className="text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-white leading-[0.8] mb-12">
+              {t.oracleHasSpoken.split('Report')[0]} <span className="mythic-gradient-text">Report</span> <br/>
               {t.oracleHasSpoken.split('Report')[1]}
             </h1>
-            <p className="text-xl md:text-2xl font-serif text-white/40 italic leading-snug">
+            <p className="text-2xl md:text-3xl font-serif text-white/40 italic leading-snug max-w-2xl">
               "{report.summary}"
             </p>
 
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-16 flex flex-wrap gap-8">
               {[
-                { label: lang === "ko" ? "색상" : "Color", value: report.luckInfo.color, icon: "🎨" },
-                { label: lang === "ko" ? "아이템" : "Item", value: report.luckInfo.item, icon: "💎" },
-                { label: lang === "ko" ? "음식" : "Food", value: report.luckInfo.food, icon: "🍵" },
+                { label: lang === "ko" ? "COLOR" : "COLOR", value: report.luckInfo.color },
+                { label: lang === "ko" ? "ITEM" : "ITEM", value: report.luckInfo.item },
+                { label: lang === "ko" ? "FOOD" : "FOOD", value: report.luckInfo.food },
               ].map((luck, i) => (
-                <div key={i} className="px-4 py-2 bg-white/5 border border-white/10 rounded-full flex items-center gap-3">
-                  <span className="text-xs">{luck.icon}</span>
-                  <span className="text-[10px] font-sans font-black uppercase tracking-widest text-mythic-gold">{luck.label}:</span>
-                  <span className="text-xs text-white/80">{luck.value}</span>
+                <div key={i} className="flex flex-col gap-2">
+                  <span className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-white/30">{luck.label}</span>
+                  <span className="text-xl font-serif italic text-white">{luck.value}</span>
                 </div>
               ))}
             </div>
           </div>
           
           <div className="text-center md:text-right flex flex-col justify-end items-center md:items-end">
-            <p className="text-[10px] font-sans font-bold tracking-[0.4em] text-white/20 uppercase mb-4">{t.authorizedRecipient}</p>
-            <div className="text-4xl md:text-6xl font-serif font-black text-white">{userData.name}</div>
-            <p className="text-lg text-white/30 italic mt-2 mb-6">{userData.birthDate} ({userData.isLunar ? t.lunar : t.solar})</p>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="p-1 border border-white/5 rounded-xl bg-white/[0.02]"
-            >
+            <div className="mb-8 p-1.5 border border-white/5 rounded-2xl bg-white/[0.02]">
               <Illustration zodiac={report.zodiac} />
-            </motion.div>
+            </div>
+            <div className="text-[10px] font-sans font-bold tracking-[0.5em] text-white/20 uppercase mb-4">{t.authorizedRecipient}</div>
+            <div className="text-5xl md:text-7xl font-serif font-black text-white italic">{userData.name}</div>
+            <p className="text-xl text-white/20 italic mt-4">{userData.birthDate} ({userData.isLunar ? t.lunar : t.solar})</p>
           </div>
         </header>
 
-        {/* Manse-ryeok Section */}
-        <div className="mb-8 p-6 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center md:items-start gap-4">
-          <div className="text-[10px] uppercase font-sans font-black tracking-[0.4em] text-mythic-gold opacity-60">{t.manseRyeok}</div>
-          <div className="text-2xl md:text-4xl font-serif font-black italic text-white/80 tracking-tighter">
+        {/* Manse-ryeok - Museum Label Style */}
+        <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8">
+          <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em] mythic-gradient-text">{t.manseRyeok}</div>
+          <div className="text-3xl md:text-5xl font-serif font-black italic text-white/80 tracking-tighter">
             {manseRyeok.full}
           </div>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-12 gap-6 mb-24 relative z-10">
+        {/* Bento Grid with Refined Design */}
+        <div className="grid grid-cols-12 gap-px bg-white/10 mb-32 relative z-10 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
         {displaySections.map((section, idx) => {
           const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6; // idx 1 (Today) is light, idx 2 (Overview) is dark
           const isRed = idx === 5;
@@ -275,154 +231,76 @@ export default function ReportResultView({ report, onReset, userData, lang }: Re
           return (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className={`bento-card-refined p-10 flex flex-col group overflow-hidden relative ${isUnpaidLocked ? "col-span-12 py-20 bg-black/40 border-mythic-gold/10" : getSlotClass(idx)}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: idx * 0.05 }}
+              className={`bg-black p-12 md:p-16 flex flex-col relative group ${isUnpaidLocked ? "col-span-12 py-32" : getSlotClass(idx)}`}
               data-premium-section={idx >= 3 ? "true" : undefined}
             >
-              <div className={`absolute -right-4 -top-4 text-9xl font-serif font-black italic opacity-[0.03] transition-all group-hover:scale-110 ${(isDark || isRed) ? "opacity-[0.1]" : ""}`}>
-                {idx + 1}
-              </div>
-
-              <div className="mb-8">
-                <div className={`flex items-center gap-3 mb-6`}>
-                  <div className={`text-[10px] uppercase tracking-[0.4em] font-sans font-black ${(isDark || isRed) ? "opacity-60" : "text-mythic-gold"}`}>
-                    {idx === 0 ? t.freeTaste : isUnpaidLocked ? t.premiumFeature : t.section + " " + String(idx + 1).padStart(2, '0')}
+              <div className="mb-12">
+                <div className="flex items-center gap-4 mb-8">
+                  <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
+                    {idx === 0 ? "FREE TRIAL" : isUnpaidLocked ? "PREMIUM CONTENT" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
                   </div>
                   {isUnpaidLocked && (
-                    <span className="flex items-center gap-1.5 px-2 py-0.5 bg-mythic-red/20 border border-mythic-red/30 rounded text-[9px] font-black text-mythic-red uppercase tracking-tight">
-                      <Lock className="w-2.5 h-2.5" />
+                    <span className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/20 rounded-none text-[10px] font-black text-white uppercase tracking-widest">
+                      <Lock className="w-3 h-3" />
                       {t.premiumBadge}
                     </span>
                   )}
                 </div>
-                <h3 className={`text-2xl md:text-5xl font-serif font-black italic leading-tight text-white ${isUnpaidLocked ? "text-center mb-12" : ""}`}>
+                <h3 className={`text-4xl md:text-5xl font-serif font-black italic leading-[0.9] text-white ${isUnpaidLocked ? "text-center mb-16 text-7xl md:text-9xl" : ""}`}>
                   {isUnpaidLocked ? t.unlockDetailedReport : section.title}
                 </h3>
               </div>
 
-              <div className={`relative flex-1 ${isUnpaidLocked ? "flex flex-col items-center" : ""}`}>
-                {!isUnpaidLocked ? (
-                  <div className={`text-sm md:text-lg font-sans tracking-tight leading-relaxed markdown-container transition-all ${(isDark || isRed) ? "opacity-90" : "text-white/70"}`}>
-                    <ReactMarkdown>
-                      {section.content}
-                    </ReactMarkdown>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center gap-8">
-                    <p className="text-white/40 font-serif italic text-lg text-center max-w-md">
-                      {t.simpleLockNote}
-                    </p>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handlePayment}
-                      className="px-12 py-6 bg-mythic-gold text-black text-[12px] font-black uppercase tracking-[0.3em] rounded-full shadow-2xl shadow-mythic-gold/40 hover:bg-white transition-colors"
-                    >
-                      {t.unlockButton}
-                    </motion.button>
-                  </div>
-                )}
-              </div>
+              {!isUnpaidLocked ? (
+                <div className="text-lg md:text-lg font-sans tracking-tight leading-relaxed markdown-container text-white/70">
+                  <ReactMarkdown>
+                    {section.content}
+                  </ReactMarkdown>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-12">
+                  <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
+                    {t.simpleLockNote}
+                  </p>
+                  <button
+                    onClick={handlePayment}
+                    className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all"
+                  >
+                    {t.unlockButton}
+                  </button>
+                </div>
+              )}
             </motion.div>
           )
         })}
-      </div>
-
-      {/* Medical / Warning Banner */}
-      {report.medicalAdvice && (
-        <div className="mb-12 p-12 bg-mythic-red/10 border border-mythic-red/20 rounded-[40px] flex items-center gap-10 relative z-10">
-          <div className="w-16 h-16 bg-mythic-red rounded-full flex-shrink-0 flex items-center justify-center text-white shadow-lg shadow-mythic-red/20">
-            <AlertTriangle className="w-8 h-8" />
-          </div>
-          <div>
-            <div className="text-[10px] uppercase font-sans font-black tracking-[0.4em] text-mythic-red mb-2">{t.disclaimer}</div>
-            <p className="text-white/60 font-sans leading-relaxed text-sm md:text-base">{report.medicalAdvice}</p>
-          </div>
         </div>
-      )}
 
-    
-
-      </div>
-
-      {/* Chat Bot Section - Premium Only - Tagged for PDF hiding */}
-      {isPremium && (
-        <div data-premium-section="true" className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start mb-24 relative z-10">
-          <div className="lg:col-span-4 sticky top-12">
-            <h2 className="text-5xl font-serif font-black italic mb-6 text-white">{t.askSpirit}</h2>
-            <p className="text-white/30 font-sans leading-relaxed tracking-tight whitespace-pre-line">
-              {t.askSpiritDetail}
-            </p>
-            <div className="mt-12 flex gap-4">
-              <div className="w-12 h-1 bg-mythic-gold" />
-              <div className="w-12 h-1 bg-white/10" />
-              <div className="w-12 h-1 bg-white/10" />
+        {/* Medical / Warning Banner */}
+        {report.medicalAdvice && (
+          <div className="mb-32 p-16 bg-white flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
+            <div className="w-24 h-24 bg-black flex-shrink-0 flex items-center justify-center text-white border border-white/20">
+              <AlertTriangle className="w-10 h-10 text-white" />
+            </div>
+            <div>
+              <div className="text-[11px] uppercase font-sans font-black tracking-[0.8em] text-black mb-4 italic">{t.disclaimer}</div>
+              <p className="text-black/80 font-sans leading-relaxed text-xl max-w-4xl italic font-black">{report.medicalAdvice}</p>
             </div>
           </div>
-
-          <div className="lg:col-span-8">
-            <div className="bento-card-refined h-[600px] flex flex-col overflow-hidden bg-[#0a0a0a]">
-              <div className="flex-1 overflow-y-auto p-12 space-y-10 no-scrollbar">
-                {chatHistory.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center opacity-10 grayscale text-center">
-                    <div className="text-8xl font-serif font-black italic mb-4">{lang === "ko" ? "무엇이든" : "Question?"}</div>
-                    <p className="text-sm tracking-[0.5em] uppercase font-sans font-bold">{lang === "ko" ? "분석이 가능하네" : "Analysis Ready"}</p>
-                  </div>
-                )}
-                {chatHistory.map((msg, i) => (
-                  <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                    <div className={`max-w-[80%] ${msg.role === "user" ? "text-right" : "text-left"}`}>
-                      <div className="text-[10px] uppercase tracking-widest font-sans font-black opacity-30 mb-2">
-                        {msg.role === "user" ? (lang === "ko" ? "의뢰인" : "Client") : t.halmeomSpirit}
-                      </div>
-                      <div className={`text-lg md:text-xl font-serif italic whitespace-pre-wrap ${msg.role === "user" ? "text-mythic-gold" : "text-white/80"}`}>
-                        <ReactMarkdown>{msg.text}</ReactMarkdown>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                {isAsking && (
-                  <div className="flex justify-start animate-pulse">
-                    <div className="text-xl font-serif italic text-white/20">{lang === "ko" ? "패턴 분석 중..." : "Analyzing patterns..."}</div>
-                  </div>
-                )}
-              </div>
-
-              <form onSubmit={handleAsk} className="p-8 bg-black border-t border-white/5 flex gap-4 relative">
-                <input
-                  type="text"
-                  placeholder={t.askPlaceholder}
-                  className="flex-1 bg-transparent border-b border-white/10 px-0 py-4 focus:border-mythic-gold outline-none transition-all font-serif text-xl text-white placeholder:text-white/5"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  disabled={isAsking}
-                />
-                <button
-                  type="submit"
-                  disabled={isAsking || !question.trim()}
-                  className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-black hover:bg-mythic-gold transition-all hover:scale-110 active:scale-95 disabled:opacity-20"
-                >
-                  <ArrowRight className="w-6 h-6" />
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Save PDF Button */}
-      <div className="mt-12 flex justify-center pb-24 border-b border-white/5">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+      <div className="mt-32 flex justify-center pb-32">
+        <button
           onClick={handleSavePdf}
-          className="flex items-center gap-4 px-12 py-6 bg-white/5 border border-white/10 text-white/60 font-sans font-black text-[12px] uppercase tracking-[0.5em] rounded-full hover:bg-white/10 hover:text-white transition-all shadow-xl backdrop-blur-md"
+          className="holo-button group flex items-center gap-6 px-20 py-8 text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-2xl"
         >
-          <FileDown className="w-5 h-5" />
+          <FileDown className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
           {t.savePdf}
-        </motion.button>
+        </button>
       </div>
 
 
@@ -454,9 +332,9 @@ export default function ReportResultView({ report, onReset, userData, lang }: Re
             <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
               <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> {t.backToHome}
             </button>
-            <a href="/policy" target="_blank" className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all">
+            <button onClick={onOpenPolicy} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all">
               {t.policy}
-            </a>
+            </button>
           </div>
         </div>
         <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">

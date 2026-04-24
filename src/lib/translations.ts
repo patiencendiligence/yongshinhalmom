@@ -69,7 +69,7 @@ export const translations = {
     logout: "로그아웃",
     signInWithGoogle: "Google로 로그인",
     premiumFeature: "심층 분석 리포트 (유료)",
-    unlockDetailedReport: "더 깊은 분석 결과가 궁금하느냐?",
+    unlockDetailedReport: "더 깊은 분석 결과가 궁금한게냐?",
     unlockButton: "리포트 구매 (990원)",
     paymentSuccess: "성의를 확인했으니, 이제 그대의 자취를 더 깊이 들여다봐 주마.",
     freeTaste: "요약 리포트",

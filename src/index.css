@@ -4,37 +4,59 @@
 @theme {
   --font-serif: "Playfair Display", "Noto Serif KR", serif;
   --font-sans: "Plus Jakarta Sans", "Noto Sans KR", sans-serif;
-  --color-mythic-dark: #050505;
-  --color-mythic-card: #111111;
-  --color-mythic-red: #FF3B30;
-  --color-mythic-gold: #FFD60A;
-  --color-mythic-blue: #007AFF;
-  --color-mythic-green: #34C759;
-  --color-mythic-text: #F2F2F7;
+  --color-mythic-dark: #000000;
+  --color-mythic-card: #0a0a0a;
+  --color-mythic-red: #ff3b30;
+  --color-mythic-blue: #007aff;
+  --color-mythic-green: #34c759;
+  --color-mythic-text: #ffffff;
+  --color-mythic-gold: #FFD200;
+  
+  --color-holo-cyan: #00f2ff;
+  --color-holo-pink: #ff00ff;
+  --color-holo-purple: #9d00ff;
 }
 
 @layer base {
   body {
-    @apply bg-mythic-dark text-mythic-text font-sans overflow-x-hidden antialiased;
+    @apply bg-black text-white font-sans overflow-x-hidden antialiased;
   }
 }
 
-.mythic-grain {
-  background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-  background-repeat: repeat;
-  opacity: 0.05;
+.mythic-gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[--color-holo-cyan] via-[--color-holo-pink] to-[--color-holo-purple];
 }
 
-.bento-card-refined {
-  @apply bg-[#111] border border-white/5 rounded-[32px] shadow-2xl transition-all hover:bg-[#161616] hover:border-white/10;
+.mythic-border {
+  @apply border border-white/10;
 }
 
-.obangsaek-circle {
-  @apply w-12 h-12 rounded-full flex items-center justify-center text-black font-extrabold text-lg shadow-lg;
+.mythic-glass {
+  @apply bg-white/5 backdrop-blur-2xl border border-white/10;
+}
+
+.holo-button {
+  @apply relative overflow-hidden transition-all duration-500 border border-white/20 hover:border-white/40 active:scale-95;
+  background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(255, 0, 255, 0.1));
+}
+
+.holo-button::before {
+  content: "";
+  @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-r from-[--color-holo-cyan] via-[--color-holo-pink] to-[--color-holo-purple];
+  z-index: -1;
+}
+
+.holo-button:hover::before {
+  @apply opacity-20;
 }
 
 .text-editorial {
-  @apply font-serif italic tracking-tight;
+  @apply font-serif italic tracking-tight leading-[0.9];
+}
+
+.dragon-pattern {
+  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+  background-size: 24px 24px;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -54,7 +76,7 @@
 }
 
 .markdown-container strong {
-  @apply text-mythic-gold font-black;
+  @apply text-white font-black border-b border-white/20;
 }
 
 .markdown-container p {

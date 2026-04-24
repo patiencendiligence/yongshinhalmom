@@ -32,16 +32,16 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
           <div className="flex items-center gap-3">
             <div className="flex flex-col items-end">
               <span className="text-[9px] font-black tracking-widest text-white/40 uppercase leading-none mb-1">Authenticated</span>
-              <span className="text-[10px] text-mythic-gold font-serif italic whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px] text-right">{user.email}</span>
+              <span className="text-[10px] text-white/60 font-serif italic whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px] text-right">{user.email}</span>
             </div>
             {profile?.isPremium && (
-              <span className="px-2 py-0.5 bg-mythic-gold/20 border border-mythic-gold/30 rounded text-[8px] font-black text-mythic-gold uppercase tracking-tighter">Premium</span>
+              <span className="px-2 py-0.5 bg-white/5 border border-white/20 rounded-none text-[8px] font-black text-white uppercase tracking-tighter italic">PREMIUM</span>
             )}
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={logout}
-              className="p-3 bg-white/5 border border-white/10 rounded-full hover:bg-white/10 transition-all text-white/60"
+              className="p-3 bg-white/5 border border-white/10 rounded-none hover:bg-white/10 transition-all text-white/60"
             >
               <LogOut className="w-5 h-5" />
             </motion.button>
@@ -51,7 +51,7 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={login}
-            className="flex items-center gap-2 px-5 py-3 bg-mythic-gold text-black rounded-full shadow-lg shadow-mythic-gold/20 hover:scale-105 active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest"
+            className="holo-button flex items-center gap-2 px-6 py-3 text-white font-sans font-black text-[10px] uppercase tracking-[0.4em]"
           >
             <LogIn className="w-4 h-4" />
             {t.login}
@@ -87,6 +87,7 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
 
 function MainApp() {
   const [state, setState] = useState<AppState>("LANDING");
+  const [prevState, setPrevState] = useState<AppState>("LANDING");
   const [userData, setUserData] = useState<any>(null);
   const [report, setReport] = useState<ReportResult | null>(null);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -199,10 +200,22 @@ function MainApp() {
     setState("LANDING");
   };
 
+  const handleOpenPolicy = () => {
+    setPrevState(state);
+    setState("POLICY");
+  };
+
+  const handlePolicyBack = () => {
+    if (prevState === "RESULT" && report) {
+      setState("RESULT");
+    } else {
+      setState("LANDING");
+    }
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
       <div className="fixed inset-0 mythic-gradient -z-10" />
-      <div className="fixed inset-0 bg-[url('https://www.transparenttextures.com/patterns/rice-paper-2.png')] opacity-10 pointer-events-none -z-10" />
 
       <HeaderActions lang={lang} toggleLang={toggleLang} setIsInfoModalOpen={setIsInfoModalOpen} />
 
@@ -211,8 +224,8 @@ function MainApp() {
           <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center">
             <Landing onStart={handleStart} onOpenProfiles={handleOpenProfiles} hasProfiles={profiles.length > 0} lang={lang} />
             <button 
-              onClick={() => setState("POLICY")}
-              className="mt-8 mb-12 text-[10px] uppercase tracking-[0.4em] font-black pointer-events-auto hover:text-mythic-gold transition-colors text-white/20"
+              onClick={handleOpenPolicy}
+              className="mt-8 mb-12 text-[10px] uppercase tracking-[0.5em] font-black pointer-events-auto hover:text-white transition-colors text-white/10 italic font-sans"
             >
               {t.policy}
             </button>
@@ -221,31 +234,33 @@ function MainApp() {
 
         {state === "POLICY" && (
            <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
-             <PolicyView onBack={() => setState("LANDING")} lang={lang} />
+             <PolicyView onBack={handlePolicyBack} lang={lang} />
            </motion.div>
         )}
 
         {state === "INPUT" && (
-          <motion.div key="input" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="w-full max-w-2xl px-4">
+          <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
             <InputForm onSubmit={handleSubmit} initialData={preFilledData} lang={lang} />
           </motion.div>
         )}
 
         {state === "LOADING" && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-8">
-            <div className="relative w-48 h-48">
-              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 4, ease: "linear" }} className="absolute inset-0 border-4 border-dashed border-mythic-gold/30 rounded-full" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-serif text-2xl text-mythic-gold animate-pulse">{t.loadingSummary}</span>
-              </div>
+          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-12">
+            <div className="relative w-64 h-64 flex items-center justify-center">
+              <div className="absolute inset-0 border-[1px] border-white/10 rounded-full animate-[spin_10s_linear_infinite]" />
+              <div className="absolute inset-4 border-[1px] border-white/5 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
+              <div className="text-7xl font-serif font-black italic mythic-gradient-text animate-pulse">?</div>
             </div>
-            <p className="text-white/60 font-serif italic text-lg text-center max-w-xs">{t.loadingDetail}</p>
+            <div className="flex flex-col items-center gap-4 text-center">
+              <h2 className="text-4xl font-serif font-black italic text-white tracking-tighter">{t.loadingSummary}</h2>
+              <p className="text-white/20 font-sans uppercase tracking-[0.6em] text-[10px] font-black italic">{t.loadingSummary}</p>
+            </div>
           </motion.div>
         )}
 
         {state === "RESULT" && report && (
           <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
-            <ReportResultView report={report} onReset={handleReset} userData={userData} lang={lang} />
+            <ReportResultView report={report} onReset={handleReset} onOpenPolicy={handleOpenPolicy} userData={userData} lang={lang} />
           </motion.div>
         )}
       </AnimatePresence>

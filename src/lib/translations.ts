@@ -81,7 +81,7 @@ export const translations = {
     chooseLevel: "분석 수준 선택",
     levelSimple: "기본 요약",
     levelDetailed: "심층 리포트 (990원)",
-    simpleLockNote: "성의를 보여야 더 깊은 곳까지 비춰줄 수 있는 법이니라.",
+    simpleLockNote: "성의를 보여야 더 깊은 곳까지 비춰줄 수 있는 법...",
     savePdf: "리포트 저장 (PDF)",
     manseRyeok: "Data Pattern",
     policy: "정책 및 약관"

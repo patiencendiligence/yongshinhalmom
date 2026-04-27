@@ -249,13 +249,13 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, userDa
                     </span>
                   )}
                 </div>
-                <h3 className={`text-4xl md:text-5xl font-serif font-black italic leading-[0.9] text-white ${isUnpaidLocked ? "text-center mb-16 text-7xl md:text-9xl" : ""}`}>
+                <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white ${isUnpaidLocked ? "text-center mb-16 text-5xl md:text-7xl" : ""}`}>
                   {isUnpaidLocked ? t.unlockDetailedReport : section.title}
                 </h3>
               </div>
 
               {!isUnpaidLocked ? (
-                <div className="text-lg md:text-lg font-sans tracking-tight leading-relaxed markdown-container text-white/70">
+                <div className="text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container text-white/70">
                   <ReactMarkdown>
                     {section.content}
                   </ReactMarkdown>
@@ -280,7 +280,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, userDa
 
         {/* Medical / Warning Banner */}
         {report.medicalAdvice && (
-          <div className="mb-32 p-16 bg-white flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
+          <div className="mb-16 p-6 bg-white opatcity-30 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
             <div className="w-24 h-24 bg-black flex-shrink-0 flex items-center justify-center text-white border border-white/20">
               <AlertTriangle className="w-10 h-10 text-white" />
             </div>

@@ -5,8 +5,8 @@ let supabaseInstance: SupabaseClient | null = null;
 export function getSupabase(): SupabaseClient | null {
   if (supabaseInstance) return supabaseInstance;
 
-  const supabaseUrl = (import.meta as any).env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = (import.meta as any).env.VITE_SUPABASE_ANON_KEY;
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return null;

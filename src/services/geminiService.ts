@@ -55,8 +55,7 @@ export async function getReport(userData: {
   }
 
   // 2. Client-side Fallback (for Static Hosting like GitHub Pages)
-  const meta = import.meta as any;
-  const clientApiKey = meta.env.VITE_GEMINI_API_KEY || meta.env.VITE_GOOGLE_API_KEY;
+  const clientApiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
   if (!clientApiKey) {
     throw new Error("No API key found. For GitHub Pages, please configure VITE_GEMINI_API_KEY.");
   }

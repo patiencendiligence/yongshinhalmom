@@ -11,6 +11,7 @@ export interface UserProfile {
 
 const STORAGE_KEY = "yongshin_profiles";
 const CACHE_KEY = "yongshin_report_cache";
+const PAID_KEY = "yongshin_paid_hashes";
 
 export interface ReportCacheEntry {
   inputHash: string;
@@ -47,6 +48,25 @@ export const storageService = {
   deleteProfile: (id: string) => {
     const profiles = storageService.getProfiles();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles.filter(p => p.id !== id)));
+  },
+
+  // Paid tracking logic
+  getPaidHashes: (): string[] => {
+    const data = localStorage.getItem(PAID_KEY);
+    return data ? JSON.parse(data) : [];
+  },
+
+  setPaidHash: (hash: string) => {
+    if (!hash) return;
+    const hashes = storageService.getPaidHashes();
+    if (!hashes.includes(hash)) {
+      localStorage.setItem(PAID_KEY, JSON.stringify([...hashes, hash]));
+    }
+  },
+
+  isLocalPaid: (hash: string): boolean => {
+    if (!hash) return false;
+    return storageService.getPaidHashes().includes(hash);
   },
 
   // Caching logic

@@ -6,6 +6,8 @@ import { Language, translations } from "../lib/translations";
 import { useAuth } from "../lib/AuthContext";
 import { Lock, FileDown, AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
 import { getManseRyeok } from "../lib/manseRyeok";
+import { getReportHash } from "../lib/hashUtils";
+import { storageService } from "../services/storageService";
 import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
@@ -40,10 +42,28 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
 
 export default function ReportResultView({ report, onReset, onOpenPolicy, onLogin, userData, lang }: ReportResultViewProps) {
   const t = (translations[lang] as any);
-  const { user, profile, login, markAsPaid } = useAuth();
+  const { user, profile, login, markAsPaid, checkPaymentStatus } = useAuth();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  
+  const reportHash = React.useMemo(() => getReportHash(userData), [userData]);
+  const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
 
-  const isPremium = profile?.isPremium === true;
+  // Check if this specific report is paid
+  React.useEffect(() => {
+    const checkStatus = async () => {
+      // If we already know it's paid locally, we can still verify with server
+      if (user && reportHash) {
+        const paid = await checkPaymentStatus(reportHash);
+        if (paid) {
+          setIsCurrentlyPaid(true);
+          storageService.setPaidHash(reportHash);
+        }
+      }
+    };
+    checkStatus();
+  }, [user, reportHash, checkPaymentStatus]);
+
+  const isPremium = isCurrentlyPaid || profile?.isPremium === true;
   const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
 
   // Swap Sections 2 (idx 1) and 3 (idx 2)
@@ -63,9 +83,13 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
       }
       return;
     }
-    setIsPaymentModalOpen(true);
-    // User can manually be marked as paid via a separate logic or admin, 
-    // for now we'll allow developer to use markAsPaid for testing or use a button in modal
+    
+    // Save current hash for redirect recovery
+    sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
+    
+    // Polar Payment Link
+    const polarUrl = "https://buy.polar.sh/polar_cl_jVS8higVh9RXkUM8rPOZAzD2ijTajsWPMLWID1cUGuy";
+    window.location.href = polarUrl;
   };
 
   const handleSavePdf = async () => {

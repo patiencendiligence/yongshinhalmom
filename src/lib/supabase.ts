@@ -66,16 +66,21 @@ export async function signOut() {
   if (error) throw error;
 }
 
-export async function getPaymentStatus(userId: string) {
+export async function getPaymentStatus(userId: string, reportHash?: string) {
   if (!userId) return false;
   const client = getSupabase();
   if (!client) return false;
 
-  const { data, error } = await client
+  let query = client
     .from('payments')
     .select('is_premium')
-    .eq('user_id', userId)
-    .limit(1);
+    .eq('user_id', userId);
+    
+  if (reportHash) {
+    query = query.eq('report_hash', reportHash);
+  }
+
+  const { data, error } = await query.limit(1);
   
   if (error) {
     console.error("Error fetching payment status:", error);
@@ -83,23 +88,22 @@ export async function getPaymentStatus(userId: string) {
   return data?.[0]?.is_premium || false;
 }
 
-export async function updatePaymentStatus(userId: string, isPremium: boolean) {
+export async function updatePaymentStatus(userId: string, isPremium: boolean, reportHash?: string, checkoutId?: string) {
   const client = getSupabase();
   if (!client) throw new Error("Supabase is not configured.");
 
-  /* 
-    Security Note: 403 Forbidden errors are often caused by missing RLS (Row Level Security) policies.
-    Ensure 'payments' table has policies:
-    - SELECT: allow users to select their own data (user_id = auth.uid())
-    - ALL (INSERT/UPDATE): allow users to upsert their own data
-    
-    SQL command to run in Supabase SQL Editor:
-    ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
-    CREATE POLICY "Allow users to manage their own payments" ON public.payments FOR ALL USING (auth.uid() = user_id);
-  */
+  const payload: any = { 
+    user_id: userId, 
+    is_premium: isPremium, 
+    updated_at: new Date().toISOString() 
+  };
+
+  if (reportHash) payload.report_hash = reportHash;
+  if (checkoutId) payload.checkout_id = checkoutId;
+
   const { error } = await client
     .from('payments')
-    .upsert({ user_id: userId, is_premium: isPremium, updated_at: new Date().toISOString() });
+    .upsert(payload, { onConflict: 'user_id,report_hash' });
   
   if (error) throw error;
 }

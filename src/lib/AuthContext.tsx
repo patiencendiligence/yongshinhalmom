@@ -14,7 +14,8 @@ interface AuthContextType {
   loading: boolean;
   login: () => Promise<void>;
   logout: () => Promise<void>;
-  markAsPaid: () => Promise<void>;
+  markAsPaid: (reportHash?: string, checkoutId?: string) => Promise<void>;
+  checkPaymentStatus: (reportHash: string) => Promise<boolean>;
   isConfigured: boolean;
 }
 
@@ -64,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = async (u: User) => {
     try {
+      // Global premium status check (optional fallback)
       const isPremium = await getPaymentStatus(u.id);
       setProfile({
         uid: u.id,
@@ -72,6 +74,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch (error) {
       console.error("Error fetching profile:", error);
+    }
+  };
+
+  const checkPaymentStatus = async (reportHash: string) => {
+    if (!user) return false;
+    try {
+      return await getPaymentStatus(user.id, reportHash);
+    } catch (error) {
+      console.error("Error checking specific payment:", error);
+      return false;
     }
   };
 
@@ -102,10 +114,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const markAsPaid = async () => {
+  const markAsPaid = async (reportHash?: string, checkoutId?: string) => {
     if (!user) return;
     try {
-      await updatePaymentStatus(user.id, true);
+      await updatePaymentStatus(user.id, true, reportHash, checkoutId);
+      // Update local profile if it was a general premium update or we want to reflect it
       setProfile(prev => prev ? { ...prev, isPremium: true } : null);
     } catch (error: any) {
       console.error("Payment update error:", error);
@@ -116,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, login, logout, markAsPaid, isConfigured }}>
+    <AuthContext.Provider value={{ user, profile, loading, login, logout, markAsPaid, checkPaymentStatus, isConfigured }}>
       {children}
     </AuthContext.Provider>
   );

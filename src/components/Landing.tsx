@@ -98,10 +98,10 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
       </motion.div>
 
       <div className="absolute top-1/2 left-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
-        Ancient Wisdom • Modern Tech
+        Pattern Science • Modern Tech
       </div>
       <div className="absolute top-1/2 right-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
-        Dragon Soul • Divine Pattern
+        User Insight • Life Pattern
       </div>
     </div>
   );

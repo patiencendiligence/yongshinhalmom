@@ -33,13 +33,20 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
               <img src="https://polar.sh/favicon.ico" alt="Polar" className="w-full h-full grayscale" />
             </div>
             <h3 className="text-4xl md:text-6xl font-serif font-black italic mb-6 text-white leading-none">
-              {lang === 'ko' ? "심층 리포트 구매" : "Unlock Full Report"}
+              {lang === 'ko' ? "Annual Lifestyle Report" : "Annual Lifestyle Report"}
             </h3>
-            <p className="text-white/40 font-sans tracking-tight mb-12 max-w-sm text-lg leading-relaxed">
-              {lang === 'ko' ? "명운의 모든 흐름을 읽는 990원의 가치. Polar를 통해 안전하게 결제하세요." : "Unlock every stream of your destiny for 990 KRW. Secure payment via Polar."}
+            <p className="text-white/40 font-sans tracking-tight mb-4 max-w-md text-lg leading-relaxed">
+              {lang === 'ko' 
+                ? "개인적인 성찰과 생활 패턴 분석을 위한 1회용 디지털 리포트입니다. (990원)" 
+                : "A one-time digital report providing general lifestyle insights for self-reflection. (990 KRW)"}
+            </p>
+            <p className="text-white/20 text-[11px] mb-12 max-w-md leading-relaxed">
+              {lang === 'ko'
+                ? "본 서비스는 전문적, 재정적 또는 예측적 조언을 제공하지 않으며, 디지털 콘텐츠 특성상 결제 후 환불이 불가능합니다."
+                : "This service does not provide professional or predictive advice. Due to the nature of digital content, all sales are final."}
             </p>
             <a 
-              href="https://buy.polar.sh/polar_cl_jVS8higVh9RXkUM8rPOZAzD2ijTajsWPMLWID1cUGuy" 
+              href="https://buy.polar.sh/polar_cl_ypvnbPpvJaL5lsVY8n3UWuXLzMTVlnZDS82YE1HPBMN" 
               target="_blank" 
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"

@@ -25,12 +25,16 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
+  // Handle path for both local dev and GitHub Pages
+  const basePath = import.meta.env.BASE_URL === './' ? '' : import.meta.env.BASE_URL;
+  const imageUrl = `${basePath}zodiac_guardians.png`.replace('//', '/');
+  
   return (
-    <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-black/20">
+    <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900">
       <div 
         className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
         style={{
-          backgroundImage: 'url("zodiac_guardians.png")',
+          backgroundImage: `url("${imageUrl}")`,
           backgroundSize: '600% 200%',
           backgroundPosition: `${(col / 5) * 100}% ${(row / 1) * 100}%`,
           backgroundRepeat: 'no-repeat'
@@ -75,6 +79,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
   }
 
   const handlePayment = async () => {
+    console.log("handlePayment triggered, user status:", !!user);
     if (!user) {
       if (onLogin) {
         await onLogin();
@@ -88,8 +93,10 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
     // Polar Payment Link
-    const polarUrl = "https://buy.polar.sh/polar_cl_jVS8higVh9RXkUM8rPOZAzD2ijTajsWPMLWID1cUGuy";
-    window.location.href = polarUrl;
+    const polarUrl = "https://buy.polar.sh/polar_cl_ypvnbPpvJaL5lsVY8n3UWuXLzMTVlnZDS82YE1HPBMN";
+    
+    // Using window.open for checkout links is more reliable in iframes
+    window.open(polarUrl, "_blank", "noreferrer");
   };
 
   const handleSavePdf = async () => {
@@ -208,8 +215,8 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
         <header className="pt-32 pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-white/10 mb-16 relative z-10">
           <div className="max-w-3xl mb-12 md:mb-0">
             <h1 className="text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-white leading-[0.8] mb-12">
-              {t.oracleHasSpoken.split('Report')[0]} <span className="mythic-gradient-text">Report</span> <br/>
-              {t.oracleHasSpoken.split('Report')[1]}
+              {t.yourLifestyleReport.split('Report')[0]} <span className="mythic-gradient-text">Report</span> <br/>
+              {t.yourLifestyleReport.split('Report')[1]}
             </h1>
             <p className="text-2xl md:text-3xl font-serif text-white/40 italic leading-snug max-w-2xl">
               "{report.summary}"

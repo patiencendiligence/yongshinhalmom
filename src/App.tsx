@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
+import { HashRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Languages, HelpCircle, LogIn, LogOut } from "lucide-react";
 import Landing from "./components/Landing";
@@ -339,14 +339,11 @@ function MainApp() {
 }
 
 export default function App() {
-  // Determine basename based on location for GitHub Pages support
-  const basename = window.location.pathname.startsWith("/yongshinhalmom") ? "/yongshinhalmom" : "/";
-  
   return (
-    <BrowserRouter basename={basename}>
+    <HashRouter>
       <AuthProvider>
         <MainApp />
       </AuthProvider>
-    </BrowserRouter>
+    </HashRouter>
   );
 }

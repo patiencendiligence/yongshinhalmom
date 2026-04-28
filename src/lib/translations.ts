@@ -5,7 +5,7 @@ const nextYear = currentYear + 1;
 
 export const translations = {
   ko: {
-    title: "Pattern Report by Yongshin",
+    title: "Yongshin Pattern Report",
     subtitle: "Life Analysis",
     grandmother: "scary grandma",
     ancientOracle: "패턴 분석 리포트",
@@ -87,7 +87,7 @@ export const translations = {
     policy: "정책 및 약관"
   },
   en: {
-    title: "Pattern Report by Yongshin",
+    title: "Yongshin Pattern Report",
     subtitle: "Life Analysis",
     grandmother: "scary grandma",
     ancientOracle: "Life Analysis",

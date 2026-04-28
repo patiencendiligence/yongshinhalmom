@@ -25,7 +25,12 @@ export const supabase = new Proxy({} as SupabaseClient, {
   get: (target, prop) => {
     const client = getSupabase();
     if (!client) {
-      throw new Error("Supabase is not configured. Please add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to your secrets.");
+      if (typeof prop === 'string' && ['auth', 'from', 'storage'].includes(prop)) {
+         console.warn(`Supabase ${prop} accessed but client is not configured.`);
+      }
+      // Return a dummy object to prevent immediate crash, 
+      // but methods will likely fail if called.
+      return (target as any)[prop];
     }
     return (client as any)[prop];
   }

@@ -19,18 +19,18 @@ let openaiClient: OpenAI | null = null;
 
 function getGenAI() {
   if (!genAI) {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    // Try both common names for the API key in AI Studio
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    
     if (!apiKey) {
-      console.error("Missing GEMINI_API_KEY or GOOGLE_API_KEY");
-      throw new Error("Gemini API key environment variable is required");
+      console.error("Missing Gemini API Key (tried GEMINI_API_KEY, GOOGLE_API_KEY, VITE_GEMINI_API_KEY)");
+      throw new Error("Gemini API key is required but not configured in the environment.");
     }
     
-    // Masked logging for debugging
-    const masked = apiKey.length > 8 ? `${apiKey.substring(0, 4)}...${apiKey.substring(apiKey.length - 4)}` : "****";
-    console.log(`[Server] Initializing Gemini with key: ${masked}`);
-    
-    // Some keys might be passed with quotes from certain environments
     const cleanKey = apiKey.replace(/['"]/g, '').trim();
+    const masked = cleanKey.length > 8 ? `${cleanKey.substring(0, 4)}...${cleanKey.substring(cleanKey.length - 4)}` : "****";
+    console.log(`[Server] Initializing GoogleGenerativeAI with key: ${masked}`);
+    
     genAI = new GoogleGenerativeAI(cleanKey);
   }
   return genAI;

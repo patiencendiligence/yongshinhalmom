@@ -261,7 +261,6 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
           // After swap: 0 (Saju), 1 (Today), 2 (Overview) are unlocked. 3 onwards are locked and grouped.
           const isUnpaidLocked = !isPremium && idx >= 3;
           
-          if (isUnpaidLocked && idx > 3) return null; // Only render the group block at index 3
 
           return (
             <motion.div

@@ -38,7 +38,9 @@ export const supabase = new Proxy({} as SupabaseClient, {
 
 export async function signInWithGoogle() {
   const client = getSupabase();
-  if (!client) throw new Error("Supabase is not configured.");
+  if (!client) {
+    throw new Error("Supabase is not configured. 배포 환경(예: GitHub Secrets)에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY가 설정되어 있는지 확인해 주세요.");
+  }
   
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',

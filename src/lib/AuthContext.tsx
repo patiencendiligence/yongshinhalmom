@@ -72,6 +72,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async () => {
     try {
+      const client = getSupabase();
+      if (!client) {
+        alert("Supabase 설정이 누락되었습니다.\n\n환경 변수(VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)가 올바르게 설정되었는지 확인해 주세요. GitHub Pages 배포 시에는 'Repository Secrets'에 등록해야 합니다.");
+        return;
+      }
       await signInWithGoogle();
     } catch (error: any) {
       console.error("Login Error:", error);

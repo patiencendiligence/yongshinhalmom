@@ -42,10 +42,13 @@ export async function signInWithGoogle() {
     throw new Error("Supabase is not configured. 배포 환경(예: GitHub Secrets)에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY가 설정되어 있는지 확인해 주세요.");
   }
   
+  // Use current URL minus the hash to return exactly where we were
+  const redirectUrl = window.location.origin + window.location.pathname;
+  
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: window.location.origin,
+      redirectTo: redirectUrl,
       queryParams: {
         prompt: 'select_account'
       }

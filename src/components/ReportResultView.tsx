@@ -14,6 +14,7 @@ interface ReportResultViewProps {
   report: ReportResult;
   onReset: () => void;
   onOpenPolicy: () => void;
+  onLogin?: () => Promise<void>;
   userData: any;
   lang: Language;
 }
@@ -37,7 +38,7 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   );
 };
 
-export default function ReportResultView({ report, onReset, onOpenPolicy, userData, lang }: ReportResultViewProps) {
+export default function ReportResultView({ report, onReset, onOpenPolicy, onLogin, userData, lang }: ReportResultViewProps) {
   const t = (translations[lang] as any);
   const { user, profile, login, markAsPaid } = useAuth();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -55,7 +56,11 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, userDa
 
   const handlePayment = async () => {
     if (!user) {
-      await login();
+      if (onLogin) {
+        await onLogin();
+      } else {
+        await login();
+      }
       return;
     }
     setIsPaymentModalOpen(true);

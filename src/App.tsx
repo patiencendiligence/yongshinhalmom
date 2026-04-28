@@ -166,6 +166,19 @@ function MainApp() {
     setLang(prev => prev === "ko" ? "en" : "ko");
   };
 
+  const handleBack = () => {
+    navigate("/");
+  };
+
+  const handlePurchase = () => {
+    if (report) {
+      setState("RESULT");
+    } else {
+      setState("LANDING");
+    }
+    navigate("/");
+  };
+
   const handleStart = () => {
     setPreFilledData(null);
     setState("INPUT");
@@ -243,19 +256,6 @@ function MainApp() {
 
   const handleOpenPolicy = () => {
     navigate("/policies");
-  };
-
-  const handlePolicyBack = () => {
-    navigate("/");
-  };
-
-  const handlePurchase = () => {
-    if (report) {
-      setState("RESULT");
-    } else {
-      setState("LANDING");
-    }
-    navigate("/");
   };
 
   return (

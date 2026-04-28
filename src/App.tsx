@@ -133,7 +133,18 @@ function MainApp() {
     // Handle payment success redirect
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success' && user) {
-      markAsPaid();
+      const checkoutId = urlParams.get('checkout_id');
+      const savedHash = sessionStorage.getItem("yongshin_pending_pay_hash");
+      
+      if (savedHash) {
+        markAsPaid(savedHash, checkoutId || undefined);
+        storageService.setPaidHash(savedHash);
+        sessionStorage.removeItem("yongshin_pending_pay_hash");
+      } else {
+        // Fallback to global if hash missing (shouldn't happen)
+        markAsPaid();
+      }
+
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     }

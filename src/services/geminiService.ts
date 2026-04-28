@@ -1,5 +1,5 @@
 import { Language } from "../lib/translations";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenAI, Type } from "@google/genai";
 
 export interface ReportSection {
   title: string;
@@ -64,16 +64,11 @@ export async function getReport(userData: {
     throw new Error("No API key found. For GitHub Pages, please configure VITE_GEMINI_API_KEY.");
   }
 
-  const genAI = new GoogleGenerativeAI(clientApiKey);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-1.5-flash",
-    systemInstruction: SYSTEM_INSTRUCTION,
-  });
+  const ai = new GoogleGenAI({ apiKey: clientApiKey });
 
   const now = new Date();
   const currentDate = now.toISOString().split('T')[0];
   const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
-  const currentYear = now.getFullYear();
 
   const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
@@ -87,46 +82,48 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 JSON 형식으로 summary, zodiac(0-11), illustrationType, sections[], luckInfo{color, item, food}를 응답해라.
 `;
 
-  const response = await model.generateContent({
+  const response = await ai.models.generateContent({
+    model: "gemini-3-flash-preview",
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
-    generationConfig: {
+    config: {
+      systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
       responseSchema: {
-        type: SchemaType.OBJECT,
+        type: Type.OBJECT,
         properties: {
-          summary: { type: SchemaType.STRING },
-          zodiac: { type: SchemaType.NUMBER },
+          summary: { type: Type.STRING },
+          zodiac: { type: Type.NUMBER },
           illustrationType: { 
-            type: SchemaType.STRING, 
+            type: Type.STRING, 
             enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
           },
           sections: {
-            type: SchemaType.ARRAY,
+            type: Type.ARRAY,
             items: {
-              type: SchemaType.OBJECT,
+              type: Type.OBJECT,
               properties: {
-                title: { type: SchemaType.STRING },
-                content: { type: SchemaType.STRING },
+                title: { type: Type.STRING },
+                content: { type: Type.STRING },
               },
               required: ["title", "content"],
             },
-          } as any,
+          },
           luckInfo: {
-            type: SchemaType.OBJECT,
+            type: Type.OBJECT,
             properties: {
-              color: { type: SchemaType.STRING },
-              item: { type: SchemaType.STRING },
-              food: { type: SchemaType.STRING },
+              color: { type: Type.STRING },
+              item: { type: Type.STRING },
+              food: { type: Type.STRING },
             },
             required: ["color", "item", "food"],
           },
         },
         required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
-      } as any,
+      },
     },
   });
 
-  const text = response.response.text();
+  const text = response.text;
   if (!text) throw new Error("Empty response from Gemini Client");
   return JSON.parse(text);
 }

@@ -75,12 +75,12 @@ export async function getPaymentStatus(userId: string) {
     .from('payments')
     .select('is_premium')
     .eq('user_id', userId)
-    .maybeSingle();
+    .limit(1);
   
-  if (error && error.code !== 'PGRST116') {
+  if (error) {
     console.error("Error fetching payment status:", error);
   }
-  return data?.is_premium || false;
+  return data?.[0]?.is_premium || false;
 }
 
 export async function updatePaymentStatus(userId: string, isPremium: boolean) {

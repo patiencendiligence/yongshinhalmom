@@ -13,6 +13,8 @@ import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 
+import zodiacGuardians from "../zodiac_guardians.png";
+
 interface ReportResultViewProps {
   report: ReportResult;
   onReset: () => void;
@@ -26,16 +28,12 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
-  // Handle path for both local dev and GitHub Pages
-  const basename = window.location.pathname.startsWith("/yongshinhalmom") ? "/yongshinhalmom" : "";
-  const imageUrl = `${window.location.origin}${basename}/zodiac_guardians.png`.replace(/([^:]\/)\/+/g, "$1");
-  
   return (
     <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900">
       <div 
         className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
         style={{
-          backgroundImage: `url("${imageUrl}")`,
+          backgroundImage: `url("${zodiacGuardians}")`,
           backgroundSize: '600% 200%',
           backgroundPosition: `${(col / 5) * 100}% ${(row / 1) * 100}%`,
           backgroundRepeat: 'no-repeat'

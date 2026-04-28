@@ -45,10 +45,14 @@ export async function getReport(userData: {
       return await response.json();
     }
     
-    // If we get a 404, it might be a static host like GitHub Pages
-    if (response.status !== 404) {
+    // Check if it's JSON before parsing
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("application/json")) {
       const errorData = await response.json();
       throw new Error(errorData.error || "Failed to generate report via server");
+    } else {
+      // If not JSON (like a 405 HTML page from GitHub), just go to fallback
+      console.warn(`Server returned non-JSON response (${response.status}). Falling back to client-side.`);
     }
   } catch (error) {
     console.warn("Server API failed or not available, checking client-side fallback...", error);

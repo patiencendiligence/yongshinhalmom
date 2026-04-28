@@ -75,7 +75,7 @@ export async function getPaymentStatus(userId: string) {
     .from('payments')
     .select('is_premium')
     .eq('user_id', userId)
-    .single();
+    .maybeSingle();
   
   if (error && error.code !== 'PGRST116') {
     console.error("Error fetching payment status:", error);

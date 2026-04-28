@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YONGSHIN HALMOM</title>
+    <script type="text/javascript">
+      // GitHub Pages SPA 404 Fix
+      (function() {
+        var path = window.location.pathname;
+        var basename = '/yongshinhalmom';
+        // If we are in the subpath, remove it for the hash
+        if (path.indexOf(basename) === 0) {
+          path = path.slice(basename.length);
+        }
+        // Redirect to the root with the path as a hash
+        window.location.replace((basename || '') + '/#' + path + window.location.search);
+      })();
+    </script>
+  </head>
+  <body>
+    Redirecting...
+  </body>
+</html>

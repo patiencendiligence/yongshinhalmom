@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 import { getReport, ReportResult } from "../services/geminiService";
 import { Language, translations } from "../lib/translations";
 import { useAuth } from "../lib/AuthContext";
+import { Link } from "react-router-dom";
 import { Lock, FileDown, AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
 import { getManseRyeok } from "../lib/manseRyeok";
 import { getReportHash } from "../lib/hashUtils";
@@ -25,9 +26,8 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
-  // Handle path for both local dev and GitHub Pages
-  const basePath = import.meta.env.BASE_URL === './' ? '' : import.meta.env.BASE_URL;
-  const imageUrl = `${basePath}zodiac_guardians.png`.replace('//', '/');
+  // Use absolute URL from GitHub to ensure it works across all deployments
+  const imageUrl = "https://raw.githubusercontent.com/patiencendiligence/yongshinhalmom/main/public/zodiac_guardians.png";
   
   return (
     <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900">
@@ -248,7 +248,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
         {/* Manse-ryeok - Museum Label Style */}
         <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8">
-          <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em] mythic-gradient-text">{t.manseRyeok}</div>
+          <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em]">{t.manseRyeok}</div>
           <div className="text-3xl md:text-5xl font-serif font-black italic text-white/80 tracking-tighter">
             {manseRyeok.full}
           </div>
@@ -368,9 +368,12 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
               <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> {t.backToHome}
             </button>
-            <button onClick={onOpenPolicy} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all">
+            <Link 
+              to="/policies"
+              className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all"
+            >
               {t.policy}
-            </button>
+            </Link>
           </div>
         </div>
         <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">

@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect } from "react";
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Languages, HelpCircle, LogIn, LogOut } from "lucide-react";
 import Landing from "./components/Landing";
@@ -87,7 +88,6 @@ function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: any) {
 
 function MainApp() {
   const [state, setState] = useState<AppState>("LANDING");
-  const [prevState, setPrevState] = useState<AppState>("LANDING");
   const [userData, setUserData] = useState<any>(null);
   const [report, setReport] = useState<ReportResult | null>(null);
   const [profiles, setProfiles] = useState<UserProfile[]>([]);
@@ -99,6 +99,9 @@ function MainApp() {
     const saved = localStorage.getItem("yongshin_lang");
     return (saved as Language) || "ko";
   });
+
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const { user, profile, login, markAsPaid } = useAuth();
   const t = translations[lang];
@@ -238,16 +241,11 @@ function MainApp() {
   };
 
   const handleOpenPolicy = () => {
-    setPrevState(state);
-    setState("POLICY");
+    navigate("/policies");
   };
 
   const handlePolicyBack = () => {
-    if (prevState === "RESULT" && report) {
-      setState("RESULT");
-    } else {
-      setState("LANDING");
-    }
+    navigate(-1);
   };
 
   return (
@@ -256,59 +254,62 @@ function MainApp() {
 
       <HeaderActions lang={lang} toggleLang={toggleLang} setIsInfoModalOpen={setIsInfoModalOpen} />
 
-      <AnimatePresence mode="wait">
-        {state === "LANDING" && (
-          <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center">
-            <Landing onStart={handleStart} onOpenProfiles={handleOpenProfiles} hasProfiles={profiles.length > 0} lang={lang} />
-            <button 
-              onClick={handleOpenPolicy}
-              className="mt-8 mb-12 text-[10px] uppercase tracking-[0.5em] font-black pointer-events-auto hover:text-white transition-colors text-white/10 italic font-sans"
-            >
-              {t.policy}
-            </button>
+      <Routes>
+        <Route path="/policies" element={
+          <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
+            <PolicyView onBack={handlePolicyBack} lang={lang} />
           </motion.div>
-        )}
+        } />
+        <Route path="*" element={
+          <AnimatePresence mode="wait">
+            {state === "LANDING" && (
+              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center">
+                <Landing onStart={handleStart} onOpenProfiles={handleOpenProfiles} hasProfiles={profiles.length > 0} lang={lang} />
+                <Link 
+                  to="/policies"
+                  className="mt-8 mb-12 text-[10px] uppercase tracking-[0.5em] font-black pointer-events-auto hover:text-white transition-colors text-white/10 italic font-sans"
+                >
+                  {t.policy}
+                </Link>
+              </motion.div>
+            )}
 
-        {state === "POLICY" && (
-           <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
-             <PolicyView onBack={handlePolicyBack} lang={lang} />
-           </motion.div>
-        )}
+            {state === "INPUT" && (
+              <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
+                <InputForm onSubmit={handleSubmit} initialData={preFilledData} lang={lang} />
+              </motion.div>
+            )}
 
-        {state === "INPUT" && (
-          <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
-            <InputForm onSubmit={handleSubmit} initialData={preFilledData} lang={lang} />
-          </motion.div>
-        )}
+            {state === "LOADING" && (
+              <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-16">
+                <div className="relative w-72 h-72 flex items-center justify-center border border-white/5 shadow-[0_0_100px_rgba(255,255,255,0.03)] dragon-pattern">
+                  <div className="absolute inset-0 border-[0.5px] border-white/10 animate-[spin_20s_linear_infinite]" />
+                  <div className="absolute inset-8 border-[0.5px] border-white/5 animate-[spin_30s_linear_infinite_reverse]" />
+                  <div className="text-8xl font-serif font-black italic text-white/10 animate-pulse tracking-tighter">Halmom</div>
+                </div>
+                <div className="flex flex-col items-center gap-6 text-center max-w-sm">
+                  <h2 className="text-3xl md:text-5xl font-serif font-black italic text-white leading-none tracking-tighter">{t.loadingSummary}</h2>
+                  <div className="w-16 h-0.5 bg-white/10" />
+                  <p className="text-white/20 font-sans uppercase tracking-[0.8em] text-[9px] font-black italic">{lang === 'ko' ? "명운의 실타래를 읽는 중" : "READING THE THREADS OF DESTINY"}</p>
+                </div>
+              </motion.div>
+            )}
 
-        {state === "LOADING" && (
-          <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center gap-16">
-            <div className="relative w-72 h-72 flex items-center justify-center border border-white/5 shadow-[0_0_100px_rgba(255,255,255,0.03)] dragon-pattern">
-              <div className="absolute inset-0 border-[0.5px] border-white/10 animate-[spin_20s_linear_infinite]" />
-              <div className="absolute inset-8 border-[0.5px] border-white/5 animate-[spin_30s_linear_infinite_reverse]" />
-              <div className="text-8xl font-serif font-black italic text-white/10 animate-pulse tracking-tighter">Halmom</div>
-            </div>
-            <div className="flex flex-col items-center gap-6 text-center max-w-sm">
-              <h2 className="text-3xl md:text-5xl font-serif font-black italic text-white leading-none tracking-tighter">{t.loadingSummary}</h2>
-              <div className="w-16 h-0.5 bg-white/10" />
-              <p className="text-white/20 font-sans uppercase tracking-[0.8em] text-[9px] font-black italic">{lang === 'ko' ? "명운의 실타래를 읽는 중" : "READING THE THREADS OF DESTINY"}</p>
-            </div>
-          </motion.div>
-        )}
-
-        {state === "RESULT" && report && (
-          <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
-            <ReportResultView 
-              report={report} 
-              onReset={handleReset} 
-              onOpenPolicy={handleOpenPolicy} 
-              onLogin={loginAndPersist}
-              userData={userData} 
-              lang={lang} 
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
+            {state === "RESULT" && report && (
+              <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
+                <ReportResultView 
+                  report={report} 
+                  onReset={handleReset} 
+                  onOpenPolicy={handleOpenPolicy} 
+                  onLogin={loginAndPersist}
+                  userData={userData} 
+                  lang={lang} 
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        } />
+      </Routes>
 
       <ProfileModal isOpen={isProfileModalOpen} onClose={() => setIsProfileModalOpen(false)} onSelect={handleSelectProfile} profiles={profiles} onDelete={handleDeleteProfile} lang={lang} />
       <InfoModal isOpen={isInfoModalOpen} onClose={() => setIsInfoModalOpen(false)} onOpenReport={() => { window.location.href = "mailto:patiencendiligence@gmail.com"; }} lang={lang} />
@@ -323,9 +324,14 @@ function MainApp() {
 }
 
 export default function App() {
+  // Determine basename based on location for GitHub Pages support
+  const basename = window.location.pathname.startsWith("/yongshinhalmom") ? "/yongshinhalmom" : "/";
+  
   return (
-    <AuthProvider>
-      <MainApp />
-    </AuthProvider>
+    <BrowserRouter basename={basename}>
+      <AuthProvider>
+        <MainApp />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }

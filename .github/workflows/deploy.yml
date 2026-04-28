@@ -32,11 +32,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SYSTEM_INSTRUCTION: ${{ secrets.SYSTEM_INSTRUCTION }}
-          TIME_LOGIC: ${{ secrets.TIME_LOGIC }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

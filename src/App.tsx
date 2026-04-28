@@ -14,6 +14,7 @@ import ProfileModal from "./components/ProfileModal";
 import InfoModal from "./components/InfoModal";
 import ChoiceModal from "./components/ChoiceModal";
 import PolicyView from "./components/PolicyView";
+import PricingView from "./components/PricingView";
 import { getReport, ReportResult } from "./services/geminiService";
 import { storageService, UserProfile } from "./services/storageService";
 import { Language, translations } from "./lib/translations";
@@ -248,6 +249,15 @@ function MainApp() {
     navigate(-1);
   };
 
+  const handlePurchase = () => {
+    if (report) {
+      setState("RESULT");
+    } else {
+      setState("LANDING");
+    }
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
       <div className="fixed inset-0 mythic-gradient -z-10" />
@@ -258,6 +268,11 @@ function MainApp() {
         <Route path="/policies" element={
           <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
             <PolicyView onBack={handlePolicyBack} lang={lang} />
+          </motion.div>
+        } />
+        <Route path="/pricing" element={
+          <motion.div key="pricing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
+            <PricingView onBack={() => navigate(-1)} onPurchase={handlePurchase} lang={lang} />
           </motion.div>
         } />
         <Route path="*" element={

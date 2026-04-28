@@ -26,8 +26,9 @@ const Illustration = ({ zodiac }: { zodiac: number }) => {
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
-  // Use absolute URL from GitHub to ensure it works across all deployments
-  const imageUrl = "https://raw.githubusercontent.com/patiencendiligence/yongshinhalmom/main/public/zodiac_guardians.png";
+  // Handle path for both local dev and GitHub Pages
+  const basename = window.location.pathname.startsWith("/yongshinhalmom") ? "/yongshinhalmom" : "";
+  const imageUrl = `${window.location.origin}${basename}/zodiac_guardians.png`.replace(/([^:]\/)\/+/g, "$1");
   
   return (
     <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900">

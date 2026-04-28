@@ -38,6 +38,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (session) {
         setUser(session.user);
         fetchProfile(session.user);
+        
+        // Cleanup hash fragments from URL after successful login
+        if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery'))) {
+           window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
       }
       setLoading(false);
     });

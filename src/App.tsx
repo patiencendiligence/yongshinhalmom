@@ -103,6 +103,32 @@ function MainApp() {
   const { user, profile, login, markAsPaid } = useAuth();
   const t = translations[lang];
 
+  // Restore state after redirect
+  useEffect(() => {
+    const savedState = sessionStorage.getItem("yongshin_pending_state");
+    if (savedState) {
+      try {
+        const { state: s, userData: ud, report: r } = JSON.parse(savedState);
+        if (s) setState(s);
+        if (ud) setUserData(ud);
+        if (r) setReport(r);
+        sessionStorage.removeItem("yongshin_pending_state");
+      } catch (e) {
+        console.error("Failed to restore state", e);
+      }
+    }
+  }, []);
+
+  // Persistent storage for redirect
+  const loginAndPersist = async () => {
+    sessionStorage.setItem("yongshin_pending_state", JSON.stringify({
+      state,
+      userData,
+      report
+    }));
+    await login();
+  };
+
   useEffect(() => {
     // Handle payment success redirect
     const urlParams = new URLSearchParams(window.location.search);
@@ -154,7 +180,7 @@ function MainApp() {
     setIsChoiceModalOpen(false);
     
     if (level === 'detailed' && !user) {
-      await login();
+      await loginAndPersist();
       return; // Login happens, choice will be handled after or just stay simple until pay
     }
 
@@ -261,7 +287,14 @@ function MainApp() {
 
         {state === "RESULT" && report && (
           <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
-            <ReportResultView report={report} onReset={handleReset} onOpenPolicy={handleOpenPolicy} userData={userData} lang={lang} />
+            <ReportResultView 
+              report={report} 
+              onReset={handleReset} 
+              onOpenPolicy={handleOpenPolicy} 
+              onLogin={loginAndPersist}
+              userData={userData} 
+              lang={lang} 
+            />
           </motion.div>
         )}
       </AnimatePresence>

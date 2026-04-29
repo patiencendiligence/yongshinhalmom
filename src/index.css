@@ -86,7 +86,7 @@
   @apply list-disc list-inside mb-4;
 }
 
-.bg-[#1a1a1a] .markdown-container strong,
+.bg-\[\#1a1a1a\] .markdown-container strong,
 .bg-mythic-red .markdown-container strong {
   @apply text-white border-b border-white/30;
 }

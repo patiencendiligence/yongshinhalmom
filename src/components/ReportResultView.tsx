@@ -28,25 +28,19 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
-  // Using percentage for object-position: 
-  // 0 column -> 0%
-  // 5 column -> 100%
-  // So: (col / 5) * 100
-  const xPercent = (col / 5) * 100;
-  const yPercent = (row / 1) * 100;
-
   return (
     <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
       <img 
         src={zodiacGuardians}
         alt="Zodiac Guardian"
         crossOrigin="anonymous"
-        className="absolute w-[600%] h-[200%] max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"
+        className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"
         style={{
-          objectFit: 'cover',
-          objectPosition: `${xPercent}% ${yPercent}%`,
-          left: 0,
-          top: 0
+          width: '600%',
+          height: '200%',
+          left: `-${col * 100}%`,
+          top: `-${row * 100}%`,
+          zIndex: 1
         }}
       />
     </div>
@@ -155,7 +149,9 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; }
             body { background: #000000 !important; font-family: sans-serif !important; margin: 0; padding: 0; }
             #report-content { 
-              background: #000000 !important; 
+              background-color: #000000 !important; 
+              background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0) !important;
+              background-size: 24px 24px !important;
               color: #ffffff !important; 
               padding: 80px !important; 
               width: 1200px !important;
@@ -164,14 +160,14 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             
             /* Mythic Aesthetic */
             .font-serif { font-family: 'Playfair Display', 'Noto Serif KR', serif !important; }
-            h1 { color: #ffffff !important; line-height: 0.9 !important; font-size: 72px !important; margin-bottom: 40px !important; font-style: italic !important; font-weight: 900 !important; }
-            h3 { color: #ffffff !important; line-height: 1.2 !important; font-size: 32px !important; margin-bottom: 24px !important; font-style: italic !important; font-weight: 900 !important; }
-            p, div, span { line-height: 1.8 !important; font-size: 18px !important; color: rgba(255,255,255,0.7) !important; }
+            h1 { color: #ffffff !important; line-height: 0.9 !important; font-size: 84px !important; margin-bottom: 40px !important; font-style: italic !important; font-weight: 900 !important; letter-spacing: -0.05em !important; }
+            h3 { color: #ffffff !important; line-height: 1.2 !important; font-size: 36px !important; margin-bottom: 24px !important; font-style: italic !important; font-weight: 900 !important; }
+            p, div, span { line-height: 1.6 !important; font-size: 18px !important; color: rgba(255,255,255,0.8) !important; }
             
             .mythic-gradient-text {
-              background: linear-gradient(to right, #ffd60a, #ff9f0a, #ff3b30) !important;
+              color: #ffd60a !important; /* Fallback for PDF */
+              background: linear-gradient(to right, #ffd60a, #ff9f0a) !important;
               -webkit-background-clip: text !important;
-              color: transparent !important;
             }
             
             /* Structural Bento Cards */
@@ -187,6 +183,20 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
             .bg-\\[\\#1a1a1a\\] { background-color: #1a1a1a !important; }
             .bg-mythic-red\\/90 { background-color: #ff3b30 !important; }
+            
+            /* Disclaimer styling in PDF */
+            .opacity-30.bg-white {
+              background-color: #1a1a1a !important;
+              opacity: 1 !important;
+              border: 1px solid #ff3b30 !important;
+            }
+            .opacity-30.bg-white p {
+              color: #ff3b30 !important;
+              font-weight: bold !important;
+            }
+            .opacity-30.bg-white .text-black {
+              color: #ffffff !important;
+            }
             
             /* Illustration Styling */
             .zodiac-container {
@@ -238,11 +248,28 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
       });
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       
-      pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      const imgProps = pdf.getImageProperties(imgData);
+      const totalImgHeightMm = (imgProps.height * pdfWidth) / imgProps.width;
+      
+      let heightLeft = totalImgHeightMm;
+      let position = 0;
+
+      // Add first page
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, totalImgHeightMm);
+      heightLeft -= pdfHeight;
+
+      // Add subsequent pages if content overflows the first page
+      while (heightLeft > 0) {
+        position = heightLeft - totalImgHeightMm;
+        pdf.addPage();
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, totalImgHeightMm);
+        heightLeft -= pdfHeight;
+      }
+      
       pdf.save(`yongshin_report_${userData.name}.pdf`);
     } catch (error) {
       console.error("PDF generation error:", error);
@@ -398,7 +425,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
         {/* Medical / Warning Banner */}
         {report.medicalAdvice && (
-          <div className="mb-16 p-6 bg-white opatcity-30 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
+          <div className="mb-16 p-6 bg-white opacity-30 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
             <div className="w-24 h-24 bg-black flex-shrink-0 flex items-center justify-center text-white border border-white/20">
               <AlertTriangle className="w-10 h-10 text-white" />
             </div>

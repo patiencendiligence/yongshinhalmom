@@ -265,46 +265,70 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
         {/* Bento Grid with Refined Design */}
         <div className="grid grid-cols-12 gap-px bg-white/10 mb-32 relative z-10 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-        {displaySections.map((section, idx) => {
-          const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6; // idx 1 (Today) is light, idx 2 (Overview) is dark
-          const isRed = idx === 5;
-          // After swap: 0 (Saju), 1 (Today), 2 (Overview) are unlocked. 3 onwards are locked and grouped.
-          const isUnpaidLocked = !isPremium && idx >= 3;
+        {(() => {
+          // If NOT premium, we only want to show the first 3 sections (0, 1, 2) 
+          // and then ONE single box for the remaining CHAPTERS.
+          const visibleSections = isPremium 
+            ? displaySections 
+            : displaySections.slice(0, 3);
           
-
-          return (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: idx * 0.05 }}
-              className={`bg-black p-12 md:p-16 flex flex-col relative group ${isUnpaidLocked ? "col-span-12 py-32" : getSlotClass(idx)}`}
-              data-premium-section={idx >= 3 ? "true" : undefined}
-            >
-              <div className="mb-12">
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
-                    {idx === 0 ? "FREE" : isUnpaidLocked ? "PREMIUM CONTENT" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
+          const rendered = visibleSections.map((section, idx) => {
+            const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6;
+            const isRed = idx === 5;
+            
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: idx * 0.05 }}
+                className={`bg-black p-12 md:p-16 flex flex-col relative group ${getSlotClass(idx)}`}
+              >
+                <div className="mb-12">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
+                      {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
+                    </div>
                   </div>
-                  {isUnpaidLocked && (
-                    <span className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/20 rounded-none text-[10px] font-black text-white uppercase tracking-widest">
-                      <Lock className="w-3 h-3" />
-                      {t.premiumBadge}
-                    </span>
-                  )}
+                  <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white`}>
+                    {section.title}
+                  </h3>
                 </div>
-                <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white ${isUnpaidLocked ? "text-center mb-16 text-5xl md:text-7xl" : ""}`}>
-                  {isUnpaidLocked ? t.unlockDetailedReport : section.title}
-                </h3>
-              </div>
 
-              {!isUnpaidLocked ? (
                 <div className="text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container text-white/70">
                   <ReactMarkdown>
                     {section.content}
                   </ReactMarkdown>
                 </div>
-              ) : (
+              </motion.div>
+            );
+          });
+
+          // Append one locked box if not premium
+          if (!isPremium) {
+            rendered.push(
+              <motion.div
+                key="locked-premium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="col-span-12 py-32 bg-black/50 p-12 md:p-16 flex flex-col items-center justify-center relative group backdrop-blur-sm border-t border-white/5"
+              >
+                <div className="mb-16 text-center">
+                  <div className="flex items-center justify-center gap-4 mb-8">
+                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
+                      PREMIUM CONTENT
+                    </div>
+                    <span className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/20 rounded-none text-[10px] font-black text-white uppercase tracking-widest">
+                      <Lock className="w-3 h-3" />
+                      {t.premiumBadge}
+                    </span>
+                  </div>
+                  <h3 className="text-5xl md:text-7xl font-serif font-black italic leading-[0.9] text-white">
+                    {t.unlockDetailedReport}
+                  </h3>
+                </div>
+
                 <div className="flex flex-col items-center gap-12">
                   <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
                     {t.simpleLockNote}
@@ -316,10 +340,12 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
                     {t.unlockButton}
                   </button>
                 </div>
-              )}
-            </motion.div>
-          )
-        })}
+              </motion.div>
+            );
+          }
+
+          return rendered;
+        })()}
         </div>
 
         {/* Medical / Warning Banner */}

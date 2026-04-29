@@ -184,9 +184,14 @@ function getGenAI() {
       throw new Error("Gemini API key is required but not configured in the environment.");
     }
     
-    const cleanKey = apiKey.replace(/['"]/g, '').trim();
+    const cleanKey = apiKey.replace(/['"]/g, "").trim();
     const masked = cleanKey.length > 8 ? `${cleanKey.substring(0, 4)}...${cleanKey.substring(cleanKey.length - 4)}` : "****";
     console.log(`[Server] Initializing GoogleGenerativeAI with key: ${masked}`);
+    
+    // Check if it's a placeholder
+    if (cleanKey.toLowerCase().includes("your_") || cleanKey.toLowerCase().includes("placeholder")) {
+      throw new Error("GEMINI_API_KEY appears to be a placeholder. Please set a valid key in your environment variables.");
+    }
     
     genAI = new GoogleGenerativeAI(cleanKey);
   }
@@ -195,17 +200,22 @@ function getGenAI() {
 
 function getOpenAI() {
   if (!openaiClient) {
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
     if (!apiKey) {
       console.warn("Missing OPENAI_API_KEY, fallback disabled");
       return null;
     }
-    openaiClient = new OpenAI({ apiKey });
+    const cleanKey = apiKey.replace(/['"]/g, "").trim();
+    if (cleanKey.toLowerCase().includes("your_") || cleanKey.toLowerCase().includes("placeholder")) {
+      console.warn("OPENAI_API_KEY appears to be a placeholder");
+      return null;
+    }
+    openaiClient = new OpenAI({ apiKey: cleanKey });
   }
   return openaiClient;
 }
 
-const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "당신은 인생의 지혜를 전하는 엄격하면서도 따뜻한 할머니입니다.";
+const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "";
 const TIME_LOGIC = process.env.TIME_LOGIC || "";
 
 const FREE_MODELS = [
@@ -226,24 +236,45 @@ async function callWithFallback(
       return await operation(modelName);
     } catch (error: any) {
       lastError = error;
+      const errorMessage = error.message || "";
       const errorStr = JSON.stringify(error);
+      
+      console.error(`[Server] Model ${modelName} failed:`, errorMessage);
+      
+      // If the API key is strictly invalid, do not bother with other models
+      if (errorMessage.includes("API key not valid") || errorMessage.includes("API_KEY_INVALID")) {
+        throw new Error("The Gemini API key provided is invalid. Please check your Vercel/Environment settings.");
+      }
+
       const isQuota = 
-        error?.message?.includes("429") || 
+        errorMessage.includes("429") || 
         error?.status === 429 || 
         error?.error?.code === 429 ||
         errorStr.includes("429") ||
-        errorStr.includes("RESOURCE_EXHAUSTED");
+        errorStr.includes("RESOURCE_EXHAUSTED") ||
+        errorMessage.includes("quota");
       
-      console.warn(`Model ${modelName} failed. Error:`, error.message || error);
+      if (isQuota) {
+        console.warn(`[Server] Model ${modelName} hit rate limit/quota. Continuing to next...`);
+        continue;
+      }
       
-      // Continue to next model or fallback for any error during debugging
+      // For other errors, we might still want to try next models
       continue;
     }
   }
 
   if (openaiFallback) {
-    console.log("Falling back to OpenAI...");
-    return await openaiFallback();
+    console.log("[Server] All Gemini models failed or hit quota. Falling back to OpenAI...");
+    try {
+      return await openaiFallback();
+    } catch (oaError: any) {
+      console.error("[Server] OpenAI fallback also failed:", oaError.message || oaError);
+      if (oaError.message?.includes("quota") || oaError.status === 429) {
+        throw new Error("OpenAI quota exceeded. Please check your OpenAI billing details.");
+      }
+      throw oaError;
+    }
   }
 
   throw lastError;
@@ -262,57 +293,29 @@ app.get("/api/health", (req, res) => {
 });
 
 app.post("/api/report", async (req, res) => {
-  const { userData, lang } = req.body;
+  const { userData, lang, level } = req.body;
+  const isDetailed = level === 'detailed';
   
   try {
     const now = new Date();
     const currentDate = now.toISOString().split('T')[0];
     const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
-    const currentYear = now.getFullYear();
+    const currentYear = userData?.targetYear || now.getFullYear();
 
     const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
-ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}. This is critical.
+ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 
-현재 시각(서버 시간): ${currentDate} ${currentTime} (올해는 ${currentYear}년임에 유의하게)
+현재 시각: ${currentDate} ${currentTime}
+분석 대상 연도: ${currentYear}년
+의뢰인 정보: ${JSON.stringify(userData)}
+분석 수준: ${isDetailed ? "심층 분석 (Deep Analysis)" : "기본 분석 (Quick Summary)"}
 
-응답 언어: ${lang === "ko" ? "한국어 (Korean)" : "영어 (English)"}
-
-의뢰인 정보:
-- 성명: ${userData.name}
-- 생년월일: ${userData.birthDate} (ISO 형식) 위 정보를 바탕으로 분석 알고리즘을 적용하여 사용자의 고유 패턴을 도출하게. **특히 각 시점의 변화는 입춘(立春, 보통 양력 2월 4~5일경)을 기준으로 분석해야 함을 절대 잊지 말게나.** 현대인의 데이터와 패턴을 분석하여 생산성 향상과 심리적 안정을 돕는 정밀 리포트를 작성해주게.
-
-[계산 기준 (매우 중요)]
-${TIME_LOGIC}
-
-[상세 지침]
-1. 분석 관점: 단순한 길흉화복보다는 심리적 기제, 현대적 직업 적성, 자아 실현의 도구로서 라이프스타일 패턴을 풀이해주게나. "~할 것이다"와 같은 단정적 예언보다는 "~한 경향이 있다", "~할 가능성이 높다"와 같은 분석적 표현을 사용하게.
-2. 말투: 엄격하면서도 부드러운 할머니의 말투("하게"체와 "해라"체)를 사용하게나.
-3. ALL CONTENT, including summary, titles, item names, and advice, MUST be written strictly in ${lang === "ko" ? "Korean" : "English"}.
-4. 섹션 구성:
-   - 섹션 1 (기초 패턴 및 성향 분석): 타고난 기저 성향, 환경적 변화의 흐름, 생애 주기별 패턴을 분석하여 기술하게. **반드시 글의 마지막에 아래 형식을 빌려 '리포트 요약'을 포함시킬 것.** 가독성을 위해 줄바꿈을 충분히 사용하게나.
-     예시 형식:
-     [한 줄 요약]
-     
-     분석 근거: [패턴 설명]
-
-     주요 흐름: [기간별 경향성]
-     
-     * 핵심 인사이트
-     [분석 포인트 1]
-
-     [분석 포인트 2]
-     
-     [분석 포인트 3]
-     
-     더 나은 일상을 위한 가이드가 되길 바라네.
-
-   - 섹션 2 (${currentYear}년 타임라인 분석): 올해의 주요 에너지 흐름.
-   - 섹션 3 (데일리 체크): 접속일(${currentDate}) 기준 환경적 요인과 개인 패턴을 결합한 분석.
-   - 섹션 4 (월별 세부 인사이트): 양력 기준 1~12월 기술. **각 월별 분석은 반드시 글머리 기호(Markdown Bullet Points)와 줄바꿈(Newline)을 사용하여 하나씩 명확하게 구분**할 것이며, 가독성을 최우선으로 하게. 유의미한 기간은 **키워드** 볼드 처리하게.
-   - 섹션 5~8: 웰니스, 대인관계, 커리어/생산성, 그리고 할머니의 특별한 제언.
-
-신뢰감 있고 무게감 있는 할머니의 말투를 유지하며, 분석 기준을 엄격히 따라주게나.
+[분석 요구사항]
+1. ${isDetailed ? "심층 분석 모드이므로, 각 섹션의 내용을 매우 상세하고 풍부하게 작성해주게. 특히 섹션 1, 4, 5, 6, 7에서 구체적인 행동 가이드와 심리적 기제 분석을 깊이 있게 다뤄주게나." : "기본 분석 모드이므로, 각 섹션의 핵심 내용을 명확하고 간결하게 전달해주게."}
+2. 섹션 8 (월별 상세 생활 흐름)은 반드시 1월부터 12월까지의 정보를 모두 포함해야 하네.
+3. 모든 내용은 '용신할멈'의 어투를 유지하며, 신뢰감 있는 데이터 기반의 라이프스타일 분석 리포트로 작성해주게.
+4. JSON 형식을 엄격히 준수하게나.
 `;
 
     const result = await callWithFallback(

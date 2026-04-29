@@ -30,7 +30,7 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
           
           <div className="py-24 px-12 flex flex-col items-center justify-center text-center backdrop-blur-sm">
             <div className="w-24 h-24 bg-white p-5 rounded-none flex items-center justify-center mb-12 shadow-2xl border border-white/20">
-              <img src="https://polar.sh/favicon.ico" alt="Polar" className="w-full h-full grayscale" />
+              <img src="https://www.lemonsqueezy.com/favicon.ico" alt="Lemon Squeezy" className="w-full h-full grayscale" />
             </div>
             <h3 className="text-4xl md:text-6xl font-serif font-black italic mb-6 text-white leading-none">
               {lang === 'ko' ? "Annual Lifestyle Report" : "Annual Lifestyle Report"}
@@ -46,13 +46,13 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
                 : "This service does not provide professional or predictive advice. Due to the nature of digital content, all sales are final."}
             </p>
             <a 
-              href="https://buy.polar.sh/polar_cl_ypvnbPpvJaL5lsVY8n3UWuXLzMTVlnZDS82YE1HPBMN" 
+              href="https://yongshinhalmom.lemonsqueezy.com/checkout" 
               target="_blank" 
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"
               className="holo-button px-16 py-7 bg-white text-black font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center gap-6 shadow-2xl"
             >
-              Polar {lang === 'ko' ? "입장" : "Enter"}
+              Checkout {lang === 'ko' ? "입장" : "Enter"}
               <ExternalLink className="w-5 h-5" />
             </a>
           </div>

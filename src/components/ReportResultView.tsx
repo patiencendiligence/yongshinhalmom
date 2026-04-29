@@ -91,11 +91,11 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     // Save current hash for redirect recovery
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
-    // Polar Payment Link
-    const polarUrl = "https://buy.polar.sh/polar_cl_ypvnbPpvJaL5lsVY8n3UWuXLzMTVlnZDS82YE1HPBMN";
+    // Lemon Squeezy Payment Link
+    const lemonSqueezyUrl = "https://yongshinhalmom.lemonsqueezy.com/checkout";
     
     // Using window.open for checkout links is more reliable in iframes
-    window.open(polarUrl, "_blank", "noreferrer");
+    window.open(lemonSqueezyUrl, "_blank", "noreferrer");
   };
 
   const handleSavePdf = async () => {
@@ -274,7 +274,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
               <div className="mb-12">
                 <div className="flex items-center gap-4 mb-8">
                   <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
-                    {idx === 0 ? "FREE TRIAL" : isUnpaidLocked ? "PREMIUM CONTENT" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
+                    {idx === 0 ? "FREE" : isUnpaidLocked ? "PREMIUM CONTENT" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
                   </div>
                   {isUnpaidLocked && (
                     <span className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/20 rounded-none text-[10px] font-black text-white uppercase tracking-widest">

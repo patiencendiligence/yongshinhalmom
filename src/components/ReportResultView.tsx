@@ -24,19 +24,22 @@ interface ReportResultViewProps {
   lang: Language;
 }
 
-const Illustration = ({ zodiac }: { zodiac: number }) => {
+const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: string }) => {
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
   return (
-    <div className="w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900">
-      <div 
-        className="absolute inset-0 grayscale hover:grayscale-0 transition-all duration-700"
+    <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
+      <img 
+        src={zodiacGuardians}
+        alt="Zodiac Guardian"
+        crossOrigin="anonymous"
+        className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700"
         style={{
-          backgroundImage: `url("${zodiacGuardians}")`,
-          backgroundSize: '600% 200%',
-          backgroundPosition: `${(col / 5) * 100}% ${(row / 1) * 100}%`,
-          backgroundRepeat: 'no-repeat'
+          width: '600%',
+          height: '200%',
+          left: `-${col * 100}%`,
+          top: `-${row * 100}%`
         }}
       />
     </div>
@@ -114,9 +117,10 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
     try {
       const canvas = await html2canvas(element, {
-        backgroundColor: "#000",
+        backgroundColor: "#000000",
         scale: 2,
         useCORS: true,
+        allowTaint: true,
         logging: false,
         onclone: (clonedDoc) => {
           // 1. Disable ALL original styles to prevent oklab/modern CSS parsing errors
@@ -124,64 +128,100 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             clonedDoc.styleSheets[i].disabled = true;
           }
 
-          // 2. Hide Premium sections for non-premium users in the PDF clone
-          if (!isPremium) {
-            const premiumSections = clonedDoc.querySelectorAll('[data-premium-section="true"]');
-            premiumSections.forEach(node => {
-              (node as HTMLElement).style.display = 'none';
-            });
+          // 2. Hide Premium lock for PDF
+          const premiumLock = clonedDoc.querySelector('[data-premium-lock="true"]');
+          if (premiumLock) {
+            (premiumLock as HTMLElement).style.display = 'none';
           }
+          
+          // Hide navigation/buttons in PDF
+          const hideInPdf = clonedDoc.querySelectorAll('.hide-in-pdf');
+          hideInPdf.forEach(node => {
+            (node as HTMLElement).style.display = 'none';
+          });
 
           // 3. Inject Ultra-Stable PDF Styles (HEX ONLY)
           const style = clonedDoc.createElement('style');
           style.innerHTML = `
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,700&family=Noto+Serif+KR:wght@700;900&display=swap');
+            
             * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; }
             body { background: #000000 !important; font-family: sans-serif !important; margin: 0; padding: 0; }
             #report-content { 
               background: #000000 !important; 
               color: #ffffff !important; 
-              padding: 60px !important; 
-              width: 1200px !important; 
+              padding: 80px !important; 
+              width: 1200px !important;
+              position: relative !important;
             }
             
-            /* Typography with proper line-height for readability */
-            .font-serif { font-family: serif !important; }
-            h1 { color: #ffd60a !important; line-height: 1.2 !important; font-size: 54px !important; margin-bottom: 40px !important; }
-            h3 { color: #ffd60a !important; line-height: 1.5 !important; font-size: 28px !important; margin-bottom: 24px !important; }
-            p, div, span { line-height: 2.2 !important; font-size: 16px !important; }
+            /* Mythic Aesthetic */
+            .font-serif { font-family: 'Playfair Display', 'Noto Serif KR', serif !important; }
+            h1 { color: #ffffff !important; line-height: 0.9 !important; font-size: 72px !important; margin-bottom: 40px !important; font-style: italic !important; font-weight: 900 !important; }
+            h3 { color: #ffffff !important; line-height: 1.2 !important; font-size: 32px !important; margin-bottom: 24px !important; font-style: italic !important; font-weight: 900 !important; }
+            p, div, span { line-height: 1.8 !important; font-size: 18px !important; color: rgba(255,255,255,0.7) !important; }
+            
+            .mythic-gradient-text {
+              background: linear-gradient(to right, #ffd60a, #ff9f0a, #ff3b30) !important;
+              -webkit-background-clip: text !important;
+              color: transparent !important;
+            }
             
             /* Structural Bento Cards */
-            .bento-card-refined { 
-              background-color: #111111 !important; 
-              border: 1px solid #333333 !important;
-              border-radius: 40px !important;
-              padding: 50px !important;
-              margin-bottom: 60px !important;
-              display: block !important;
+            .grid { display: block !important; }
+            .bg-black { 
+              background-color: #0c0c0c !important; 
+              border: 1px solid rgba(255,255,255,0.1) !important;
+              border-radius: 16px !important;
+              padding: 60px !important;
+              margin-bottom: 40px !important;
               page-break-inside: avoid !important;
-              overflow: visible !important;
             }
+
+            .bg-\\[\\#1a1a1a\\] { background-color: #1a1a1a !important; }
+            .bg-mythic-red\\/90 { background-color: #ff3b30 !important; }
+            
+            /* Illustration Styling */
+            .zodiac-container {
+              background: rgba(255,255,255,0.02) !important;
+              border: 1px solid rgba(255,255,255,0.05) !important;
+              border-radius: 24px !important;
+              padding: 20px !important;
+              margin-bottom: 30px !important;
+              display: inline-block !important;
+            }
+            
+            .manse-ryeok-badge {
+              border-left: 2px solid rgba(255,255,255,0.2) !important;
+              padding-left: 30px !important;
+              margin-bottom: 60px !important;
+            }
+
+            .text-white { color: #ffffff !important; }
+            .text-mythic-gold { color: #ffd60a !important; }
             
             /* Ensure text wrapping */
             .markdown-container { word-break: break-word !important; overflow-wrap: break-word !important; }
             
-            /* Layout Helpers */
-            .flex { display: flex !important; }
-            .items-center { align-items: center !important; }
-            .gap-10 { margin-right: 40px !important; }
-            
-            .text-mythic-gold { color: #ffd60a !important; }
-            .text-mythic-red { color: #ff3b30 !important; }
-            .bg-mythic-red { background-color: #ff3b30 !important; }
-            .rounded-full { border-radius: 9999px !important; border: 1px solid #333333 !important; padding: 12px 24px !important; }
-            
             /* Limit scaling */
             #report-content { transform-origin: top left !important; }
             
+            /* Hide animations and shadows for clarity */
             * { box-shadow: none !important; text-shadow: none !important; backdrop-filter: none !important; transition: none !important; }
+            
+            /* Explicit chapter labeling */
+            .chapter-label {
+               font-size: 12px !important;
+               font-weight: 900 !important;
+               letter-spacing: 0.5em !important;
+               color: rgba(255,255,255,0.3) !important;
+               margin-bottom: 20px !important;
+               text-transform: uppercase !important;
+            }
           `;
           clonedDoc.head.appendChild(style);
 
+          // Force clean background
           const clonedElement = clonedDoc.getElementById("report-content");
           if (clonedElement) {
             clonedElement.style.background = "#000000";
@@ -246,7 +286,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
           </div>
           
           <div className="text-center md:text-right flex flex-col justify-end items-center md:items-end">
-            <div className="mb-8 p-1.5 border border-white/5 rounded-2xl bg-white/[0.02]">
+            <div className="mb-8 p-1.5 border border-white/5 rounded-2xl bg-white/[0.02] zodiac-container">
               <Illustration zodiac={report.zodiac} />
             </div>
             <div className="text-[10px] font-sans font-bold tracking-[0.5em] text-white/20 uppercase mb-4">{t.authorizedRecipient}</div>
@@ -256,7 +296,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
         </header>
 
         {/* Manse-ryeok - Museum Label Style */}
-        <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8">
+        <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8 manse-ryeok-badge">
           <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em]">{t.manseRyeok}</div>
           <div className="text-3xl md:text-5xl font-serif font-black italic text-white/80 tracking-tighter">
             {manseRyeok.full}
@@ -286,7 +326,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
               >
                 <div className="mb-12">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
+                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic chapter-label">
                       {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
                     </div>
                   </div>
@@ -304,7 +344,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             );
           });
 
-          // Append one locked box if not premium
+          // Append one locked box if not premium (Hides in PDF)
           if (!isPremium) {
             rendered.push(
               <motion.div
@@ -312,6 +352,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
+                data-premium-lock="true"
                 className="col-span-12 py-32 bg-black/50 p-12 md:p-16 flex flex-col items-center justify-center relative group backdrop-blur-sm border-t border-white/5"
               >
                 <div className="mb-16 text-center">
@@ -363,7 +404,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
       </div>
 
       {/* Save PDF Button */}
-      <div className="mt-32 flex justify-center pb-32">
+      <div className="mt-32 flex justify-center pb-32 hide-in-pdf">
         <button
           onClick={handleSavePdf}
           className="holo-button group flex items-center gap-6 px-20 py-8 text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-2xl"
@@ -375,7 +416,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
 
 
       {/* Feedback / Contact */}
-      <div className="mt-24 text-center opacity-30 relative z-10">
+      <div className="mt-24 text-center opacity-30 relative z-10 hide-in-pdf">
         <p className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase mb-2">
           {lang === "ko" ? "오류 제보 및 문의" : "Bug Reports & Inquiries"}
         </p>
@@ -394,7 +435,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
       />
 
       {/* Footer Navigation */}
-      <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10">
+      <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10 hide-in-pdf">
         <div className="flex flex-col items-center md:items-start gap-4">
           <div className="text-3xl font-serif font-black italic text-white/60 mb-2">{t.title}</div>
           <div className="text-[10px] uppercase tracking-[0.4em] mb-4">{t.grandmother}</div>

@@ -91,11 +91,21 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     // Save current hash for redirect recovery
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
-    // Lemon Squeezy Payment Link
-    const lemonSqueezyUrl = "https://yongshinhalmom.lemonsqueezy.com/checkout";
+    // Lemon Squeezy Payment Link from env
+    const baseUrl = import.meta.env.VITE_PAYMENT_URL;
+    if (!baseUrl) {
+      alert("Payment URL is not configured.");
+      return;
+    }
+
+    // Append user context for easier tracking/webhooks
+    const checkoutUrl = new URL(baseUrl);
+    if (user?.email) checkoutUrl.searchParams.set("checkout[email]", user.email);
+    checkoutUrl.searchParams.set("checkout[custom][report_hash]", reportHash);
+    checkoutUrl.searchParams.set("checkout[custom][user_id]", user.id);
     
     // Using window.open for checkout links is more reliable in iframes
-    window.open(lemonSqueezyUrl, "_blank", "noreferrer");
+    window.open(checkoutUrl.toString(), "_blank", "noreferrer");
   };
 
   const handleSavePdf = async () => {

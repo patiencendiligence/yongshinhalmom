@@ -27,8 +27,8 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
           <div className="text-[10px] uppercase font-sans font-black tracking-[0.8em] text-white/30 mb-6 italic">
             Legal Document — {t.label}
           </div>
-          <h1 className="text-4xl md:text-7xl font-serif font-black italic mb-8 text-white tracking-tighter leading-[0.85]">{t.title}</h1>
-          <p className="text-xl text-white/50 mb-12 font-serif italic max-w-2xl leading-relaxed">
+          <h1 className="text-4xl md:text-4xl font-serif font-black italic mb-8 text-white tracking-tighter leading-[0.85]">{t.title}</h1>
+          <p className="text-xl text-white/50 mb-12 font-serif italic max-w-xl leading-relaxed">
             {t.intro}
           </p>
           <div className="bg-white/5 p-8 border-l-4 border-white/20 space-y-6">

@@ -46,7 +46,7 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
                 : "This service does not provide professional or predictive advice. Due to the nature of digital content, all sales are final."}
             </p>
             <a 
-              href="https://yongshinhalmom.lemonsqueezy.com/checkout" 
+              href={import.meta.env.VITE_PAYMENT_URL} 
               target="_blank" 
               rel="noopener noreferrer"
               referrerPolicy="no-referrer"

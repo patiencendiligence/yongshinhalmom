@@ -2,10 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppState } from "../components/MainApp";
 import { ReportResult, getReport } from "../services/geminiService";
+import { getReportHash } from "../lib/hashUtils";
 import { storageService } from "../services/storageService";
 import { Language, translations } from "../lib/translations";
 
-export function useReportFlow(lang: Language, user: any, login: () => Promise<void>, markAsPaid: (hash?: string, checkoutId?: string) => void) {
+export function useReportFlow(
+  lang: Language, 
+  user: any, 
+  login: () => Promise<void>, 
+  markAsPaid: (hash?: string, checkoutId?: string) => void,
+  checkPaymentStatus: (hash: string) => Promise<boolean>
+) {
   const [state, setState] = useState<AppState>("LANDING");
   const [userData, setUserData] = useState<any>(null);
   const [report, setReport] = useState<ReportResult | null>(null);
@@ -71,25 +78,37 @@ export function useReportFlow(lang: Language, user: any, login: () => Promise<vo
 
     if (!activeData) return;
 
+    // Check payment status for detailed analysis
+    let actualLevel = level;
+    if (level === 'detailed') {
+      const reportHash = getReportHash(activeData);
+      const isPaid = await checkPaymentStatus(reportHash);
+      
+      if (!isPaid) {
+        actualLevel = 'simple';
+      }
+    }
+
     setState("LOADING");
     try {
-      const year = userData.targetYear;
-      const cached = storageService.findCachedReport(userData, year);
+      const year = activeData.targetYear;
+      const cached = storageService.findCachedReport(activeData, year, actualLevel);
       
       let result;
       if (cached) {
         result = cached;
       } else {
-        result = await getReport(userData, lang, level);
+        result = await getReport(activeData, lang, actualLevel);
         storageService.setReportCache({
           inputHash: JSON.stringify({
-            name: userData.name,
-            birthDate: userData.birthDate,
-            birthTime: userData.birthTime,
-            isLunar: userData.isLunar,
-            gender: userData.gender
+            name: activeData.name,
+            birthDate: activeData.birthDate,
+            birthTime: activeData.birthTime,
+            isLunar: activeData.isLunar,
+            gender: activeData.gender
           }),
           year: year,
+          level: actualLevel,
           date: new Date().toISOString().split('T')[0],
           result: result
         });

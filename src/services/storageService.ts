@@ -16,6 +16,7 @@ const PAID_KEY = "yongshin_paid_hashes";
 export interface ReportCacheEntry {
   inputHash: string;
   year: number;
+  level: 'simple' | 'detailed';
   date: string; // YYYY-MM-DD
   result: any;
 }
@@ -77,11 +78,11 @@ export const storageService = {
 
   setReportCache: (entry: ReportCacheEntry) => {
     const cache = storageService.getReportCache();
-    const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year);
+    const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year || e.level !== entry.level);
     localStorage.setItem(CACHE_KEY, JSON.stringify([entry, ...filtered]));
   },
 
-  findCachedReport: (data: any, year: number): any | null => {
+  findCachedReport: (data: any, year: number, level: 'simple' | 'detailed'): any | null => {
     const hash = JSON.stringify({
       name: data.name,
       birthDate: data.birthDate,
@@ -91,7 +92,7 @@ export const storageService = {
     });
     const today = new Date().toISOString().split('T')[0];
     const cache = storageService.getReportCache();
-    const entry = cache.find(e => e.inputHash === hash && e.year === year && e.date === today);
+    const entry = cache.find(e => e.inputHash === hash && e.year === year && e.date === today && (e.level === level || e.level === 'detailed'));
     return entry ? entry.result : null;
   }
 };

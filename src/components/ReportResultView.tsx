@@ -28,18 +28,25 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   const col = zodiac % 6;
   const row = Math.floor(zodiac / 6);
   
+  // Using percentage for object-position: 
+  // 0 column -> 0%
+  // 5 column -> 100%
+  // So: (col / 5) * 100
+  const xPercent = (col / 5) * 100;
+  const yPercent = (row / 1) * 100;
+
   return (
     <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
       <img 
         src={zodiacGuardians}
         alt="Zodiac Guardian"
         crossOrigin="anonymous"
-        className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700"
+        className="absolute w-[600%] h-[200%] max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"
         style={{
-          width: '600%',
-          height: '200%',
-          left: `-${col * 100}%`,
-          top: `-${row * 100}%`
+          objectFit: 'cover',
+          objectPosition: `${xPercent}% ${yPercent}%`,
+          left: 0,
+          top: 0
         }}
       />
     </div>

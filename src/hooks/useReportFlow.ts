@@ -17,18 +17,23 @@ export function useReportFlow(lang: Language, user: any, login: () => Promise<vo
     const savedState = sessionStorage.getItem("yongshin_pending_state");
     if (savedState) {
       try {
-        const { state: s, userData: ud, report: r } = JSON.parse(savedState);
+        const { state: s, userData: ud, report: r, pendingAction } = JSON.parse(savedState);
         if (s) setState(s);
         if (ud) setUserData(ud);
         if (r) setReport(r);
         sessionStorage.removeItem("yongshin_pending_state");
+
+        // Auto-resume if there was a pending action
+        if (pendingAction === 'detailed' && ud) {
+          handleChoice('detailed', ud);
+        }
       } catch (e) {
         console.error("Failed to restore state", e);
       }
     }
-  }, []);
+  }, [user]); // Add user dependency to ensure handleChoice has the user
 
-  // Handle payment success redirect
+  // Handle payment success redirect (Lemonsqueezy)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('payment') === 'success' && user) {
@@ -46,20 +51,25 @@ export function useReportFlow(lang: Language, user: any, login: () => Promise<vo
     }
   }, [user, markAsPaid]);
 
-  const loginAndPersist = useCallback(async () => {
+  const loginAndPersist = useCallback(async (action?: string) => {
     sessionStorage.setItem("yongshin_pending_state", JSON.stringify({
       state,
       userData,
-      report
+      report,
+      pendingAction: action
     }));
     await login();
   }, [state, userData, report, login]);
 
-  const handleChoice = async (level: 'simple' | 'detailed') => {
+  const handleChoice = async (level: 'simple' | 'detailed', overridenData?: any) => {
+    const activeData = overridenData || userData;
+    
     if (level === 'detailed' && !user) {
-      await loginAndPersist();
+      await loginAndPersist('detailed');
       return;
     }
+
+    if (!activeData) return;
 
     setState("LOADING");
     try {
@@ -70,7 +80,7 @@ export function useReportFlow(lang: Language, user: any, login: () => Promise<vo
       if (cached) {
         result = cached;
       } else {
-        result = await getReport(userData, lang);
+        result = await getReport(userData, lang, level);
         storageService.setReportCache({
           inputHash: JSON.stringify({
             name: userData.name,

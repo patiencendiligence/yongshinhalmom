@@ -5,13 +5,170 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import OpenAI from "openai";
+import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
 
+// Supabase Admin Client holder
+let _supabaseAdmin: any = null;
+
+function getSupabaseAdmin() {
+  if (!_supabaseAdmin) {
+    const url = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!url || !key) {
+      throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required for server-side admin operations.");
+    }
+
+    _supabaseAdmin = createClient(url, key, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    });
+  }
+  return _supabaseAdmin;
+}
+
+// Middleware for Lemon Squeezy Webhook (needs raw body for signature verification)
+const rawBodyMiddleware = (req: any, res: any, next: any) => {
+  let data = "";
+  req.on("data", (chunk: any) => {
+    data += chunk;
+  });
+  req.on("end", () => {
+    req.rawBody = data;
+    next();
+  });
+};
+
 app.use(express.json());
+
+// --- Lemon Squeezy Logic ---
+
+// Webhook for asynchronous payment notification
+app.post("/api/webhook/lemonsqueezy", rawBodyMiddleware, async (req: any, res) => {
+  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
+  const hmac = crypto.createHmac("sha256", secret || "");
+  const digest = hmac.update(req.rawBody).digest("hex");
+  const signature = req.headers["x-signature"];
+
+  if (signature !== digest) {
+    console.error("[Webhook] Invalid signature");
+    return res.status(401).send("Invalid signature");
+  }
+
+  const payload = JSON.parse(req.rawBody);
+  const eventName = payload.meta.event_name;
+  const customData = payload.meta.custom_data;
+
+  console.log(`[Webhook] Received event: ${eventName}`, customData);
+
+  if (eventName === "order_created") {
+    const { user_id, report_hash } = customData;
+
+    try {
+      const supabaseAdmin = getSupabaseAdmin();
+      // Update user to premium in Supabase
+      if (user_id) {
+        const { error } = await supabaseAdmin
+          .from("profiles") // assuming 'profiles' table exists
+          .update({ is_premium: true })
+          .eq("id", user_id);
+
+        if (error) throw error;
+        console.log(`[Webhook] User ${user_id} upgraded to premium via LS Webhook`);
+      }
+      
+      // Optionally mark the specific report as paid
+      if (report_hash) {
+        await supabaseAdmin
+          .from("reports")
+          .update({ is_paid: true })
+          .eq("report_hash", report_hash);
+      }
+    } catch (err) {
+      console.error("[Webhook] Database update failed:", err);
+      return res.status(500).send("Database update failed");
+    }
+  }
+
+  res.status(200).send("OK");
+});
+
+// GET /api/verify-order - Directly verify an order with Lemon Squeezy API
+app.get("/api/verify-order", async (req, res) => {
+  const { orderId, userId, reportHash } = req.query;
+  const apiKey = process.env.LEMONSQUEEZY_API_KEY;
+
+  if (!orderId || !userId) {
+    return res.status(400).json({ error: "Missing orderId or userId" });
+  }
+
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    // 1. Call Lemon Squeezy API to get order details
+    const response = await axios.get(`https://api.lemonsqueezy.com/v1/orders/${orderId}`, {
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        Accept: "application/vnd.api+json",
+        "Content-Type": "application/vnd.api+json",
+      },
+    });
+
+    const orderData = response.data.data;
+    const status = orderData.attributes.status; // e.g., 'paid'
+
+    if (status === "paid") {
+      // 2. Update Supabase
+      const { error } = await supabaseAdmin
+        .from("profiles")
+        .update({ is_premium: true })
+        .eq("id", userId);
+
+      if (error) throw error;
+
+      if (reportHash) {
+        await supabaseAdmin
+          .from("reports")
+          .update({ is_paid: true })
+          .eq("report_hash", reportHash);
+      }
+
+      return res.json({ success: true, status });
+    }
+
+    res.json({ success: false, status });
+  } catch (err: any) {
+    console.error("[VerifyOrder] Error:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to verify order" });
+  }
+});
+
+// GET /api/check-payment - Allow client to verify their own payment status
+app.get("/api/check-payment", async (req, res) => {
+  const { userId } = req.query;
+  if (!userId) return res.status(400).json({ error: "userId required" });
+  
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("is_premium")
+      .eq("id", userId)
+      .single();
+
+    if (error) throw error;
+    res.json({ isPremium: !!data?.is_premium });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to check status" });
+  }
+});
 
 // Gemini / OpenAI Logic moved to server
 let genAI: GoogleGenerativeAI | null = null;

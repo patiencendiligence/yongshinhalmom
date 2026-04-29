@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
+import axios from "axios";
 import { supabase, signInWithGoogle, signOut, getPaymentStatus, updatePaymentStatus, getSupabase } from "./supabase";
 
 interface UserProfile {
@@ -40,9 +41,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(session.user);
         fetchProfile(session.user);
         
-        // Cleanup hash fragments from URL after successful login
+        // 1. Cleanup hash fragments
         if (window.location.hash && (window.location.hash.includes('access_token') || window.location.hash.includes('type=recovery'))) {
            window.history.replaceState(null, "", window.location.pathname + window.location.search);
+        }
+
+        // 2. Check for Lemon Squeezy Order Verification (Query Param)
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get("order_id");
+        if (orderId && session.user) {
+          const reportHash = sessionStorage.getItem("yongshin_pending_pay_hash");
+          axios.get(`/api/verify-order?orderId=${orderId}&userId=${session.user.id}&reportHash=${reportHash || ""}`)
+            .then(() => {
+              fetchProfile(session.user!);
+              // Clean up URL
+              urlParams.delete("order_id");
+              const newSearch = urlParams.toString();
+              window.history.replaceState(null, "", window.location.pathname + (newSearch ? `?${newSearch}` : ""));
+              sessionStorage.removeItem("yongshin_pending_pay_hash");
+            })
+            .catch(err => console.error("Auto verification failed:", err));
         }
       }
       setLoading(false);

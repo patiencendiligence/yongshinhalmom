@@ -12,7 +12,8 @@ export default defineConfig(({mode}) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.VITE_GEMINI_API_KEY || env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || ''),
       'process.env.OPENAI_API_KEY': JSON.stringify(env.VITE_OPENAI_API_KEY || env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || process.env.OPENAI_API_KEY || ''),
       'process.env.SYSTEM_INSTRUCTION' : JSON.stringify(env.VITE_SYSTEM_INSTRUCTION || env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || process.env.SYSTEM_INSTRUCTION || ''),
-      'process.env.TIME_LOGIC': JSON.stringify(env.VITE_TIME_LOGIC || env.TIME_LOGIC || process.env.VITE_TIME_LOGIC || process.env.TIME_LOGIC || '')
+      'process.env.TIME_LOGIC': JSON.stringify(env.VITE_TIME_LOGIC || env.TIME_LOGIC || process.env.VITE_TIME_LOGIC || process.env.TIME_LOGIC || ''),
+      'process.env.PAYMENT_URL': JSON.stringify(env.VITE_PAYMENT_URL || env.PAYMENT_URL || process.env.VITE_PAYMENT_URL || process.env.PAYMENT_URL || '')
     },
     resolve: {
       alias: {

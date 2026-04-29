@@ -31,7 +31,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   return (
     <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
       <img 
-        src="/zodiac_guardians.png"
+        src="/zodiac_guardians1.png"
         alt="Zodiac Guardian"
         crossOrigin="anonymous"
         className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"

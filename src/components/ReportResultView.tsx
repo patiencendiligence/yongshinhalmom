@@ -12,8 +12,7 @@ import { storageService } from "../services/storageService";
 import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-
-
+import zodiacGuardians from "../assets/zodiac_guardians.png";
 
 interface ReportResultViewProps {
   report: ReportResult;
@@ -31,7 +30,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   return (
     <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
       <img 
-        src="/zodiac_guardians1.png"
+        src={zodiacGuardians}
         alt="Zodiac Guardian"
         crossOrigin="anonymous"
         className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"

@@ -12,8 +12,8 @@ import { storageService } from "../services/storageService";
 import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import zodiacGuardians from "/zodiac_guardians.png";
 
-const zodiacGuardians = "/zodiac_guardians.png";
 
 interface ReportResultViewProps {
   report: ReportResult;

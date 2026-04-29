@@ -32,9 +32,9 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
       </div>
 
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 5 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
+        transition={{ delay: 0.1, duration: 0.5 }}
         className="relative z-20 mb-8"
       >
         <div className="inline-block px-4 py-1 border border-white/10 rounded-none bg-black backdrop-blur-sm">
@@ -43,9 +43,9 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
       </motion.div>
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.05, duration: 0.4 }}
         className="relative z-10"
       >
         <h1 className="flex flex-col items-center mb-12">
@@ -64,7 +64,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
+        transition={{ delay: 0.3 }}
         className="max-w-xl mx-auto mb-16 relative z-10"
       >
         <p className="text-white/60 text-sm md:text-base font-sans leading-relaxed tracking-tight max-w-sm">

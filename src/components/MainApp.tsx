@@ -86,7 +86,7 @@ export default function MainApp() {
         <Route path="*" element={
           <AnimatePresence mode="wait">
             {state === "LANDING" && (
-              <motion.div key="landing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center">
+              <div key="landing" className="w-full h-full flex flex-col items-center">
                 <Landing 
                   onStart={handleStart} 
                   onOpenProfiles={() => setIsProfileModalOpen(true)} 
@@ -99,7 +99,7 @@ export default function MainApp() {
                 >
                   {t.policy}
                 </Link>
-              </motion.div>
+              </div>
             )}
 
             {state === "INPUT" && (

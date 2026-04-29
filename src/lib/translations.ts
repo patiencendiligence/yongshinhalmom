@@ -84,7 +84,46 @@ export const translations = {
     simpleLockNote: "성의를 보여야 더 깊은 곳까지 비춰줄 수 있는 법...",
     savePdf: "리포트 저장 (PDF)",
     manseRyeok: "Data Pattern",
-    policy: "정책 및 약관"
+    policy: "정책 및 약관",
+    policyView: {
+      back: "돌아가기",
+      label: "고시",
+      title: "용신할멈 라이프스타일 분석",
+      intro: "본 리포트를 통해 개인의 라이프스타일 패턴을 확인해보세요. 이 서비스는 날짜와 관련된 패턴을 기반으로 일반적인 통찰을 제공하며, 습관, 성향 및 일상 루틴을 돌아보는 데 도움을 줍니다.",
+      whatYouGet: "제공되는 내용:",
+      items: [
+        "개인 라이프스타일 패턴 개요",
+        "습관 및 생산성 통찰",
+        "자기 성찰을 위한 질문",
+        "일상생활을 위한 일반적인 가이드"
+      ],
+      disclaimer: "본 리포트는 정보 제공 및 자기 성찰 목적으로만 제작되었습니다. 어떠한 예측이나 전문적인 조언도 제공하지 않습니다.",
+      support: "고객 지원",
+      responseTime: "24시간 이내 답변",
+      refundTitle: "환불 정책",
+      refundText: "디지털 제품의 특성상, 리포트가 생성된 후에는 모든 판매가 최종적이며 환불이 불가능합니다. 기술적인 문제가 발생할 경우 문의해 주세요.",
+      cancelTitle: "취소 정책",
+      cancelText: "본 서비스는 1회성 구매입니다. 구독이나 반복 결제는 포함되지 않습니다.",
+      legalTitle: "법적 고지",
+      legalText: "본 서비스는 그러한 콘텐츠가 제한된 지역에서는 이용이 불가능할 수 있습니다.",
+      termsTitle: "이용 약관",
+      termsText: "본 제품을 구매함으로써 귀하는 콘텐츠가 일반적인 정보 제공 목적으로만 제공되며 금융, 의료 또는 법적 조언을 구성하지 않음에 동의합니다."
+    },
+    pricingView: {
+      back: "돌아가기",
+      label: "프리미엄 서비스",
+      title: "상세리포트보기",
+      subtitle: "당신의 라이프스타일 패턴을 깊이 분석합니다.",
+      price: "990원",
+      purchase: "구매하기",
+      features: [
+        "개인 라이프스타일 패턴 개요",
+        "습관 및 생산성 통찰",
+        "자기 성찰을 위한 실천 가이드"
+      ],
+      oneTime: "단회성 결제 (구독 없음)",
+      disclaimer: "결제 즉시 분석이 시작되며 디지털 콘텐츠 특성상 환불이 불가능합니다."
+    }
   },
   en: {
     title: "Yongshin Pattern Report",
@@ -168,6 +207,45 @@ export const translations = {
     simpleLockNote: "Full analysis results are available after purchasing the report.",
     savePdf: "Save Report (PDF)",
     manseRyeok: "Data Pattern",
-    policy: "Policies & Terms"
+    policy: "Policies & Terms",
+    policyView: {
+      back: "Back to App",
+      label: "PUBLIC NOTICE",
+      title: "Yongshinhalmom Lifestyle Insights",
+      intro: "Discover your personal lifestyle patterns with our report. This service provides general insights based on date-related patterns, helping you reflect on your habits, tendencies, and daily routines.",
+      whatYouGet: "What you get:",
+      items: [
+        "Personal lifestyle pattern overview",
+        "Habit and productivity insights",
+        "Self-reflection prompts",
+        "General guidance for daily life"
+      ],
+      disclaimer: "This report is intended for informational and self-reflection purposes only. It does not provide predictions or professional advice.",
+      support: "Customer Support",
+      responseTime: "Response time: within 24 hours",
+      refundTitle: "Refund Policy",
+      refundText: "Due to the nature of digital products, all sales are final and non-refundable once the report has been generated. If you experience technical issues, please contact us.",
+      cancelTitle: "Cancellation Policy",
+      cancelText: "This is a one-time purchase. No subscription or recurring billing is involved.",
+      legalTitle: "Legal Notice",
+      legalText: "This service may not be available in jurisdictions where such content is restricted.",
+      termsTitle: "Terms of Use",
+      termsText: "By purchasing this product, you agree that the content is provided for general informational purposes only and does not constitute financial, medical, or legal advice."
+    },
+    pricingView: {
+      back: "Back",
+      label: "PREMIUM SERVICE",
+      title: "Detailed Report Access",
+      subtitle: "Analyze the lifestyle pattern in detail.",
+      price: "₩990",
+      purchase: "Purchase Access",
+      features: [
+        "Personalized Lifestyle Overview",
+        "Habit & Productivity Insights",
+        "Practical Reflection Guide"
+      ],
+      oneTime: "One-time purchase (No subscription)",
+      disclaimer: "Analysis begins immediately after purchase. Digital contents are non-refundable."
+    }
   }
 };

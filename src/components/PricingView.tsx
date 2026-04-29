@@ -1,6 +1,6 @@
 import { ArrowLeft, CreditCard, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
-import { Language } from "../lib/translations";
+import { Language, translations } from "../lib/translations";
 
 interface PricingViewProps {
   onBack: () => void;
@@ -10,24 +10,7 @@ interface PricingViewProps {
 
 export default function PricingView({ onBack, onPurchase, lang }: PricingViewProps) {
   const isKo = lang === 'ko';
-
-  const t = {
-    back: isKo ? "돌아가기" : "Back",
-    title: isKo ? "상세리포트보기" : "Detailed Report Access",
-    subtitle: isKo ? "당신의 라이프스타일 패턴을 깊이 분석합니다." : "Analyze the lifestyle pattern in detail.",
-    price: isKo ? "990원" : "₩990",
-    purchase: isKo ? "구매하기" : "Purchase Access",
-    features: isKo ? [
-      "개인 라이프스타일 패턴 개요",
-      "습관 및 생산성 통찰",
-      "자기 성찰을 위한 실천 가이드"
-    ] : [
-      "Personalized Lifestyle Overview",
-      "Habit & Productivity Insights",
-      "Practical Reflection Guide"
-    ],
-    oneTime: isKo ? "단회성 결제 (구독 없음)" : "One-time purchase (No subscription)"
-  };
+  const t = translations[lang].pricingView;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
@@ -44,7 +27,7 @@ export default function PricingView({ onBack, onPurchase, lang }: PricingViewPro
       <div className="bg-black border border-white/20 p-8 md:p-20 relative overflow-hidden shadow-2xl dragon-pattern">
         <div className="relative z-10 flex flex-col items-center text-center">
           <div className="text-[10px] uppercase font-sans font-black tracking-[0.8em] text-cyan-400/50 mb-6 italic">
-            {isKo ? "프리미엄 서비스" : "PREMIUM SERVICE"}
+            {t.label}
           </div>
           
           <h1 className="text-4xl md:text-7xl font-serif font-black italic mb-6 text-white tracking-tighter leading-[0.85]">
@@ -58,10 +41,8 @@ export default function PricingView({ onBack, onPurchase, lang }: PricingViewPro
           <div className="w-full max-w-md bg-white/[0.03] border border-white/10 rounded-2xl p-10 mb-12 transform hover:scale-[1.02] transition-all duration-500 shadow-[0_0_50px_rgba(255,255,255,0.02)]">
             <div className="flex flex-col items-center gap-2 mb-8 border-b border-white/10 pb-8">
               <span className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black">Limited Access</span>
-              <div className="text-6xl font-serif font-black italic text-white flex items-start">
-                <span className="text-2xl mt-2 mr-1">{isKo ? "" : "₩"}</span>
-                {isKo ? "990" : "990"}
-                <span className="text-xl mt-8 ml-1">{isKo ? "원" : ""}</span>
+              <div className="text-6xl font-serif font-black italic text-white">
+                {t.price}
               </div>
             </div>
 
@@ -85,9 +66,7 @@ export default function PricingView({ onBack, onPurchase, lang }: PricingViewPro
           </div>
 
           <p className="text-[10px] text-white/30 italic max-w-md font-sans tracking-widest leading-loose">
-            {isKo 
-              ? "결제 즉시 분석이 시작되며 디지털 콘텐츠 특성상 환불이 불가능합니다." 
-              : "Analysis begins immediately after purchase. Digital contents are non-refundable."}
+            {t.disclaimer}
           </p>
         </div>
       </div>

@@ -28,7 +28,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   const row = Math.floor(zodiac / 6);
   
   return (
-    <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 ${className}`}>
+    <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 zodiac-illustration ${className}`}>
       <img 
         src={zodiacGuardians}
         alt="Zodiac Guardian"
@@ -205,6 +205,24 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
               padding: 20px !important;
               margin-bottom: 30px !important;
               display: inline-block !important;
+            }
+
+            .zodiac-illustration {
+              width: 128px !important;
+              height: 176px !important;
+              overflow: hidden !important;
+              position: relative !important;
+              border: 1px solid rgba(255,255,255,0.1) !important;
+              border-radius: 8px !important;
+              background-color: #0c0c0c !important;
+            }
+
+            .zodiac-illustration img {
+              width: 600% !important;
+              height: 200% !important;
+              max-width: none !important;
+              position: absolute !important;
+              display: block !important;
             }
             
             .manse-ryeok-badge {

@@ -26,7 +26,7 @@ export default function ChoiceModal({ isOpen, onClose, onChoose, lang }: ChoiceM
           <div className="p-12 text-center">
             <h2 className="text-4xl md:text-5xl font-serif font-black italic text-white mb-6 leading-none">{t.chooseLevel}</h2>
             <div className="text-[10px] uppercase font-sans font-black tracking-[0.5em] mythic-gradient-text mb-12 italic">
-              {lang === 'ko' ? "명운의 깊이를 얼마나 알고 싶으신가?" : "How deep do you wish to see your destiny?"}
+              {lang === 'ko' ? "삶의 깊이를 얼마나 알고 싶으신가?" : "How deep do you wish to see your LifeStyle pattern?"}
             </div>
 
             <div className="flex flex-col gap-6">

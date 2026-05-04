@@ -34,7 +34,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
       data-col={col}
       data-row={row}
       style={{
-        backgroundImage: `url(${zodiacGuardians})`,
+        backgroundImage: `url("${zodiacGuardians}")`,
         backgroundSize: '600% 200%',
         backgroundPosition: `${col * 20}% ${row * 100}%`,
         backgroundRepeat: 'no-repeat'
@@ -275,7 +275,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             htmlEl.style.display = 'block';
             htmlEl.style.visibility = 'visible';
             htmlEl.style.opacity = '1';
-            htmlEl.style.backgroundImage = `url(${zodiacGuardians})`;
+            htmlEl.style.backgroundImage = `url("${zodiacGuardians}")`;
             htmlEl.style.backgroundSize = '768px 352px';
             htmlEl.style.backgroundPosition = `-${col * 128}px -${row * 176}px`;
             htmlEl.style.backgroundRepeat = 'no-repeat';

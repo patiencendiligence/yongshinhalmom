@@ -177,7 +177,7 @@ let openaiClient: OpenAI | null = null;
 function getGenAI() {
   if (!genAI) {
     // Platform-provided key in AI Studio
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     
     if (!apiKey) {
       console.error("Missing GEMINI_API_KEY in environment");
@@ -186,11 +186,11 @@ function getGenAI() {
     
     const cleanKey = apiKey.replace(/['"]/g, "").trim();
     const masked = cleanKey.length > 8 ? `${cleanKey.substring(0, 4)}...${cleanKey.substring(cleanKey.length - 4)}` : "****";
-    console.log(`[Server] Initializing GoogleGenAI with key: ${masked}`);
+    console.log(`[Server] Initializing GoogleGenAI with key: ${masked} (Length: ${cleanKey.length})`);
     
-    // Check if it's a placeholder (only if it explicitly contains placeholder text)
-    if (cleanKey.toLowerCase().includes("your_") || (cleanKey.toLowerCase().includes("placeholder") && cleanKey.length > 50)) {
-      throw new Error("GEMINI_API_KEY appears to be a placeholder. Please ensure a valid key is set.");
+    // Loosen validation to avoid false positives with real keys
+    if (cleanKey.toLowerCase().includes("your_") || (cleanKey.length > 50 && cleanKey.toLowerCase().includes("placeholder"))) {
+      throw new Error("GEMINI_API_KEY appears to be a placeholder.");
     }
     
     genAI = new GoogleGenAI({ apiKey: cleanKey });
@@ -219,9 +219,6 @@ const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "";
 const TIME_LOGIC = process.env.TIME_LOGIC || "";
 
 const FREE_MODELS = [
-  "gemini-2.0-flash-exp",
-  "gemini-1.5-flash",
-  "gemini-1.5-pro",
   "gemini-3-flash-preview",
   "gemini-3.1-pro-preview",
   "gemini-flash-latest"

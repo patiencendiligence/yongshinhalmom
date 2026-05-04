@@ -22,7 +22,7 @@ export type AppState = "LANDING" | "INPUT" | "LOADING" | "CHOICE" | "RESULT" | "
 export default function MainApp() {
   const { lang, toggleLang } = useLanguage();
   const { profiles, saveProfile, deleteProfile } = useProfiles();
-  const { user, login, markAsPaid, checkPaymentStatus } = useAuth();
+  const { user, profile, login, markAsPaid, checkPaymentStatus } = useAuth();
   
   const {
     state,
@@ -38,7 +38,7 @@ export default function MainApp() {
     handleSelectProfile,
     handleBack,
     handlePurchase
-  } = useReportFlow(lang, user, login, markAsPaid, checkPaymentStatus);
+  } = useReportFlow(lang, user, profile, login, markAsPaid, checkPaymentStatus);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
@@ -115,6 +115,7 @@ export default function MainApp() {
                 <ReportResultView 
                   report={report} 
                   onReset={handleReset} 
+                  onUpgrade={() => handleChoice('detailed')}
                   onOpenPolicy={() => setState("POLICY" as any)} 
                   onLogin={loginAndPersist}
                   userData={userData} 

@@ -18,6 +18,7 @@ const zodiacGuardians = "/assets/zodiac_guardians.png";
 interface ReportResultViewProps {
   report: ReportResult;
   onReset: () => void;
+  onUpgrade?: () => void;
   onOpenPolicy: () => void;
   onLogin?: () => Promise<void>;
   userData: any;
@@ -43,7 +44,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   );
 };
 
-export default function ReportResultView({ report, onReset, onOpenPolicy, onLogin, userData, lang }: ReportResultViewProps) {
+export default function ReportResultView({ report, onReset, onUpgrade, onOpenPolicy, onLogin, userData, lang }: ReportResultViewProps) {
   const t = (translations[lang] as any);
   const { user, profile, login, markAsPaid, checkPaymentStatus } = useAuth();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -66,7 +67,11 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     checkStatus();
   }, [user, reportHash, checkPaymentStatus]);
 
-  const isPremiumUser = isCurrentlyPaid || profile?.isPremium === true || user?.email === 'patiencendiligence@gmail.com';
+  // Only the test account or users who paid for THIS specific report (matched by hash) see the detailed content
+  const isPremiumUser = isCurrentlyPaid || user?.email === 'patiencendiligence@gmail.com';
+  
+  // Even if they are premium, if they chose 'simple' (Basic Summary), we show the simple view.
+  // They only see details if they are premium AND selected (or upgraded to) 'detailed'.
   const displayDetailed = isPremiumUser && report.level === 'detailed';
   const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
 
@@ -447,11 +452,11 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
                   </p>
                   {isPremiumUser ? (
                     <button
-                      onClick={onReset}
+                      onClick={onUpgrade}
                       className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
                     >
                       <RotateCcw className="w-4 h-4" />
-                      {lang === 'ko' ? "심층 분석 다시 받기" : "Get Detailed Analysis"}
+                      {lang === 'ko' ? "심층 분석 내용 보기" : "View Detailed Analysis"}
                     </button>
                   ) : (
                     <button

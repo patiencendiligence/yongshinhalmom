@@ -12,7 +12,8 @@ import { storageService } from "../services/storageService";
 import PaymentModal from "./PaymentModal";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
-import zodiacGuardians from "../assets/zodiac_guardians.png";
+
+const zodiacGuardians = "/assets/zodiac_guardians.png";
 
 interface ReportResultViewProps {
   report: ReportResult;
@@ -30,6 +31,8 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   return (
     <div 
       className={`w-32 h-44 border border-white/10 rounded-lg bg-neutral-900 zodiac-illustration shadow-2xl ${className}`}
+      data-col={col}
+      data-row={row}
       style={{
         backgroundImage: `url(${zodiacGuardians})`,
         backgroundSize: '600% 200%',
@@ -264,11 +267,18 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
           const illustrations = clonedDoc.querySelectorAll('.zodiac-illustration');
           illustrations.forEach(el => {
             const htmlEl = el as HTMLElement;
+            const col = parseInt(htmlEl.dataset.col || '0');
+            const row = parseInt(htmlEl.dataset.row || '0');
+
             htmlEl.style.width = '128px';
             htmlEl.style.height = '176px';
             htmlEl.style.display = 'block';
             htmlEl.style.visibility = 'visible';
             htmlEl.style.opacity = '1';
+            htmlEl.style.backgroundImage = `url(${zodiacGuardians})`;
+            htmlEl.style.backgroundSize = '768px 352px';
+            htmlEl.style.backgroundPosition = `-${col * 128}px -${row * 176}px`;
+            htmlEl.style.backgroundRepeat = 'no-repeat';
           });
         }
       });

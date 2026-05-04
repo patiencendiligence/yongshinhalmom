@@ -128,9 +128,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await signOut();
+      // Clear local state first to provide immediate feedback
+      setUser(null);
+      setProfile(null);
+      
+      const client = getSupabase();
+      if (client) {
+        await client.auth.signOut();
+      }
+      
+      // Full refresh to ensure clean state and clear all storage if needed
+      window.location.href = window.location.origin + window.location.pathname;
     } catch (error) {
       console.error("Logout Error:", error);
+      // Fallback: direct reload
+      window.location.reload();
     }
   };
 

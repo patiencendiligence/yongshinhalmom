@@ -72,9 +72,9 @@ export async function getReport(userData: {
   }
 
   // 2. Client-side Fallback (for Static Hosting like GitHub Pages)
-  const clientApiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+  const clientApiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
   if (!clientApiKey) {
-    throw new Error("No API key found. For local development or static hosting, please check your environment variables.");
+    throw new Error("No Gemini API key found. Please configure GEMINI_API_KEY or GOOGLE_API_KEY in your environment.");
   }
 
   const ai = new GoogleGenAI({ apiKey: clientApiKey });
@@ -82,26 +82,22 @@ export async function getReport(userData: {
   const now = new Date();
   const currentDate = now.toISOString().split('T')[0];
   const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
+  const currentYear = userData?.targetYear || now.getFullYear();
 
   const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 
 현재 시각: ${currentDate} ${currentTime}
+분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
+분석 수준: ${level === 'detailed' ? "심층 분석 (Deep Analysis)" : "기본 분석 (Quick Summary)"}
 
-[분석 지침]
-1. 사용자의 태어난 시간과 환경 데이터 패턴을 분석하여 'Annual Lifestyle Report'를 작성하게나.
-2. 분석 내용은 다음을 포함해야 하네:
-   - 전반적인 생활 패턴 및 기질적 성향 요약 (summary)
-   - 12가지 상징 동물 중 해당 패턴에 가장 부합하는 인덱스 (zodiac, 0-11)
-   - 시각적 요소를 위한 테마 결정 (illustrationType)
-   - 세부 분석 섹션 3~4개: 성격적 특성, 생산성 스타일, 대인관계 성향, 자기 성찰을 위한 가이드 등
-   - 도움이 될 수 있는 실생활 아이템들 (luckInfo: 색상, 아이템, 음식)
-
-3. 말투 지침: 용신할멈 특유의 정감 가면서도 연륜이 느껴지는 어조를 사용하게나. "~로구나", "~일세", "~구먼" 같은 말씨를 써서, 마치 할머니가 곁에서 자네의 삶을 가만히 들여다보고 조언해주는 느낌이 나야 하네.
-
-JSON 형식으로 summary, zodiac, illustrationType, sections[], luckInfo를 응답하게나.
+[분석 요구사항]
+1. ${level === 'detailed' ? "심층 분석 모드이므로, 각 섹션의 내용을 매우 상세하고 풍부하게 작성해주게. 특히 섹션 1, 4, 5, 6, 7에서 구체적인 행동 가이드와 심리적 기제 분석을 깊이 있게 다뤄주게나." : "기본 분석 모드이므로, 각 섹션의 핵심 내용을 명확하고 간결하게 전달해주게."}
+2. 섹션 8 (월별 상세 생활 흐름)은 반드시 1월부터 12월까지의 정보를 모두 포함해야 하네.
+3. 모든 내용은 '용신할멈'의 어투를 유지하며, 신뢰감 있는 데이터 기반의 라이프스타일 분석 리포트로 작성해주게.
+4. JSON 형식을 엄격히 준수하게나.
 `;
 
   const response = await ai.models.generateContent({

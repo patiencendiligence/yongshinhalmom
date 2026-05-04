@@ -9,6 +9,7 @@ import { Language, translations } from "../lib/translations";
 export function useReportFlow(
   lang: Language, 
   user: any, 
+  profile: any,
   login: () => Promise<void>, 
   markAsPaid: (hash?: string, checkoutId?: string) => void,
   checkPaymentStatus: (hash: string) => Promise<boolean>
@@ -83,7 +84,8 @@ export function useReportFlow(
     if (level === 'detailed') {
       const isAdmin = user?.email === 'patiencendiligence@gmail.com';
       const reportHash = getReportHash(activeData);
-      const isPaid = isAdmin || (await checkPaymentStatus(reportHash));
+      const isPaidForHash = await checkPaymentStatus(reportHash);
+      const isPaid = isAdmin || isPaidForHash;
       
       if (!isPaid) {
         actualLevel = 'simple';
@@ -115,7 +117,7 @@ export function useReportFlow(
         });
       }
 
-      setReport(result);
+      setReport({ ...result, level: actualLevel });
       setState("RESULT");
     } catch (error: any) {
       console.error(error);

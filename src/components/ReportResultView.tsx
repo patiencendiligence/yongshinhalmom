@@ -28,21 +28,15 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   const row = Math.floor(zodiac / 6);
   
   return (
-    <div className={`w-32 h-44 overflow-hidden relative border border-white/10 rounded-lg bg-neutral-900 zodiac-illustration ${className}`}>
-      <img 
-        src={zodiacGuardians}
-        alt="Zodiac Guardian"
-        crossOrigin="anonymous"
-        className="absolute max-w-none grayscale hover:grayscale-0 transition-all duration-700 block"
-        style={{
-          width: '600%',
-          height: '200%',
-          left: `-${col * 100}%`,
-          top: `-${row * 100}%`,
-          zIndex: 1
-        }}
-      />
-    </div>
+    <div 
+      className={`w-32 h-44 border border-white/10 rounded-lg bg-neutral-900 zodiac-illustration shadow-2xl ${className}`}
+      style={{
+        backgroundImage: `url(${zodiacGuardians})`,
+        backgroundSize: '600% 200%',
+        backgroundPosition: `${col * 20}% ${row * 100}%`,
+        backgroundRepeat: 'no-repeat'
+      }}
+    />
   );
 };
 
@@ -224,8 +218,6 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             }
 
             .zodiac-illustration img {
-              width: 600% !important;
-              height: 200% !important;
               max-width: none !important;
               position: absolute !important;
               display: block !important;
@@ -267,6 +259,17 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             clonedElement.style.background = "#000000";
             clonedElement.style.color = "#ffffff";
           }
+
+          // Handle Illustrations for PDF stability
+          const illustrations = clonedDoc.querySelectorAll('.zodiac-illustration');
+          illustrations.forEach(el => {
+            const htmlEl = el as HTMLElement;
+            htmlEl.style.width = '128px';
+            htmlEl.style.height = '176px';
+            htmlEl.style.display = 'block';
+            htmlEl.style.visibility = 'visible';
+            htmlEl.style.opacity = '1';
+          });
         }
       });
       const imgData = canvas.toDataURL("image/png");

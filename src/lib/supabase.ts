@@ -42,21 +42,21 @@ export async function signInWithGoogle() {
     throw new Error("Supabase is not configured. 배포 환경(예: Vercel 환경 변수)에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY가 설정되어 있는지 확인해 주세요.");
   }
   
+  // Get the current origin for the redirect URL
+  const redirectTo = window.location.origin;
+
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
     options: {
+      redirectTo,
       queryParams: {
-        prompt: 'select_account'
+        prompt: 'select_account',
+        access_type: 'offline',
       },
-      skipBrowserRedirect: false // Ensure it uses pop-up if possible, or standard flow
+      skipBrowserRedirect: false // Standard redirect works but can be tricky in iframes
     }
   });
 
-  // Note: Supabase JS library doesn't have a direct 'signInWithPopup' like Firebase, 
-  // but we can try to use pop-up by setting up a helper or just refining the redirect logic.
-  // Actually, Supabase signInWithOAuth by default redirects the whole page.
-  // To avoid this, we can try to use the 'redirectTo' pointing to a blank auth helper page or just ensure it works.
-  
   if (error) throw error;
   return data;
 }

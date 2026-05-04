@@ -51,3 +51,6 @@ GitHub: https://github.com/patiencendiligence
 - [Terms of Service](./TERMS.md)
 - [Privacy Policy](./PRIVACY.md)
 - [Disclaimer](./DISCLAIMER.md)
+
+## Policies
+- https://patiencendiligence.github.io/yongshinhalmom/policies.html

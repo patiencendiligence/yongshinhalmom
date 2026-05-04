@@ -16,6 +16,7 @@ export interface ReportResult {
     item: string;
     food: string;
   };
+  level: 'simple' | 'detailed';
   medicalAdvice?: string;
   isAbuse?: boolean;
   abuseMessage?: string;
@@ -71,9 +72,9 @@ export async function getReport(userData: {
   }
 
   // 2. Client-side Fallback (for Static Hosting like GitHub Pages)
-  const clientApiKey = import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
+  const clientApiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_API_KEY;
   if (!clientApiKey) {
-    throw new Error("No API key found. For GitHub Pages, please configure VITE_GEMINI_API_KEY.");
+    throw new Error("No API key found. For local development or static hosting, please check your environment variables.");
   }
 
   const ai = new GoogleGenAI({ apiKey: clientApiKey });
@@ -146,5 +147,6 @@ JSON 형식으로 summary, zodiac, illustrationType, sections[], luckInfo를 응
 
   const text = response.text;
   if (!text) throw new Error("Empty response from Gemini Client");
-  return JSON.parse(text);
+  const parsed = JSON.parse(text);
+  return { ...parsed, level };
 }

@@ -66,7 +66,8 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     checkStatus();
   }, [user, reportHash, checkPaymentStatus]);
 
-  const isPremium = isCurrentlyPaid || profile?.isPremium === true || user?.email === 'patiencendiligence@gmail.com';
+  const isPremiumUser = isCurrentlyPaid || profile?.isPremium === true || user?.email === 'patiencendiligence@gmail.com';
+  const displayDetailed = isPremiumUser && report.level === 'detailed';
   const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
 
   // Swap Sections 2 (idx 1) and 3 (idx 2)
@@ -376,9 +377,9 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
         {/* Bento Grid with Refined Design */}
         <div className="grid grid-cols-12 gap-px bg-white/10 mb-32 relative z-10 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
         {(() => {
-          // If NOT premium, we only want to show the first 3 sections (0, 1, 2) 
+          // If NOT showing detailed content, we only want to show the first 3 sections (0, 1, 2) 
           // and then ONE single box for the remaining CHAPTERS.
-          const visibleSections = isPremium 
+          const visibleSections = displayDetailed 
             ? displaySections 
             : displaySections.slice(0, 3);
           
@@ -414,8 +415,8 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
             );
           });
 
-          // Append one locked box if not premium (Hides in PDF)
-          if (!isPremium) {
+          // Append one locked box if not showing detailed content (Hides in PDF)
+          if (!displayDetailed) {
             rendered.push(
               <motion.div
                 key="locked-premium"
@@ -444,12 +445,22 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
                   <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
                     {t.simpleLockNote}
                   </p>
-                  <button
-                    onClick={handlePayment}
-                    className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all"
-                  >
-                    {t.unlockButton}
-                  </button>
+                  {isPremiumUser ? (
+                    <button
+                      onClick={onReset}
+                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      {lang === 'ko' ? "심층 분석 다시 받기" : "Get Detailed Analysis"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handlePayment}
+                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all"
+                    >
+                      {t.unlockButton}
+                    </button>
+                  )}
                 </div>
               </motion.div>
             );

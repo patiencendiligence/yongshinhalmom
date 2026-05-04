@@ -27,7 +27,7 @@ export function LoadingView({ lang }: LoadingViewProps) {
         </h2>
         <div className="w-16 h-0.5 bg-white/10" />
         <p className="text-white/20 font-sans uppercase tracking-[0.8em] text-[9px] font-black italic">
-          {lang === 'ko' ? "명운의 실타래를 읽는 중" : "READING THE THREADS OF DESTINY"}
+          {lang === 'ko' ? "데이터를 읽는 중" : "READING THE THREADS OF PATTERNS"}
         </p>
       </div>
     </motion.div>

@@ -168,7 +168,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
           type="submit"
           className="holo-button w-full py-8 mt-12 bg-black text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
         >
-          {t.checkDestiny} <ArrowRight className="w-5 h-5" />
+          {t.checkData} <ArrowRight className="w-5 h-5" />
         </button>
       </form>
     </div>

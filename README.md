@@ -30,12 +30,6 @@ The report is generated instantly and delivered as a digital product.
 - One-time purchase (no subscription)
 - Users pay once to unlock the full report
 
-## Demo
-
-A demo video is available showing the full user flow, including input, report generation, and final output.
-
-Note: The demo uses a test account. Payment is simulated for demonstration purposes.  
-In the live environment, users complete a real checkout before accessing the full report.
 
 ## Disclaimer
 

@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
+import { GoogleGenAI, Type as SchemaType } from "@google/genai";
 import OpenAI from "openai";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
@@ -171,29 +171,29 @@ app.get("/api/check-payment", async (req, res) => {
 });
 
 // Gemini / OpenAI Logic moved to server
-let genAI: GoogleGenerativeAI | null = null;
+let genAI: GoogleGenAI | null = null;
 let openaiClient: OpenAI | null = null;
 
 function getGenAI() {
   if (!genAI) {
-    // Try both common names for the API key in AI Studio
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    // Platform-provided key in AI Studio
+    const apiKey = process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
-      console.error("Missing Gemini API Key (tried GEMINI_API_KEY, GOOGLE_API_KEY, VITE_GEMINI_API_KEY)");
-      throw new Error("Gemini API key is required but not configured in the environment.");
+      console.error("Missing GEMINI_API_KEY in environment");
+      throw new Error("Gemini API key is required but not found in process.env.GEMINI_API_KEY.");
     }
     
     const cleanKey = apiKey.replace(/['"]/g, "").trim();
     const masked = cleanKey.length > 8 ? `${cleanKey.substring(0, 4)}...${cleanKey.substring(cleanKey.length - 4)}` : "****";
-    console.log(`[Server] Initializing GoogleGenerativeAI with key: ${masked}`);
+    console.log(`[Server] Initializing GoogleGenAI with key: ${masked}`);
     
-    // Check if it's a placeholder
-    if (cleanKey.toLowerCase().includes("your_") || cleanKey.toLowerCase().includes("placeholder")) {
-      throw new Error("GEMINI_API_KEY appears to be a placeholder. Please set a valid key in your environment variables.");
+    // Check if it's a placeholder (only if it explicitly contains placeholder text)
+    if (cleanKey.toLowerCase().includes("your_") || (cleanKey.toLowerCase().includes("placeholder") && cleanKey.length > 50)) {
+      throw new Error("GEMINI_API_KEY appears to be a placeholder. Please ensure a valid key is set.");
     }
     
-    genAI = new GoogleGenerativeAI(cleanKey);
+    genAI = new GoogleGenAI({ apiKey: cleanKey });
   }
   return genAI;
 }
@@ -219,9 +219,12 @@ const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "";
 const TIME_LOGIC = process.env.TIME_LOGIC || "";
 
 const FREE_MODELS = [
+  "gemini-2.0-flash-exp",
   "gemini-1.5-flash",
   "gemini-1.5-pro",
-  "gemini-2.0-flash-exp"
+  "gemini-3-flash-preview",
+  "gemini-3.1-pro-preview",
+  "gemini-flash-latest"
 ];
 
 async function callWithFallback(
@@ -321,17 +324,13 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
     const result = await callWithFallback(
       async (modelName) => {
         const ai = getGenAI();
-        const apiKey = process.env.GEMINI_API_KEY;
-        console.log(`[Server] Model: ${modelName}, Key Prefix: ${apiKey ? apiKey.substring(0, 6) : "None"}`);
+        console.log(`[Server] Attempting call with model: ${modelName}`);
         
-        const model = ai.getGenerativeModel({
+        const response = await ai.models.generateContent({
           model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION,
-        });
-        
-        const response = await model.generateContent({
           contents: [{ role: 'user', parts: [{ text: prompt }] }],
-          generationConfig: {
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
             responseMimeType: "application/json",
             responseSchema: {
               type: SchemaType.OBJECT,
@@ -371,9 +370,10 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
           },
         });
 
-        const text = response.response.text();
+        const text = response.text;
         if (!text) throw new Error("Empty response from Gemini");
-        return JSON.parse(text);
+        const parsed = JSON.parse(text);
+        return { ...parsed, level: level };
       },
       async () => {
         const openai = getOpenAI();
@@ -388,7 +388,8 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
         });
         const text = response.choices[0].message.content;
         if (!text) throw new Error("Empty response from OpenAI");
-        return JSON.parse(text);
+        const parsed = JSON.parse(text);
+        return { ...parsed, level: level };
       }
     );
 

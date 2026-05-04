@@ -46,21 +46,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
            window.history.replaceState(null, "", window.location.pathname + window.location.search);
         }
 
-        // 2. Check for Lemon Squeezy Order Verification (Query Param)
+        // 2. Check for Payment Verification (Query Param)
         const urlParams = new URLSearchParams(window.location.search);
-        const orderId = urlParams.get("order_id");
+        const orderId = urlParams.get("order_id") || urlParams.get("sale_id");
         if (orderId && session.user) {
           const reportHash = sessionStorage.getItem("yongshin_pending_pay_hash");
-          axios.get(`/api/verify-order?orderId=${orderId}&userId=${session.user.id}&reportHash=${reportHash || ""}`)
-            .then(() => {
-              fetchProfile(session.user!);
-              // Clean up URL
-              urlParams.delete("order_id");
-              const newSearch = urlParams.toString();
-              window.history.replaceState(null, "", window.location.pathname + (newSearch ? `?${newSearch}` : ""));
-              sessionStorage.removeItem("yongshin_pending_pay_hash");
-            })
-            .catch(err => console.error("Auto verification failed:", err));
+          // Re-fetch profile to see if webhook already processed it
+          fetchProfile(session.user).then(() => {
+            // Clean up URL
+            urlParams.delete("order_id");
+            urlParams.delete("sale_id");
+            const newSearch = urlParams.toString();
+            window.history.replaceState(null, "", window.location.pathname + (newSearch ? `?${newSearch}` : ""));
+            sessionStorage.removeItem("yongshin_pending_pay_hash");
+          });
         }
       }
       setLoading(false);

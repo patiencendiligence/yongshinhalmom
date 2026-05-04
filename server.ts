@@ -51,6 +51,61 @@ app.use(express.json());
 
 // --- Lemon Squeezy Logic ---
 
+// --- Gumroad Logic ---
+app.post("/api/webhook/gumroad", async (req: any, res) => {
+  const payload = req.body;
+  
+  // Gumroad sends 'sale' events as POST with a set of fields
+  // Note: For extra security, you should verify the 'seller_id' matches yours
+  // Your Seller ID: patiencendiligence@gmail.com (usually matches account email or a hash)
+  
+  console.log(`[Gumroad Webhook] Received sale event:`, payload);
+
+  const { email, product_id, user_id, report_hash, sale_id } = payload;
+  
+  // Custom fields come at the top level in Gumroad Pings if passed via URL parameters
+  // e.g. /l/link?user_id=123&report_hash=abc
+
+  try {
+    const supabaseAdmin = getSupabaseAdmin();
+    
+    // 1. Update Profile (General Premium)
+    if (user_id) {
+      await supabaseAdmin
+        .from("profiles")
+        .update({ is_premium: true })
+        .eq("id", user_id);
+      console.log(`[Gumroad Webhook] User ${user_id} upgraded to premium`);
+    }
+
+    // 2. Mark Specific Report as Paid
+    if (report_hash && user_id) {
+      await supabaseAdmin
+        .from("reports")
+        .upsert({ 
+          user_id: user_id,
+          report_hash: report_hash,
+          is_paid: true,
+          checkout_id: sale_id || "gumroad_sale"
+        }, { onConflict: 'report_hash' });
+      console.log(`[Gumroad Webhook] Report hash ${report_hash} marked as paid`);
+    } else if (report_hash) {
+      // Fallback if user_id is missing but hash is there
+      await supabaseAdmin
+        .from("reports")
+        .update({ is_paid: true })
+        .eq("report_hash", report_hash);
+    }
+
+  } catch (err) {
+    console.error("[Gumroad Webhook] Database update failed:", err);
+    // Don't 500 Gumroad unless it's a transient error, or it will keep retrying
+    return res.status(200).send("DB update failed but acknowledged");
+  }
+
+  res.status(200).send("OK");
+});
+
 // Webhook for asynchronous payment notification
 app.post("/api/webhook/lemonsqueezy", rawBodyMiddleware, async (req: any, res) => {
   const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;

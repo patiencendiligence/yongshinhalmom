@@ -103,18 +103,14 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
     // Save current hash for redirect recovery
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
-    // Lemon Squeezy Payment Link from env
-    const baseUrl = import.meta.env.VITE_PAYMENT_URL;
-    if (!baseUrl) {
-      alert("Payment URL is not configured.");
-      return;
-    }
+    // Gumroad Payment Link
+    const gumroadUrl = "https://patiencekeeper30.gumroad.com/l/jueghh";
 
-    // Append user context for easier tracking/webhooks
-    const checkoutUrl = new URL(baseUrl);
-    if (user?.email) checkoutUrl.searchParams.set("checkout[email]", user.email);
-    checkoutUrl.searchParams.set("checkout[custom][report_hash]", reportHash);
-    checkoutUrl.searchParams.set("checkout[custom][user_id]", user.id);
+    // Append user context for easier tracking/webhooks in Gumroad
+    const checkoutUrl = new URL(gumroadUrl);
+    if (user?.email) checkoutUrl.searchParams.set("email", user.email);
+    checkoutUrl.searchParams.set("report_hash", reportHash);
+    checkoutUrl.searchParams.set("user_id", user.id);
     
     // Using window.open for checkout links is more reliable in iframes
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");

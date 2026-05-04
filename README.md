@@ -1,6 +1,6 @@
-# Yongshin Halmeom – AI Lifestyle Report
+# Yongshin Halmom – AI Lifestyle Report
 
-Yongshin Halmeom is a web-based application that generates personalized lifestyle reports using AI.
+Yongshin Halmom is a web-based application that generates personalized lifestyle reports using AI.
 
 ## Overview
 

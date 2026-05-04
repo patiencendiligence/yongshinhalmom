@@ -42,8 +42,8 @@ export async function signInWithGoogle() {
     throw new Error("Supabase is not configured. 배포 환경(예: Vercel 환경 변수)에 VITE_SUPABASE_URL과 VITE_SUPABASE_ANON_KEY가 설정되어 있는지 확인해 주세요.");
   }
   
-  // Get the current origin for the redirect URL
-  const redirectTo = window.location.origin;
+  // Use a cleaner redirect URL construction
+  const redirectTo = `${window.location.origin}/`;
 
   const { data, error } = await client.auth.signInWithOAuth({
     provider: 'google',
@@ -51,9 +51,7 @@ export async function signInWithGoogle() {
       redirectTo,
       queryParams: {
         prompt: 'select_account',
-        access_type: 'offline',
       },
-      skipBrowserRedirect: false // Standard redirect works but can be tricky in iframes
     }
   });
 

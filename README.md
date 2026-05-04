@@ -45,3 +45,9 @@ It does not offer predictions, guarantees, or professional advice.
 ## Author
 Independent Developer  
 GitHub: https://github.com/patiencendiligence
+
+## Legal
+
+- [Terms of Service](./TERMS.md)
+- [Privacy Policy](./PRIVACY.md)
+- [Disclaimer](./DISCLAIMER.md)

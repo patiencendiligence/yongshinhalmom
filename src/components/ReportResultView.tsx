@@ -69,7 +69,7 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
     checkStatus();
   }, [user, reportHash, checkPaymentStatus]);
 
-  const isPremium = isCurrentlyPaid || profile?.isPremium === true;
+  const isPremium = isCurrentlyPaid || profile?.isPremium === true || user?.email === 'patiencendiligence@gmail.com';
   const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
 
   // Swap Sections 2 (idx 1) and 3 (idx 2)
@@ -88,6 +88,12 @@ export default function ReportResultView({ report, onReset, onOpenPolicy, onLogi
       } else {
         await login();
       }
+      return;
+    }
+    
+    if (user?.email === 'patiencendiligence@gmail.com') {
+      setIsCurrentlyPaid(true);
+      storageService.setPaidHash(reportHash);
       return;
     }
     

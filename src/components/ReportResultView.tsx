@@ -51,21 +51,32 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
   
   const reportHash = React.useMemo(() => getReportHash(userData), [userData]);
   const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
+  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
 
   // Check if this specific report is paid
   React.useEffect(() => {
+    if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;
+
     const checkStatus = async () => {
-      // If we already know it's paid locally, we can still verify with server
-      if (user && reportHash) {
-        const paid = await checkPaymentStatus(reportHash);
-        if (paid) {
-          setIsCurrentlyPaid(true);
-          storageService.setPaidHash(reportHash);
+      const paid = await checkPaymentStatus(reportHash);
+      if (paid) {
+        setIsCurrentlyPaid(true);
+        storageService.setPaidHash(reportHash);
+        
+        // If they were looking at a simple report, automatically upgrade to detailed
+        if (report.level === 'simple' && onUpgrade) {
+          onUpgrade();
         }
       }
     };
+
     checkStatus();
-  }, [user, reportHash, checkPaymentStatus]);
+    
+    // Set up polling while the component is mounted and not yet paid
+    const interval = setInterval(checkStatus, 3000);
+    
+    return () => clearInterval(interval);
+  }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade]);
 
   // Only the test account or users who paid for THIS specific report (matched by hash) see the detailed content
   const isPremiumUser = isCurrentlyPaid || user?.email === 'patiencendiligence@gmail.com';
@@ -111,6 +122,9 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
     if (user?.email) checkoutUrl.searchParams.set("email", user.email);
     checkoutUrl.searchParams.set("report_hash", reportHash);
     checkoutUrl.searchParams.set("user_id", user.id);
+    
+    // Show verification message in UI
+    setIsCheckingPayment(true);
     
     // Using window.open for checkout links is more reliable in iframes
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");
@@ -437,29 +451,36 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
                       {t.premiumBadge}
                     </span>
                   </div>
-                  <h3 className="text-5xl md:text-7xl font-serif font-black italic leading-[0.9] text-white">
+                   <h3 className="text-5xl md:text-7xl font-serif font-black italic leading-[0.9] text-white">
                     {t.unlockDetailedReport}
                   </h3>
                 </div>
 
                 <div className="flex flex-col items-center gap-12">
                   <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
-                    {t.simpleLockNote}
+                    {isCheckingPayment 
+                      ? (lang === 'ko' ? "결제가 완료된 후, 잠시만 기다려 주시면 자동으로 리포트가 생성됩니다. (결제 창은 닫으셔도 좋습니다)" : "After payment, please wait for a moment and the report will be generated automatically. (You can close the payment window)")
+                      : t.simpleLockNote}
                   </p>
                   {isPremiumUser ? (
                     <button
                       onClick={onUpgrade}
                       className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
                     >
-                      <RotateCcw className="w-4 h-4" />
+                      {report.level === 'loading' ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      ) : <RotateCcw className="w-4 h-4" />}
                       {lang === 'ko' ? "심층 분석 내용 보기" : "View Detailed Analysis"}
                     </button>
                   ) : (
                     <button
                       onClick={handlePayment}
-                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all"
+                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
                     >
-                      {t.unlockButton}
+                      {isCheckingPayment && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                      {isCheckingPayment 
+                        ? (lang === 'ko' ? "결제 확인 중..." : "Verifying Payment...")
+                        : t.unlockButton}
                     </button>
                   )}
                 </div>

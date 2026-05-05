@@ -71,9 +71,18 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
     }
   }
 
-  // Gumroad sends URL parameters either as top-level fields OR prefixed
-  const user_id = payload.user_id || customFields.user_id || payload["custom_fields[user_id]"] || payload["url_params[user_id]"];
-  const report_hash = payload.report_hash || customFields.report_hash || payload["custom_fields[report_hash]"] || payload["url_params[report_hash]"];
+  // Gumroad sends parameters in various ways: top-level, custom_fields[key], url_params[key], etc.
+  const user_id = payload.user_id || 
+                  customFields.user_id || 
+                  payload["custom_fields[user_id]"] || 
+                  payload["url_params[user_id]"] || 
+                  req.query.user_id;
+
+  const report_hash = payload.report_hash || 
+                      customFields.report_hash || 
+                      payload["custom_fields[report_hash]"] || 
+                      payload["url_params[report_hash]"] || 
+                      req.query.report_hash;
   
   if (!user_id || !report_hash) {
     console.warn(`[Gumroad Webhook] Missing user_id or report_hash. Keys received: ${Object.keys(payload).join(", ")}`);

@@ -17,6 +17,7 @@ import { useAuth } from "../lib/AuthContext";
 import { useLanguage } from "../hooks/useLanguage";
 import { useProfiles } from "../hooks/useProfiles";
 import { useReportFlow } from "../hooks/useReportFlow";
+import { getReportHash } from "../lib/hashUtils";
 
 export type AppState = "LANDING" | "INPUT" | "LOADING" | "CHOICE" | "RESULT" | "POLICY";
 
@@ -63,6 +64,13 @@ export default function MainApp() {
     setIsChoiceModalOpen(false);
     
     if (choice === 'detailed') {
+      if (!user) {
+        // If not logged in, don't trigger payment yet.
+        // handleChoice will trigger loginAndPersist.
+        handleChoice(choice);
+        return;
+      }
+
       const reportHash = getReportHash(userData);
       // Check if already paid to avoid double charging
       const isPaid = user?.email === 'patiencendiligence@gmail.com' || await checkPaymentStatus(reportHash);

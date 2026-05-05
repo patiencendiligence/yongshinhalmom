@@ -38,7 +38,8 @@ export default function MainApp() {
     handleStart,
     handleSelectProfile,
     handleBack,
-    handlePurchase
+    handlePurchase,
+    triggerPayment
   } = useReportFlow(lang, user, profile, login, markAsPaid, checkPaymentStatus);
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -58,8 +59,19 @@ export default function MainApp() {
     setIsProfileModalOpen(false);
   };
 
-  const onHandleChoice = (choice: 'simple' | 'detailed') => {
+  const onHandleChoice = async (choice: 'simple' | 'detailed') => {
     setIsChoiceModalOpen(false);
+    
+    if (choice === 'detailed') {
+      const reportHash = getReportHash(userData);
+      // Check if already paid to avoid double charging
+      const isPaid = user?.email === 'patiencendiligence@gmail.com' || await checkPaymentStatus(reportHash);
+      if (!isPaid) {
+        // This is a direct user click context, window.open should work here
+        triggerPayment(reportHash);
+      }
+    }
+    
     handleChoice(choice);
   };
 
@@ -115,13 +127,14 @@ export default function MainApp() {
             {state === "RESULT" && report && (
               <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
                 <ReportResultView 
-                  report={report} 
-                  onReset={handleReset} 
-                  onUpgrade={() => handleChoice('detailed')}
-                  onOpenPolicy={() => setState("POLICY" as any)} 
-                  onLogin={loginAndPersist}
-                  userData={userData} 
-                  lang={lang} 
+                   report={report} 
+                   onReset={handleReset} 
+                   onUpgrade={() => handleChoice('detailed')}
+                   onOpenPolicy={() => setState("POLICY" as any)} 
+                   onLogin={loginAndPersist}
+                   triggerPayment={triggerPayment}
+                   userData={userData} 
+                   lang={lang} 
                 />
               </motion.div>
             )}

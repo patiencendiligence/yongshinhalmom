@@ -161,6 +161,29 @@ export function useReportFlow(
     navigate("/");
   };
 
+  const triggerPayment = useCallback((reportHash: string) => {
+    if (!user) return;
+    
+    // Save current hash for redirect recovery
+    sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
+    
+    // Gumroad Payment Link
+    const gumroadUrl = "https://patiencekeeper30.gumroad.com/l/jueghh";
+
+    // Append user context for easier tracking/webhooks in Gumroad
+    const checkoutUrl = new URL(gumroadUrl);
+    if (user?.email) checkoutUrl.searchParams.set("email", user.email);
+    checkoutUrl.searchParams.set("report_hash", reportHash);
+    checkoutUrl.searchParams.set("user_id", user.id);
+    
+    // Add redirect URL for completion
+    const successUrl = `${window.location.origin}/#/success`;
+    checkoutUrl.searchParams.set("redirect_url", successUrl);
+    
+    // Using window.open for checkout links is more reliable in iframes
+    window.open(checkoutUrl.toString(), "_blank", "noreferrer");
+  }, [user]);
+
   return {
     state,
     setState,
@@ -174,6 +197,7 @@ export function useReportFlow(
     handleStart,
     handleSelectProfile,
     handleBack,
-    handlePurchase
+    handlePurchase,
+    triggerPayment
   };
 }

@@ -54,11 +54,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // --- Gumroad Logic ---
 app.post("/api/webhook/gumroad", async (req: any, res) => {
-  const payload = req.body;
-  
   // Gumroad sends 'sale' events as POST with a set of fields
-  console.log(`[Gumroad Webhook] Received sale event:`, JSON.stringify(payload));
+  console.log(`[Gumroad Webhook] Received sale event body:`, JSON.stringify(req.body));
+  console.log(`[Gumroad Webhook] Received sale event query:`, JSON.stringify(req.query));
 
+  const payload = req.body;
   const { email, product_id, sale_id } = payload;
   
   // Custom fields might be a JSON string or an object

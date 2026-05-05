@@ -21,6 +21,7 @@ interface ReportResultViewProps {
   onUpgrade?: () => void;
   onOpenPolicy: () => void;
   onLogin?: () => Promise<void>;
+  triggerPayment: (hash: string) => void;
   userData: any;
   lang: Language;
 }
@@ -44,7 +45,7 @@ const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: 
   );
 };
 
-export default function ReportResultView({ report, onReset, onUpgrade, onOpenPolicy, onLogin, userData, lang }: ReportResultViewProps) {
+export default function ReportResultView({ report, onReset, onUpgrade, onOpenPolicy, onLogin, triggerPayment: propTriggerPayment, userData, lang }: ReportResultViewProps) {
   const t = (translations[lang] as any);
   const { user, profile, login, markAsPaid, checkPaymentStatus } = useAuth();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -61,11 +62,8 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
   }, [isCurrentlyPaid]);
 
   // Handle auto-payment trigger if coming from ChoiceModal
-  React.useEffect(() => {
-    if ((report as any).pendingPayment && !isCurrentlyPaid && !isCheckingPayment) {
-      handlePayment();
-    }
-  }, []);
+  // REMOVED: Auto-triggering windows in useEffect is usually blocked by browsers.
+  // We now trigger it directly in MainApp.tsx on the ChoiceModal button click.
 
   // Check if this specific report is paid
   React.useEffect(() => {
@@ -100,7 +98,7 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
 
       // Schedule next check only if still mounted and not paid
       if (isMounted && !isCurrentlyPaid) {
-        timerId = setTimeout(checkStatus, 5000); // 5 seconds is safer
+        timerId = setTimeout(checkStatus, 3000); // 3 seconds is better for responsive feel
       }
     };
 
@@ -145,28 +143,9 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
       storageService.setPaidHash(reportHash);
       return;
     }
-    
-    // Save current hash for redirect recovery
-    sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
-    
-    // Gumroad Payment Link
-    const gumroadUrl = "https://patiencekeeper30.gumroad.com/l/jueghh";
 
-    // Append user context for easier tracking/webhooks in Gumroad
-    const checkoutUrl = new URL(gumroadUrl);
-    if (user?.email) checkoutUrl.searchParams.set("email", user.email);
-    checkoutUrl.searchParams.set("report_hash", reportHash);
-    checkoutUrl.searchParams.set("user_id", user.id);
-    
-    // Add redirect URL for completion
-    const successUrl = `${window.location.origin}/#/success`;
-    checkoutUrl.searchParams.set("redirect_url", successUrl);
-    
-    // Show verification message in UI
     setIsCheckingPayment(true);
-    
-    // Using window.open for checkout links is more reliable in iframes
-    window.open(checkoutUrl.toString(), "_blank", "noreferrer");
+    propTriggerPayment(reportHash);
   };
 
   const handleSavePdf = async () => {
@@ -498,7 +477,7 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
                 <div className="flex flex-col items-center gap-12">
                   <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
                     {isCheckingPayment 
-                      ? (lang === 'ko' ? "결제가 완료된 후, 잠시만 기다려 주시면 자동으로 리포트가 생성됩니다. (결제 창은 닫으셔도 좋습니다)" : "After payment, please wait for a moment and the report will be generated automatically. (You can close the payment window)")
+                      ? (lang === 'ko' ? "결제가 완료된 후, 잠시만 기다려 주시면 자동으로 리포트가 생성됩니다. (결제 완료 후 이 창으로 돌아와 주세요)" : "After payment, the report will be generated automatically. (Please return to this window after payment)")
                       : t.simpleLockNote}
                   </p>
                   {isPremiumUser ? (
@@ -512,15 +491,26 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
                       {lang === 'ko' ? "심층 분석 내용 보기" : "View Detailed Analysis"}
                     </button>
                   ) : (
-                    <button
-                      onClick={handlePayment}
-                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
-                    >
-                      {isCheckingPayment && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                      {isCheckingPayment 
-                        ? (lang === 'ko' ? "결제 확인 중..." : "Verifying Payment...")
-                        : t.unlockButton}
-                    </button>
+                    <div className="flex flex-col items-center gap-4">
+                      <button
+                        onClick={handlePayment}
+                        className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
+                      >
+                        {isCheckingPayment && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        {isCheckingPayment 
+                          ? (lang === 'ko' ? "결제 확인 중..." : "Verifying Payment...")
+                          : t.unlockButton}
+                      </button>
+                      
+                      {isCheckingPayment && (
+                        <button 
+                          onClick={handlePayment}
+                          className="text-[10px] text-white/40 uppercase tracking-widest hover:text-white transition-colors underline underline-offset-4"
+                        >
+                          {lang === 'ko' ? "결제창이 열리지 않았나요? 다시 시도" : "Popup didn't open? Try again"}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
               </motion.div>

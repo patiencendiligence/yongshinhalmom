@@ -98,10 +98,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const checkPaymentStatus = async (reportHash: string) => {
     if (!user) return false;
     if (user.email === 'patiencendiligence@gmail.com') return true;
+    
     try {
-      return await getPaymentStatus(user.id, reportHash);
-    } catch (error) {
-      console.error("Error checking specific payment:", error);
+      const result = await getPaymentStatus(user.id, reportHash);
+      return result;
+    } catch (error: any) {
+      // Check if it's the lock error or other common Supabase transient errors
+      const isLockError = error?.message?.includes('lock') || error?.details?.includes('lock');
+      if (isLockError) {
+        console.warn("[AuthContext] Supabase lock error encountered during payment check. Skipping this check.");
+      } else {
+        console.error("Error checking specific payment:", error);
+      }
       return false;
     }
   };

@@ -48,6 +48,7 @@ const rawBodyMiddleware = (req: any, res: any, next: any) => {
 };
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // --- Lemon Squeezy Logic ---
 
@@ -61,10 +62,13 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   
   console.log(`[Gumroad Webhook] Received sale event:`, payload);
 
-  const { email, product_id, user_id, report_hash, sale_id } = payload;
+  const { email, product_id, sale_id } = payload;
   
-  // Custom fields come at the top level in Gumroad Pings if passed via URL parameters
-  // e.g. /l/link?user_id=123&report_hash=abc
+  // Custom fields might be top-level or inside a list of fields/custom_fields
+  const user_id = payload.user_id || (payload.custom_fields && payload.custom_fields.user_id) || payload["custom_fields[user_id]"];
+  const report_hash = payload.report_hash || (payload.custom_fields && payload.custom_fields.report_hash) || payload["custom_fields[report_hash]"];
+  
+  console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);
 
   try {
     const supabaseAdmin = getSupabaseAdmin();

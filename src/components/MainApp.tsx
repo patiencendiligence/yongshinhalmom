@@ -9,6 +9,7 @@ import InfoModal from "./InfoModal";
 import ChoiceModal from "./ChoiceModal";
 import PolicyView from "./PolicyView";
 import PricingView from "./PricingView";
+import SuccessView from "./SuccessView";
 import { HeaderActions } from "./HeaderActions";
 import { LoadingView } from "./LoadingView";
 import { translations } from "../lib/translations";
@@ -83,6 +84,7 @@ export default function MainApp() {
             <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />
           </motion.div>
         } />
+        <Route path="/success" element={<SuccessView lang={lang} />} />
         <Route path="*" element={
           <AnimatePresence mode="wait">
             {state === "LANDING" && (

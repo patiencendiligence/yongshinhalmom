@@ -53,29 +53,57 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
   const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
 
+  // Sync isCheckingPayment with isCurrentlyPaid
+  React.useEffect(() => {
+    if (isCurrentlyPaid) {
+      setIsCheckingPayment(false);
+    }
+  }, [isCurrentlyPaid]);
+
   // Check if this specific report is paid
   React.useEffect(() => {
     if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;
 
+    let isMounted = true;
+    let timerId: ReturnType<typeof setTimeout>;
+
     const checkStatus = async () => {
-      const paid = await checkPaymentStatus(reportHash);
-      if (paid) {
-        setIsCurrentlyPaid(true);
-        storageService.setPaidHash(reportHash);
-        
-        // If they were looking at a simple report, automatically upgrade to detailed
-        if (report.level === 'simple' && onUpgrade) {
-          onUpgrade();
+      if (!isMounted) return;
+      
+      try {
+        const paid = await checkPaymentStatus(reportHash);
+        if (paid && isMounted) {
+          setIsCurrentlyPaid(true);
+          setIsCheckingPayment(false);
+          storageService.setPaidHash(reportHash);
+          
+          // If they were looking at a simple report, automatically upgrade to detailed
+          if (report.level === 'simple' && onUpgrade) {
+            onUpgrade();
+          }
+          return; // Stop polling since we're paid
         }
+      } catch (error: any) {
+        // Handle specific lock error silently - it's a Supabase race condition
+        const isLockError = error?.message?.includes('lock') || error?.details?.includes('lock');
+        if (!isLockError) {
+          console.error("Payment check failed:", error);
+        }
+      }
+
+      // Schedule next check only if still mounted and not paid
+      if (isMounted && !isCurrentlyPaid) {
+        timerId = setTimeout(checkStatus, 5000); // 5 seconds is safer
       }
     };
 
+    // Initial check
     checkStatus();
     
-    // Set up polling while the component is mounted and not yet paid
-    const interval = setInterval(checkStatus, 3000);
-    
-    return () => clearInterval(interval);
+    return () => {
+      isMounted = false;
+      if (timerId) clearTimeout(timerId);
+    };
   }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade]);
 
   // Only the test account or users who paid for THIS specific report (matched by hash) see the detailed content
@@ -122,6 +150,10 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
     if (user?.email) checkoutUrl.searchParams.set("email", user.email);
     checkoutUrl.searchParams.set("report_hash", reportHash);
     checkoutUrl.searchParams.set("user_id", user.id);
+    
+    // Add redirect URL for completion
+    const successUrl = `${window.location.origin}/#/success`;
+    checkoutUrl.searchParams.set("redirect_url", successUrl);
     
     // Show verification message in UI
     setIsCheckingPayment(true);

@@ -81,6 +81,8 @@ export function useReportFlow(
 
     // Check payment status for detailed analysis
     let actualLevel = level;
+    let pendingPayment = false;
+    
     if (level === 'detailed') {
       const isAdmin = user?.email === 'patiencendiligence@gmail.com';
       const reportHash = getReportHash(activeData);
@@ -89,6 +91,7 @@ export function useReportFlow(
       
       if (!isPaid) {
         actualLevel = 'simple';
+        pendingPayment = true;
       }
     }
 
@@ -117,7 +120,7 @@ export function useReportFlow(
         });
       }
 
-      setReport({ ...result, level: actualLevel });
+      setReport({ ...result, level: actualLevel, pendingPayment });
       setState("RESULT");
     } catch (error: any) {
       console.error(error);

@@ -57,16 +57,27 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   const payload = req.body;
   
   // Gumroad sends 'sale' events as POST with a set of fields
-  // Note: For extra security, you should verify the 'seller_id' matches yours
-  // Your Seller ID: patiencendiligence@gmail.com (usually matches account email or a hash)
-  
-  console.log(`[Gumroad Webhook] Received sale event:`, payload);
+  console.log(`[Gumroad Webhook] Received sale event:`, JSON.stringify(payload));
 
   const { email, product_id, sale_id } = payload;
   
-  // Custom fields might be top-level or inside a list of fields/custom_fields
-  const user_id = payload.user_id || (payload.custom_fields && payload.custom_fields.user_id) || payload["custom_fields[user_id]"];
-  const report_hash = payload.report_hash || (payload.custom_fields && payload.custom_fields.report_hash) || payload["custom_fields[report_hash]"];
+  // Custom fields might be a JSON string or an object
+  let customFields = payload.custom_fields || {};
+  if (typeof customFields === 'string') {
+    try {
+      customFields = JSON.parse(customFields);
+    } catch (e) {
+      customFields = {};
+    }
+  }
+
+  // Gumroad sends URL parameters either as top-level fields OR prefixed
+  const user_id = payload.user_id || customFields.user_id || payload["custom_fields[user_id]"] || payload["url_params[user_id]"];
+  const report_hash = payload.report_hash || customFields.report_hash || payload["custom_fields[report_hash]"] || payload["url_params[report_hash]"];
+  
+  if (!user_id || !report_hash) {
+    console.warn(`[Gumroad Webhook] Missing user_id or report_hash. Keys received: ${Object.keys(payload).join(", ")}`);
+  }
   
   console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);
 

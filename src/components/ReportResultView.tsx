@@ -60,6 +60,13 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
     }
   }, [isCurrentlyPaid]);
 
+  // Handle auto-payment trigger if coming from ChoiceModal
+  React.useEffect(() => {
+    if ((report as any).pendingPayment && !isCurrentlyPaid && !isCheckingPayment) {
+      handlePayment();
+    }
+  }, []);
+
   // Check if this specific report is paid
   React.useEffect(() => {
     if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;

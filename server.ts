@@ -69,32 +69,25 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   try {
     const supabaseAdmin = getSupabaseAdmin();
     
-    // 1. Update Profile (General Premium)
+    // 1. Update Profile (if exists)
     if (user_id) {
       await supabaseAdmin
         .from("profiles")
         .update({ is_premium: true })
         .eq("id", user_id);
-      console.log(`[Gumroad Webhook] User ${user_id} upgraded to premium`);
     }
 
-    // 2. Mark Specific Report as Paid
-    if (report_hash && user_id) {
+    // 2. Mark Specific Payment as Paid in 'payments' table
+    if (user_id && report_hash) {
       await supabaseAdmin
-        .from("reports")
+        .from("payments")
         .upsert({ 
           user_id: user_id,
           report_hash: report_hash,
-          is_paid: true,
+          is_premium: true,
           checkout_id: sale_id || "gumroad_sale"
-        }, { onConflict: 'report_hash' });
-      console.log(`[Gumroad Webhook] Report hash ${report_hash} marked as paid`);
-    } else if (report_hash) {
-      // Fallback if user_id is missing but hash is there
-      await supabaseAdmin
-        .from("reports")
-        .update({ is_paid: true })
-        .eq("report_hash", report_hash);
+        }, { onConflict: 'user_id,report_hash' });
+      console.log(`[Gumroad Webhook] Payment marked as paid for user ${user_id} and hash ${report_hash}`);
     }
 
   } catch (err) {

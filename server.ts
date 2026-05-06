@@ -267,10 +267,16 @@ function getGenAI() {
 }
 
 const MODELS_TO_TRY = [
-  "gemini-3-flash-preview",
   "gemini-1.5-flash",
+  "gemini-2.0-flash-exp",
+  "gemini-3-flash-preview",
   "gemini-1.5-pro"
 ];
+
+console.log("[Server] Gemini models prioritized:", MODELS_TO_TRY.join(", "));
+if (!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY)) {
+  console.warn("[Server] WARNING: No Gemini API key found in environment variables!");
+}
 
 app.post("/api/report", async (req, res) => {
   const { userData, lang, level } = req.body;
@@ -307,9 +313,10 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 `;
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 45000)
+        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 30000)
       );
 
+      console.log(`[Server] Prompt prepared for ${modelName}. Waiting for generation...`);
       const generatePromise = model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {

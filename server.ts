@@ -58,34 +58,25 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   console.log(`[Gumroad Webhook] Received sale event body:`, JSON.stringify(req.body));
   console.log(`[Gumroad Webhook] Received sale event query:`, JSON.stringify(req.query));
 
-  const payload = req.body;
-  const { email, product_id, sale_id } = payload;
-  
-  // Custom fields might be a JSON string or an object
-  let customFields = payload.custom_fields || {};
-  if (typeof customFields === 'string') {
-    try {
-      customFields = JSON.parse(customFields);
-    } catch (e) {
-      customFields = {};
-    }
-  }
+  // Gumroad parameters can be flat, nested, or in url_params/custom_fields
+  // We try to extract them from all possible locations
+  const getParam = (name: string) => {
+    return req.body[name] || 
+           req.body.url_params?.[name] || 
+           req.body[`url_params[${name}]`] || 
+           req.body.custom_fields?.[name] || 
+           req.body[`custom_fields[${name}]`] || 
+           req.query[name];
+  };
 
-  // Gumroad sends parameters in various ways: top-level, custom_fields[key], url_params[key], etc.
-  const user_id = payload.user_id || 
-                  customFields.user_id || 
-                  payload["custom_fields[user_id]"] || 
-                  payload["url_params[user_id]"] || 
-                  req.query.user_id;
-
-  const report_hash = payload.report_hash || 
-                      customFields.report_hash || 
-                      payload["custom_fields[report_hash]"] || 
-                      payload["url_params[report_hash]"] || 
-                      req.query.report_hash;
+  const user_id = getParam("user_id");
+  const report_hash = getParam("report_hash");
+  const { email, product_id, sale_id } = req.body;
   
+  console.log(`[Gumroad Webhook] Attempted extraction: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);
+
   if (!user_id || !report_hash) {
-    console.warn(`[Gumroad Webhook] Missing user_id or report_hash. Keys received: ${Object.keys(payload).join(", ")}`);
+    console.warn(`[Gumroad Webhook] Missing user_id or report_hash. Available keys: ${Object.keys(req.body).join(", ")}`);
   }
   
   console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);

@@ -27,22 +27,26 @@ export function useReportFlow(
       const savedState = sessionStorage.getItem("yongshin_pending_state");
       if (savedState) {
         try {
-          const { state: s, userData: ud, report: r, pendingAction } = JSON.parse(savedState);
-          // Only auto-restore if it's a resume-friendly state
+          const parsed = JSON.parse(savedState);
+          const { state: s, userData: ud, report: r, pendingAction } = parsed;
+          
           if (ud) setUserData(ud);
           if (r) setReport(r);
-          if (s === "RESULT") {
-            setState("RESULT");
-            sessionStorage.removeItem("yongshin_pending_state"); // Clear once restored
-          }
           
-          // Handle pending detailed action
-          if (pendingAction === 'detailed' && ud && user) {
+          // Clear session right after extraction to prevent loops
+          sessionStorage.removeItem("yongshin_pending_state");
+
+          if (s === "RESULT" && r) {
+            setState("RESULT");
+          } else if (pendingAction === 'detailed' && ud && user) {
             handleChoice('detailed', ud);
-            sessionStorage.removeItem("yongshin_pending_state");
+          } else {
+            // Default to landing if we don't have a clear high-level state to resume
+            setState("LANDING");
           }
         } catch (e) {
           console.error("Failed to restore state", e);
+          sessionStorage.removeItem("yongshin_pending_state");
         }
       }
     }
@@ -92,6 +96,9 @@ export function useReportFlow(
       return;
     }
 
+    // IMMEDIATELY set loading to provide visual feedback
+    setState("LOADING");
+
     // Check payment status for detailed analysis
     let actualLevel = level;
     let pendingPayment = false;
@@ -111,16 +118,12 @@ export function useReportFlow(
       // Even if 'simple' is requested, check if it's already paid to mark as premium
       const isPaid = isAdmin || await checkPaymentStatus(reportHash);
       if (isPaid) {
-        // Option: we could auto-upgrade to detailed here if paid, 
-        // but user requested to go to results (basic info) first?
-        // Actually, if it's paid, showing detailed is better.
         actualLevel = 'detailed';
       }
     }
 
-    setState("LOADING");
     try {
-      const year = activeData.targetYear;
+      const year = activeData.targetYear || new Date().getFullYear();
       const cached = storageService.findCachedReport(activeData, year, actualLevel);
       
       let result;

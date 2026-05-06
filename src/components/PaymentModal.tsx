@@ -37,8 +37,8 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
             </h3>
             <p className="text-white/40 font-sans tracking-tight mb-4 max-w-md text-lg leading-relaxed">
               {lang === 'ko' 
-                ? "개인적인 성찰과 생활 패턴 분석을 위한 1회용 디지털 리포트입니다. (990원)" 
-                : "A one-time digital report providing general lifestyle insights for self-reflection. (990 KRW)"}
+                ? "개인적인 성찰과 생활 패턴 분석을 위한 1회용 디지털 리포트입니다. ($0.99 USD)" 
+                : "A one-time digital report providing general lifestyle insights for self-reflection. ($0.99 USD)"}
             </p>
             <p className="text-white/20 text-[11px] mb-12 max-w-md leading-relaxed">
               {lang === 'ko'

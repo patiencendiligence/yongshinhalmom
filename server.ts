@@ -155,16 +155,10 @@ let genAI: GoogleGenerativeAI | null = null;
 function getGenAI() {
   if (!genAI) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY;
-    if (!apiKey) throw new Error("GEMINI_API_KEY is missing in server environment");
-    genAI = new GoogleGenerativeAI(apiKey.replace(/['"]/g, "").trim());
-  }
-  return genAI;
-}
-
-const MODELS_TO_TRY = [
+    if (const MODELS_TO_TRY = [
   "gemini-1.5-flash",
+  "gemini-2.0-flash",
   "gemini-1.5-flash-8b",
-  "gemini-2.0-flash-exp",
   "gemini-1.5-pro"
 ];
 
@@ -197,15 +191,18 @@ app.post("/api/report", async (req, res) => {
   
   let lastError: any = null;
   const apiKey = getApiKey();
+  const startTime = Date.now();
 
   if (!apiKey) {
     console.error("[Server] No API Key found in process.env");
-    return res.status(500).json({ error: "서버 API 키가 설정되지 않았습니다. 관리자 도구에서 키 설정을 확인해 주세요." });
+    return res.status(500).json({ error: "서버 API 키가 설정되지 않았습니다. 환경 변수 설정을 확인해 주세요." });
   }
 
   for (const modelName of MODELS_TO_TRY) {
     try {
-      console.log(`[Server] [${modelName}] Starting report generation...`);
+      const modelStartTime = Date.now();
+      console.log(`[Server] [${modelName}] Starting report generation (Level: ${level})...`);
+      
       const ai = new GoogleGenerativeAI(apiKey);
       const model = ai.getGenerativeModel({ 
         model: modelName,
@@ -218,19 +215,21 @@ app.post("/api/report", async (req, res) => {
       const prompt = `
 YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
-STRICTLY RETURN ONLY A VALID JSON OBJECT.
+STRICTLY RETURN ONLY A VALID JSON OBJECT WITH NO MARKDOWN CODE BLOCKS.
 
 분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
-분석 수준: ${level === 'detailed' ? "심층 분석 (Deep Analysis)" : "기본 분석 (Quick Summary)"}
+분석 수준: ${level === 'detailed' ? "심층 분석 (Detailed Analysis)" : "기본 분석 (Quick Summary)"}
 
 REQUIRED JSON STRUCTURE:
 {
-  "summary": "Full fortune summary (min 300 chars)",
+  "summary": "Full fortune summary (min 300 characters, traditional teller tone)",
   "zodiac": 1-12,
   "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
   "sections": [
-    { "title": "Section Title", "content": "Detailed content" }
+    { "title": "Life Rhythm", "content": "Detailed insights" },
+    { "title": "Luck Factors", "content": "Specific guidance" },
+    { "title": "Monthly Flow", "content": "12 months summary" }
   ],
   "luckInfo": {
     "color": "Lucky Color",
@@ -241,7 +240,7 @@ REQUIRED JSON STRUCTURE:
 `;
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 55000)
+        setTimeout(() => reject(new Error("GATEWAY_TIMEOUT")), 45000)
       );
 
       const generatePromise = model.generateContent({
@@ -249,7 +248,7 @@ REQUIRED JSON STRUCTURE:
         generationConfig: {
           responseMimeType: "application/json",
           maxOutputTokens: 3500,
-          temperature: 0.82,
+          temperature: 0.75,
         },
       });
 
@@ -257,12 +256,9 @@ REQUIRED JSON STRUCTURE:
       const response = await result.response;
       let text = response.text();
       
-      if (!text) {
-        console.warn(`[Server] [${modelName}] Empty text response.`);
-        throw new Error("EMPTY_TEXT");
-      }
+      if (!text) throw new Error("EMPTY_RESPONSE");
 
-      // Robust JSON extraction (find first { and last })
+      // Robust JSON extraction
       const firstCurly = text.indexOf('{');
       const lastCurly = text.lastIndexOf('}');
       if (firstCurly !== -1 && lastCurly !== -1) {
@@ -271,20 +267,38 @@ REQUIRED JSON STRUCTURE:
       
       try {
         const parsed = JSON.parse(text);
-        console.log(`[Server] [${modelName}] Success.`);
+        const duration = ((Date.now() - modelStartTime) / 1000).toFixed(1);
+        console.log(`[Server] [${modelName}] Success in ${duration}s.`);
         return res.json({ ...parsed, level });
       } catch (e: any) {
-        console.error(`[Server] [${modelName}] JSON Parse Error: ${e.message}. Text: ${text.substring(0, 100)}...`);
-        throw new Error("JSON_PARSE_FAILED");
+        console.error(`[Server] [${modelName}] JSON Parse Fail: ${e.message}`);
+        throw new Error("MALFORMED_JSON");
       }
       
     } catch (error: any) {
       const errorMsg = error.message || String(error);
-      console.warn(`[Server] [${modelName}] Generation failed: ${errorMsg}`);
+      console.warn(`[Server] [${modelName}] Attempt failed: ${errorMsg}`);
       lastError = error;
       
+      // If it's a permanent auth error, don't retry
       if (errorMsg.includes("API key not valid") || errorMsg.includes("PERMISSION_DENIED")) {
-        return res.status(401).json({ error: "Gemini API 키 인증에 실패했습니다." });
+        return res.status(401).json({ error: "API 키가 유효하지 않습니다." });
+      }
+
+      // Small break before retry to avoid rate limit spikes
+      await new Promise(r => setTimeout(r, 500));
+      continue;
+    }
+  }
+
+  const finalDuration = ((Date.now() - startTime) / 1000).toFixed(1);
+  const finalError = lastError?.message || "Unknown Error";
+  console.error(`[Server] ALL ATTEMPTS FAILED after ${finalDuration}s. Final Error: ${finalError}`);
+  
+  res.status(500).json({ 
+    error: `분석 서버 오류 (${finalError}). ${lang === 'ko' ? '잠시 후 다시 시도해 주세요.' : 'Please try again in a moment.'}`
+  });
+});�패했습니다." });
       }
 
       continue;

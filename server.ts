@@ -223,6 +223,7 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
               zodiac: { type: SchemaType.NUMBER },
               illustrationType: { 
                 type: SchemaType.STRING, 
+                format: "enum",
                 enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
               },
               sections: {
@@ -254,12 +255,19 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
       });
 
       const result: any = await Promise.race([generatePromise, timeoutPromise]);
-      const response = result.response;
-      const text = response.text();
+      const response = await result.response;
+      let text = response.text();
       
       if (!text) {
         console.warn(`[Server] Model ${modelName} returned empty text.`);
         throw new Error("EMPTY_RESPONSE");
+      }
+
+      // Cleanup Markdown formatting if present
+      if (text.includes("```json")) {
+        text = text.split("```json")[1].split("```")[0].trim();
+      } else if (text.includes("```")) {
+        text = text.split("```")[1].split("```")[0].trim();
       }
       
       try {

@@ -101,7 +101,7 @@ export default function MainApp() {
 
             {state === "INPUT" && (
               <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
-                <InputForm onSubmit={handleSubmit} initialData={preFilledData} lang={lang} />
+                <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} />
               </motion.div>
             )}
 

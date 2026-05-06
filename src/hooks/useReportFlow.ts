@@ -168,7 +168,7 @@ export function useReportFlow(
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
     // Gumroad Payment Link
-    const gumroadUrl = "https://patiencekeeper30.gumroad.com/l/jueghh";
+    const gumroadUrl = "https://yshm.gumroad.com/l/jueghh";
 
     // Append user context for easier tracking/webhooks in Gumroad
     const checkoutUrl = new URL(gumroadUrl);

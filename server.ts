@@ -61,22 +61,39 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   // Gumroad parameters can be flat, nested, or in url_params/custom_fields
   // We try to extract them from all possible locations
   const getParam = (name: string) => {
-    return req.body[name] || 
-           req.body.url_params?.[name] || 
-           req.body[`url_params[${name}]`] || 
-           req.body.custom_fields?.[name] || 
-           req.body[`custom_fields[${name}]`] || 
-           req.query[name];
+    // 1. Direct top-level fields
+    if (req.body[name]) return req.body[name];
+    
+    // 2. Nested objects if express.json() / express.urlencoded() handled them
+    if (req.body.url_params && req.body.url_params[name]) return req.body.url_params[name];
+    if (req.body.custom_fields && req.body.custom_fields[name]) return req.body.custom_fields[name];
+    
+    // 3. Flat bracket keys (e.g. url_params[user_id])
+    if (req.body[`url_params[${name}]`]) return req.body[`url_params[${name}]`];
+    if (req.body[`custom_fields[${name}]`]) return req.body[`custom_fields[${name}]`];
+    
+    // 4. Try parsing custom_fields if it's a stringified JSON
+    if (typeof req.body.custom_fields === 'string') {
+      try {
+        const parsed = JSON.parse(req.body.custom_fields);
+        if (parsed[name]) return parsed[name];
+      } catch (e) {}
+    }
+    
+    // 5. Query params as fallback
+    return req.query[name];
   };
 
   const user_id = getParam("user_id");
   const report_hash = getParam("report_hash");
   const { email, product_id, sale_id } = req.body;
   
-  console.log(`[Gumroad Webhook] Attempted extraction: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);
+  console.log(`[Gumroad Webhook] Extraction attempt: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);
 
   if (!user_id || !report_hash) {
-    console.warn(`[Gumroad Webhook] Missing user_id or report_hash. Available keys: ${Object.keys(req.body).join(", ")}`);
+    console.warn(`[Gumroad Webhook] Data missing. Body keys: ${Object.keys(req.body).join(", ")}`);
+    // If essential data is missing, we can't process payment verification
+    return res.status(200).send("Acknowledge but missing required identifiers");
   }
   
   console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, sale_id=${sale_id}`);

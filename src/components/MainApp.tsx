@@ -65,29 +65,25 @@ export default function MainApp() {
     
     if (choice === 'detailed') {
       if (!user) {
-        // If not logged in, handleChoice will handle login logic
         handleChoice(choice);
         return;
       }
 
+      if (!userData) {
+        console.error("Cannot proceed to detailed choice: userData is missing.");
+        handleChoice(choice); // Let handleChoice try to recover or fail gracefully
+        return;
+      }
+
       const reportHash = getReportHash(userData);
-      
-      // We check profile status synchronously if possible
       const isAlreadyPremium = profile?.isPremium;
       
       if (!isAlreadyPremium) {
-        // Check background status but don't await to avoid popup blocking
-        checkPaymentStatus(reportHash).then(isPaid => {
-          if (!isPaid) {
-            triggerPayment(reportHash);
-          } else {
-            handleChoice(choice);
-          }
-        });
-        
-        // Optimistically trigger payment to avoid blocking, 
-        // handleChoice will still set state to loading/result
+        // Trigger payment in a new tab
         triggerPayment(reportHash);
+        // Current tab proceeds to show the (locked) report view
+        handleChoice(choice);
+        return;
       }
     }
     

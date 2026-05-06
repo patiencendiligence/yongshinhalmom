@@ -20,42 +20,36 @@ export function useReportFlow(
   const [preFilledData, setPreFilledData] = useState<any>(null);
   const navigate = useNavigate();
 
-  // Restore state after redirect
+  // Restore state after redirect or reload
   useEffect(() => {
     const savedState = sessionStorage.getItem("yongshin_pending_state");
     if (savedState) {
       try {
         const { state: s, userData: ud, report: r, pendingAction } = JSON.parse(savedState);
-        if (s) setState(s);
-        if (ud) setUserData(ud);
-        if (r) setReport(r);
-        sessionStorage.removeItem("yongshin_pending_state");
+        // Important: Only restore if we don't already have live data to avoid overriding
+        if (!userData && ud) setUserData(ud);
+        if (!report && r) setReport(r);
+        if (state === "LANDING" && s) setState(s);
 
-        // Auto-resume if there was a pending action
-        if (pendingAction === 'detailed' && ud) {
+        // If we were in the middle of a detailed choice, and now have user, try to resume
+        if (pendingAction === 'detailed' && ud && user && state === "LANDING") {
           handleChoice('detailed', ud);
+          sessionStorage.removeItem("yongshin_pending_state"); // Clear once resumed
         }
       } catch (e) {
         console.error("Failed to restore state", e);
       }
     }
-  }, [user]); // Add user dependency to ensure handleChoice has the user
+  }, [user]);
 
-  // Handle payment success redirect (Lemonsqueezy)
+  // Handle success redirect context
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('payment') === 'success' && user) {
-      const checkoutId = urlParams.get('checkout_id');
+    if (window.location.hash.includes('success')) {
       const savedHash = sessionStorage.getItem("yongshin_pending_pay_hash");
-      
-      if (savedHash) {
-        markAsPaid(savedHash, checkoutId || undefined);
-        storageService.setPaidHash(savedHash);
+      if (savedHash && user) {
+        markAsPaid(savedHash);
         sessionStorage.removeItem("yongshin_pending_pay_hash");
-      } else {
-        markAsPaid();
       }
-      window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, [user, markAsPaid]);
 
@@ -70,14 +64,25 @@ export function useReportFlow(
   }, [state, userData, report, login]);
 
   const handleChoice = async (level: 'simple' | 'detailed', overridenData?: any) => {
-    const activeData = overridenData || userData;
+    let activeData = overridenData || userData;
     
+    // Attempt session recovery if direct data is missing
+    if (!activeData) {
+      const saved = sessionStorage.getItem("yongshin_pending_state");
+      if (saved) {
+        try { activeData = JSON.parse(saved).userData; } catch(e){}
+      }
+    }
+
     if (level === 'detailed' && !user) {
       await loginAndPersist('detailed');
       return;
     }
 
-    if (!activeData) return;
+    if (!activeData) {
+      console.warn("handleChoice aborted: No userData available.");
+      return;
+    }
 
     // Check payment status for detailed analysis
     let actualLevel = level;
@@ -164,25 +169,33 @@ export function useReportFlow(
   const triggerPayment = useCallback((reportHash: string) => {
     if (!user) return;
     
-    // Save current hash for redirect recovery
+    // Save current state snapshot for total recovery
+    const stateSnapshot = {
+      state,
+      userData,
+      report,
+      pendingAction: 'detailed',
+      reportHash
+    };
+    sessionStorage.setItem("yongshin_pending_state", JSON.stringify(stateSnapshot));
     sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
     
     // Gumroad Payment Link
     const gumroadUrl = "https://yshm.gumroad.com/l/jueghh";
 
-    // Append user context for easier tracking/webhooks in Gumroad
+    // Append user context
     const checkoutUrl = new URL(gumroadUrl);
     if (user?.email) checkoutUrl.searchParams.set("email", user.email);
     checkoutUrl.searchParams.set("report_hash", reportHash);
     checkoutUrl.searchParams.set("user_id", user.id);
     
-    // Add redirect URL for completion
-    const successUrl = `${window.location.origin}/#/success`;
+    // Use current URL path (e.g., pricing.html) instead of just origin
+    const currentBase = window.location.href.split('#')[0];
+    const successUrl = `${currentBase}#/success`;
     checkoutUrl.searchParams.set("redirect_url", successUrl);
     
-    // Using window.open for checkout links is more reliable in iframes
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");
-  }, [user]);
+  }, [user, state, userData, report]);
 
   return {
     state,

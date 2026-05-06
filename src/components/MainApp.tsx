@@ -60,22 +60,33 @@ export default function MainApp() {
     setIsProfileModalOpen(false);
   };
 
-  const onHandleChoice = async (choice: 'simple' | 'detailed') => {
+  const onHandleChoice = (choice: 'simple' | 'detailed') => {
     setIsChoiceModalOpen(false);
     
     if (choice === 'detailed') {
       if (!user) {
-        // If not logged in, don't trigger payment yet.
-        // handleChoice will trigger loginAndPersist.
+        // If not logged in, handleChoice will handle login logic
         handleChoice(choice);
         return;
       }
 
       const reportHash = getReportHash(userData);
-      // Check if already paid to avoid double charging
-      const isPaid = user?.email === 'patiencendiligence@gmail.com' || await checkPaymentStatus(reportHash);
-      if (!isPaid) {
-        // This is a direct user click context, window.open should work here
+      
+      // We check profile status synchronously if possible
+      const isAlreadyPremium = profile?.isPremium;
+      
+      if (!isAlreadyPremium) {
+        // Check background status but don't await to avoid popup blocking
+        checkPaymentStatus(reportHash).then(isPaid => {
+          if (!isPaid) {
+            triggerPayment(reportHash);
+          } else {
+            handleChoice(choice);
+          }
+        });
+        
+        // Optimistically trigger payment to avoid blocking, 
+        // handleChoice will still set state to loading/result
         triggerPayment(reportHash);
       }
     }

@@ -127,13 +127,12 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
     displaySections[2] = temp;
   }
 
-  const handlePayment = async () => {
-    console.log("handlePayment triggered, user status:", !!user);
+  const handlePayment = () => {
     if (!user) {
       if (onLogin) {
-        await onLogin();
+        onLogin();
       } else {
-        await login();
+        login();
       }
       return;
     }

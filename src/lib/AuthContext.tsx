@@ -139,12 +139,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       setProfile(null);
       
+      // Clear app-specific storage before redirect
+      localStorage.removeItem("yongshin_profiles");
+      localStorage.removeItem("yongshin_lang");
+      sessionStorage.removeItem("yongshin_pending_pay_hash");
+      
       const client = getSupabase();
       if (client) {
         await client.auth.signOut();
       }
       
-      // Full refresh to ensure clean state and clear all storage if needed
+      // Full refresh to ensure clean state and clear all session data
       window.location.href = window.location.origin + window.location.pathname;
     } catch (error) {
       console.error("Logout Error:", error);

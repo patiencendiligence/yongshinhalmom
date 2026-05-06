@@ -129,22 +129,33 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
 
   const handlePayment = () => {
     if (!user) {
-      if (onLogin) {
-        onLogin();
-      } else {
-        login();
-      }
+      onLogin ? onLogin() : login();
       return;
     }
     
     if (user?.email === 'patiencendiligence@gmail.com') {
       setIsCurrentlyPaid(true);
       storageService.setPaidHash(reportHash);
+      if (report.level === 'simple' && onUpgrade) onUpgrade();
       return;
     }
 
     setIsCheckingPayment(true);
     propTriggerPayment(reportHash);
+  };
+
+  const handleManualCheck = async () => {
+    setIsCheckingPayment(true);
+    const paid = await checkPaymentStatus(reportHash);
+    if (paid) {
+      setIsCurrentlyPaid(true);
+      setIsCheckingPayment(false);
+      storageService.setPaidHash(reportHash);
+      if (report.level === 'simple' && onUpgrade) onUpgrade();
+    } else {
+      // Just a quick nudge, don't alert unless it's a hard error
+      console.log("Still not verified...");
+    }
   };
 
   const handleSavePdf = async () => {
@@ -502,12 +513,20 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
                       </button>
                       
                       {isCheckingPayment && (
-                        <button 
-                          onClick={handlePayment}
-                          className="text-[10px] text-white/40 uppercase tracking-widest hover:text-white transition-colors underline underline-offset-4"
-                        >
-                          {lang === 'ko' ? "결제창이 열리지 않았나요? 다시 시도" : "Popup didn't open? Try again"}
-                        </button>
+                        <div className="flex flex-col items-center gap-4">
+                          <button 
+                            onClick={handleManualCheck}
+                            className="text-[10px] text-white/40 uppercase tracking-widest hover:text-white transition-colors underline underline-offset-4"
+                          >
+                            {lang === 'ko' ? "결제 완료 후 클릭 (수동 확인)" : "Click after payment (Manual check)"}
+                          </button>
+                          <button 
+                            onClick={handlePayment}
+                            className="text-[10px] text-white/20 uppercase tracking-[0.2em] hover:text-white transition-colors"
+                          >
+                            {lang === 'ko' ? "결제창이 열리지 않았나요? 결제 다시 시도" : "Popup didn't open? Try again"}
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}

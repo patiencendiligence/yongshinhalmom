@@ -6,7 +6,6 @@ import InputForm from "./InputForm";
 import ReportResultView from "./ReportResultView";
 import ProfileModal from "./ProfileModal";
 import InfoModal from "./InfoModal";
-import ChoiceModal from "./ChoiceModal";
 import PolicyView from "./PolicyView";
 import PricingView from "./PricingView";
 import SuccessView from "./SuccessView";
@@ -45,49 +44,18 @@ export default function MainApp() {
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
-  const [isChoiceModalOpen, setIsChoiceModalOpen] = useState(false);
 
   const t = translations[lang];
 
   const handleSubmit = (data: any) => {
     setUserData(data);
     saveProfile(data);
-    setIsChoiceModalOpen(true);
+    handleChoice('simple', data);
   };
 
   const onSelectProfileUpdate = (profile: any) => {
     handleSelectProfile(profile);
     setIsProfileModalOpen(false);
-  };
-
-  const onHandleChoice = (choice: 'simple' | 'detailed') => {
-    setIsChoiceModalOpen(false);
-    
-    if (choice === 'detailed') {
-      if (!user) {
-        handleChoice(choice);
-        return;
-      }
-
-      if (!userData) {
-        console.error("Cannot proceed to detailed choice: userData is missing.");
-        handleChoice(choice); // Let handleChoice try to recover or fail gracefully
-        return;
-      }
-
-      const reportHash = getReportHash(userData);
-      const isAlreadyPremium = profile?.isPremium;
-      
-      if (!isAlreadyPremium) {
-        // Trigger payment in a new tab
-        triggerPayment(reportHash);
-        // Current tab proceeds to show the (locked) report view
-        handleChoice(choice);
-        return;
-      }
-    }
-    
-    handleChoice(choice);
   };
 
   return (
@@ -170,13 +138,6 @@ export default function MainApp() {
         isOpen={isInfoModalOpen} 
         onClose={() => setIsInfoModalOpen(false)} 
         onOpenReport={() => { window.location.href = "mailto:patiencendiligence@gmail.com"; }} 
-        lang={lang} 
-      />
-      
-      <ChoiceModal 
-        isOpen={isChoiceModalOpen} 
-        onClose={() => setIsChoiceModalOpen(false)} 
-        onChoose={onHandleChoice} 
         lang={lang} 
       />
       

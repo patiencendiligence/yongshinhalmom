@@ -34,7 +34,7 @@ export async function getReport(userData: {
   targetYear: number;
 }, lang: Language = "ko", level: 'simple' | 'detailed' = 'simple'): Promise<ReportResult> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+  const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout
 
   try {
     const response = await fetch("/api/report", {

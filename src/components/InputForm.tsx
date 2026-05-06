@@ -22,8 +22,26 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
     isLunar: initialData?.isLunar ?? false,
     gender: initialData?.gender || "female",
     birthPlace: initialData?.birthPlace || "",
-    targetYear: currentYear
+    targetYear: initialData?.targetYear || currentYear
   });
+
+  // Keep form in sync if initialData changes (e.g. after profile selection or error recovery)
+  React.useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        ...initialData,
+        // Only update if the value is actually different and provided
+        name: initialData.name ?? prev.name,
+        birthDate: initialData.birthDate ?? prev.birthDate,
+        birthTime: initialData.birthTime ?? prev.birthTime,
+        isLunar: initialData.isLunar ?? prev.isLunar,
+        gender: initialData.gender ?? prev.gender,
+        birthPlace: initialData.birthPlace ?? prev.birthPlace,
+        targetYear: initialData.targetYear ?? prev.targetYear
+      }));
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

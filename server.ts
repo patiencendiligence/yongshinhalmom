@@ -267,9 +267,9 @@ function getGenAI() {
 }
 
 const MODELS_TO_TRY = [
-  "gemini-1.5-flash",
-  "gemini-2.0-flash-exp",
   "gemini-3-flash-preview",
+  "gemini-2.0-flash-exp",
+  "gemini-1.5-flash",
   "gemini-1.5-pro"
 ];
 
@@ -313,7 +313,7 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 `;
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 30000)
+        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 40000)
       );
 
       console.log(`[Server] Prompt prepared for ${modelName}. Waiting for generation...`);
@@ -328,7 +328,6 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
               zodiac: { type: SchemaType.NUMBER },
               illustrationType: { 
                 type: SchemaType.STRING, 
-                format: "enum",
                 enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
               },
               sections: {
@@ -354,29 +353,56 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
             },
             required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
           },
+          maxOutputTokens: 3000,
+          temperature: 0.7,
         },
       });
 
       const result: any = await Promise.race([generatePromise, timeoutPromise]);
-      const text = result.response.text();
+      const response = result.response;
+      const text = response.text();
       
-      if (!text) throw new Error("Empty response from model");
+      if (!text) {
+        console.warn(`[Server] Model ${modelName} returned empty text.`);
+        throw new Error("EMPTY_RESPONSE");
+      }
       
-      console.log(`[Server] Successfully generated report using ${modelName}`);
-      return res.json({ ...JSON.parse(text), level });
+      try {
+        const parsed = JSON.parse(text);
+        console.log(`[Server] Successfully generated report using ${modelName}`);
+        return res.json({ ...parsed, level });
+      } catch (e) {
+        console.error(`[Server] Model ${modelName} returned invalid JSON:`, text.substring(0, 500));
+        throw new Error("INVALID_JSON_RESPONSE");
+      }
       
     } catch (error: any) {
-      console.warn(`[Server] Model ${modelName} failed:`, error.message || error);
+      const errorMsg = error.message || String(error);
+      console.error(`[Server] Model ${modelName} session failed. Error:`, errorMsg);
       lastError = error;
       
-      if (error.message === "MODEL_TIMEOUT") continue;
-      if (error.message?.includes("API key") || error.message?.includes("INVALID_ARGUMENT")) break;
+      if (errorMsg === "MODEL_TIMEOUT") {
+        console.warn(`[Server] ${modelName} timed out after 45s.`);
+        continue;
+      }
+      
+      if (errorMsg.includes("429") || errorMsg.includes("quota")) {
+        console.warn(`[Server] ${modelName} quota exceeded. Trying next...`);
+        continue;
+      }
+
+      if (errorMsg.includes("API key") || errorMsg.includes("INVALID_ARGUMENT") || errorMsg.includes("PERMISSION_DENIED")) {
+        console.error("[Server] Terminal Error (Auth/Key).");
+        return res.status(401).json({ error: "API 키 설정 오류가 발견되었습니다. 관리자에게 문의해 주세요." });
+      }
+
+      // If it's a general safety error or something, try next
       continue;
     }
   }
 
   res.status(500).json({ 
-    error: lastError?.message || "All models failed to generate report. Please try again later." 
+    error: `모든 모델이 분석에 실패했습니다. (마지막 에러: ${lastError?.message || "알 수 없는 오류"})` 
   });
 });
 

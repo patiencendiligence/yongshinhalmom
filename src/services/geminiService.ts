@@ -33,18 +33,32 @@ export async function getReport(userData: {
   birthPlace: string;
   targetYear: number;
 }, lang: Language = "ko", level: 'simple' | 'detailed' = 'simple'): Promise<ReportResult> {
-  const response = await fetch("/api/report", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ userData, lang, level }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ error: "Server error" }));
-    throw new Error(errorData.error || `Failed with status ${response.status}`);
+  try {
+    const response = await fetch("/api/report", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ userData, lang, level }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Server error" }));
+      throw new Error(errorData.error || `Failed with status ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error("Report generation timed out. Please try again.");
+    }
+    throw error;
   }
-
-  return await response.json();
 }

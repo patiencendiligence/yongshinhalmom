@@ -163,40 +163,48 @@ function getGenAI() {
 
 const MODELS_TO_TRY = [
   "gemini-1.5-flash",
-  "gemini-2.0-flash-exp",
   "gemini-1.5-flash-8b",
-  "gemini-3-flash-preview",
+  "gemini-2.0-flash-exp",
   "gemini-1.5-pro"
 ];
 
 console.log("[Server] Gemini models prioritized:", MODELS_TO_TRY.join(", "));
-if (!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY)) {
+
+function getApiKey() {
+  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY || "";
+  return key.replace(/['"]/g, "").trim();
+}
+
+if (!getApiKey()) {
   console.warn("[Server] WARNING: No Gemini API key found in environment variables!");
 }
 
 app.post("/api/report", async (req, res) => {
   const { userData, lang, level } = req.body;
   
-  let lastError = null;
+  let lastError: any = null;
+  const apiKey = getApiKey();
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+  }
+
   for (const modelName of MODELS_TO_TRY) {
     try {
-      console.log(`[Server] Attempting report generation with ${modelName}...`);
-      const ai = getGenAI();
+      console.log(`[Server] [${modelName}] Starting generation...`);
+      const ai = new GoogleGenerativeAI(apiKey);
       const model = ai.getGenerativeModel({ 
         model: modelName,
         systemInstruction: SYSTEM_INSTRUCTION
       });
 
       const now = new Date();
-      const currentDate = now.toISOString().split('T')[0];
-      const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
       const currentYear = userData?.targetYear || now.getFullYear();
 
       const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 
-현재 시각: ${currentDate} ${currentTime}
 분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
 분석 수준: ${level === 'detailed' ? "심층 분석 (Deep Analysis)" : "기본 분석 (Quick Summary)"}
@@ -212,7 +220,6 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
         setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 50000)
       );
 
-      console.log(`[Server] Generating report with ${modelName}...`);
       const generatePromise = model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
@@ -259,53 +266,40 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
       const response = await result.response;
       let text = response.text();
       
-      if (!text) {
-        console.warn(`[Server] Model ${modelName} returned empty text.`);
-        throw new Error("EMPTY_RESPONSE");
-      }
+      if (!text) throw new Error("Empty text returned from model");
 
       // Robust JSON extraction
       const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        text = jsonMatch[0];
-      }
+      if (jsonMatch) text = jsonMatch[0];
       
       try {
         const parsed = JSON.parse(text);
-        console.log(`[Server] Content generated successfully with ${modelName}`);
+        console.log(`[Server] [${modelName}] Success.`);
         return res.json({ ...parsed, level });
       } catch (e) {
-        console.error(`[Server] JSON Parse Error from ${modelName}. Text:`, text.substring(0, 200));
+        console.error(`[Server] [${modelName}] JSON Parse Fail. Text length: ${text.length}`);
         throw new Error("INVALID_JSON_RESPONSE");
       }
       
     } catch (error: any) {
       const errorMsg = error.message || String(error);
-      console.error(`[Server] Model ${modelName} session failed. Error:`, errorMsg);
+      console.warn(`[Server] [${modelName}] Failed: ${errorMsg}`);
       lastError = error;
       
-      if (errorMsg === "MODEL_TIMEOUT") {
-        console.warn(`[Server] ${modelName} timed out after 45s.`);
-        continue;
-      }
-      
-      if (errorMsg.includes("429") || errorMsg.includes("quota")) {
-        console.warn(`[Server] ${modelName} quota exceeded. Trying next...`);
-        continue;
+      // If the error is a terminal one (auth), don't bother retrying others
+      if (errorMsg.includes("API key not valid") || errorMsg.includes("PERMISSION_DENIED")) {
+        return res.status(401).json({ error: "Gemini API key is invalid or lacks permissions." });
       }
 
-      if (errorMsg.includes("API key") || errorMsg.includes("INVALID_ARGUMENT") || errorMsg.includes("PERMISSION_DENIED")) {
-        console.error("[Server] Terminal Error (Auth/Key).");
-        return res.status(401).json({ error: "API 키 설정 오류가 발견되었습니다. 관리자에게 문의해 주세요." });
-      }
-
-      // If it's a general safety error or something, try next
+      // Otherwise, continue to next model
       continue;
     }
   }
 
+  const finalError = lastError?.message || "Unknown error";
+  console.error(`[Server] All models failed. Last error: ${finalError}`);
   res.status(500).json({ 
-    error: `모든 모델이 분석에 실패했습니다. (마지막 에러: ${lastError?.message || "알 수 없는 오류"})` 
+    error: `분석 중 오류가 발생했습니다. (마지막 에러: ${finalError}). 잠시 후 다시 시도해 주세요.` 
   });
 });
 

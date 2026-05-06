@@ -142,7 +142,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear app-specific storage before redirect
       localStorage.removeItem("yongshin_profiles");
       localStorage.removeItem("yongshin_lang");
-      sessionStorage.removeItem("yongshin_pending_pay_hash");
+      localStorage.removeItem("yongshin_report_cache");
+      sessionStorage.clear();
       
       const client = getSupabase();
       if (client) {

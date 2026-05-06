@@ -98,68 +98,86 @@ export function useReportFlow(
 
     // IMMEDIATELY set loading to provide visual feedback
     setState("LOADING");
+    console.log(`[Flow] Starting analysis for ${activeData.name} (${level})...`);
 
     // Check payment status for detailed analysis
     let actualLevel = level;
     let pendingPayment = false;
     
-    const isAdmin = user?.email === 'patiencendiligence@gmail.com' || user?.email === 'test@example.com';
-    const reportHash = getReportHash(activeData);
-    
-    if (level === 'detailed') {
-      const isPaidForHash = await checkPaymentStatus(reportHash);
-      const isPaid = isAdmin || isPaidForHash;
-      
-      if (!isPaid) {
-        actualLevel = 'simple';
-        pendingPayment = true;
-      }
-    } else {
-      // Even if 'simple' is requested, check if it's already paid to mark as premium
-      const isPaid = isAdmin || await checkPaymentStatus(reportHash);
-      if (isPaid) {
-        actualLevel = 'detailed';
-      }
-    }
-
     try {
+      const isAdmin = user?.email === 'patiencendiligence@gmail.com' || user?.email === 'test@example.com';
+      const reportHash = getReportHash(activeData);
+      
+      if (level === 'detailed') {
+        console.log("[Flow] Checking payment status...");
+        const isPaidForHash = await checkPaymentStatus(reportHash);
+        const isPaid = isAdmin || isPaidForHash;
+        
+        if (!isPaid) {
+          console.log("[Flow] Not paid. Downgrading to simple.");
+          actualLevel = 'simple';
+          pendingPayment = true;
+        }
+      } else {
+        // Even if 'simple' is requested, check if it's already paid to mark as premium
+        console.log("[Flow] Checking if already paid...");
+        const isPaid = isAdmin || await checkPaymentStatus(reportHash);
+        if (isPaid) {
+          console.log("[Flow] Already paid. Upgrading to detailed.");
+          actualLevel = 'detailed';
+        }
+      }
+
       const year = activeData.targetYear || new Date().getFullYear();
+      console.log(`[Flow] Final level: ${actualLevel}. Looking for cache...`);
       const cached = storageService.findCachedReport(activeData, year, actualLevel);
       
       let result;
       if (cached) {
+        console.log("[Flow] Cache found.");
         result = cached;
       } else {
+        console.log("[Flow] No cache. Fetching from server...");
         result = await getReport(activeData, lang, actualLevel);
-        storageService.setReportCache({
-          inputHash: JSON.stringify({
-            name: activeData.name,
-            birthDate: activeData.birthDate,
-            birthTime: activeData.birthTime,
-            isLunar: activeData.isLunar,
-            gender: activeData.gender
-          }),
-          year: year,
-          level: actualLevel,
-          date: new Date().toISOString().split('T')[0],
-          result: result
-        });
+        
+        // Safety wrap for caching
+        try {
+          storageService.setReportCache({
+            inputHash: JSON.stringify({
+              name: activeData.name,
+              birthDate: activeData.birthDate,
+              birthTime: activeData.birthTime,
+              isLunar: activeData.isLunar,
+              gender: activeData.gender
+            }),
+            year: year,
+            level: actualLevel,
+            date: new Date().toISOString().split('T')[0],
+            result: result
+          });
+        } catch (e) {
+          console.warn("[Flow] Failed to set cache:", e);
+        }
       }
 
+      console.log("[Flow] Success. Transitioning to RESULT.");
       setReport({ ...result, level: actualLevel, pendingPayment });
       setState("RESULT");
     } catch (error: any) {
-      console.error("Report generation error:", error);
+      console.error("[Flow] Report generation error:", error);
+      
+      // CRITICAL: Ensure we get out of LOADING state even on error
       setState("INPUT");
       
-      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
-      const isKeyError = error?.message?.includes("API key") || error?.message?.includes("Environment settings");
+      const isQuota = error?.status === 429 || error?.message?.includes("429");
+      const isTimeout = error?.message?.includes("시간") || error?.message?.includes("timeout");
       
       let msg = translations[lang].errorMessage;
       if (isQuota) msg = (translations[lang] as any).quotaExceeded;
-      if (isKeyError) msg = error.message;
+      if (isTimeout) msg = error.message;
 
-      setTimeout(() => alert(msg), 100);
+      // Small delay to ensure state transition is visible before alert blocks
+      setTimeout(() => alert(msg), 200);
     }
   };
 

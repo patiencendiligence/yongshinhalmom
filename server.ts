@@ -35,7 +35,7 @@ function getSupabaseAdmin() {
   return _supabaseAdmin;
 }
 
-// Middleware for Lemon Squeezy Webhook (needs raw body for signature verification)
+// Middleware for raw body (if needed for other webhooks)
 const rawBodyMiddleware = (req: any, res: any, next: any) => {
   let data = "";
   req.on("data", (chunk: any) => {
@@ -49,11 +49,6 @@ const rawBodyMiddleware = (req: any, res: any, next: any) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// --- Logic blocks (Gumroad, LemonSqueezy, etc.) ---
-// [Existing webhook code remains but I'll skip to the Gemini part to be precise]
-
-// --- Lemon Squeezy Logic ---
 
 // --- Gumroad Logic ---
 app.post("/api/webhook/gumroad", async (req: any, res) => {
@@ -124,7 +119,6 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
         }, { onConflict: 'user_id,report_hash' });
       console.log(`[Gumroad Webhook] Payment marked as paid for user ${user_id} and hash ${report_hash}`);
     }
-
   } catch (err) {
     console.error("[Gumroad Webhook] Database update failed:", err);
     // Don't 500 Gumroad unless it's a transient error, or it will keep retrying
@@ -132,105 +126,6 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   }
 
   res.status(200).send("OK");
-});
-
-// Webhook for asynchronous payment notification
-app.post("/api/webhook/lemonsqueezy", rawBodyMiddleware, async (req: any, res) => {
-  const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET;
-  const hmac = crypto.createHmac("sha256", secret || "");
-  const digest = hmac.update(req.rawBody).digest("hex");
-  const signature = req.headers["x-signature"];
-
-  if (signature !== digest) {
-    console.error("[Webhook] Invalid signature");
-    return res.status(401).send("Invalid signature");
-  }
-
-  const payload = JSON.parse(req.rawBody);
-  const eventName = payload.meta.event_name;
-  const customData = payload.meta.custom_data;
-
-  console.log(`[Webhook] Received event: ${eventName}`, customData);
-
-  if (eventName === "order_created") {
-    const { user_id, report_hash } = customData;
-
-    try {
-      const supabaseAdmin = getSupabaseAdmin();
-      // Update user to premium in Supabase
-      if (user_id) {
-        const { error } = await supabaseAdmin
-          .from("profiles") // assuming 'profiles' table exists
-          .update({ is_premium: true })
-          .eq("id", user_id);
-
-        if (error) throw error;
-        console.log(`[Webhook] User ${user_id} upgraded to premium via LS Webhook`);
-      }
-      
-      // Optionally mark the specific report as paid
-      if (report_hash) {
-        await supabaseAdmin
-          .from("reports")
-          .update({ is_paid: true })
-          .eq("report_hash", report_hash);
-      }
-    } catch (err) {
-      console.error("[Webhook] Database update failed:", err);
-      return res.status(500).send("Database update failed");
-    }
-  }
-
-  res.status(200).send("OK");
-});
-
-// GET /api/verify-order - Directly verify an order with Lemon Squeezy API
-app.get("/api/verify-order", async (req, res) => {
-  const { orderId, userId, reportHash } = req.query;
-  const apiKey = process.env.LEMONSQUEEZY_API_KEY;
-
-  if (!orderId || !userId) {
-    return res.status(400).json({ error: "Missing orderId or userId" });
-  }
-
-  try {
-    const supabaseAdmin = getSupabaseAdmin();
-    // 1. Call Lemon Squeezy API to get order details
-    const response = await axios.get(`https://api.lemonsqueezy.com/v1/orders/${orderId}`, {
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        Accept: "application/vnd.api+json",
-        "Content-Type": "application/vnd.api+json",
-      },
-    });
-
-    const orderData = response.data.data;
-    const status = orderData.attributes.status; // e.g., 'paid'
-
-    if (status === "paid") {
-      // 2. Update Supabase
-      const { error } = await supabaseAdmin
-        .from("profiles")
-        .update({ is_premium: true })
-        .eq("id", userId);
-
-      if (error) throw error;
-
-      if (reportHash) {
-        await supabaseAdmin
-          .from("reports")
-          .update({ is_paid: true })
-          .eq("report_hash", reportHash);
-      }
-
-      return res.json({ success: true, status });
-    }
-
-    res.json({ success: false, status });
-  } catch (err: any) {
-    console.error("[VerifyOrder] Error:", err.response?.data || err.message);
-    res.status(500).json({ error: "Failed to verify order" });
-  }
 });
 
 // GET /api/check-payment - Allow client to verify their own payment status
@@ -253,13 +148,13 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다. 사주 명리학과 육효, 그리고 현대적 라이프스타일 분석을 결합하여 조언하십시오.";
+const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다. 사주 명리학과 육효, 그리고 현대적 라이프스타일 분석을 결합하여 조언하십시오.";
 
 // Gemini / OpenAI Logic hidden on server
 let genAI: GoogleGenerativeAI | null = null;
 function getGenAI() {
   if (!genAI) {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing in server environment");
     genAI = new GoogleGenerativeAI(apiKey.replace(/['"]/g, "").trim());
   }
@@ -274,7 +169,7 @@ const MODELS_TO_TRY = [
 ];
 
 console.log("[Server] Gemini models prioritized:", MODELS_TO_TRY.join(", "));
-if (!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY)) {
+if (!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY)) {
   console.warn("[Server] WARNING: No Gemini API key found in environment variables!");
 }
 
@@ -411,7 +306,7 @@ app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     env: {
-      hasGeminiKey: !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY),
+      hasGeminiKey: !!(process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY),
       nodeEnv: process.env.NODE_ENV,
       port: PORT
     }

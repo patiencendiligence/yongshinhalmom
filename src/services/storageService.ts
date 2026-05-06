@@ -6,6 +6,7 @@ export interface UserProfile {
   isLunar: boolean;
   gender: string;
   birthPlace: string;
+  targetYear: number;
   createdAt: number;
 }
 

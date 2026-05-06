@@ -57,6 +57,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                       </div>
                       <div className="flex flex-col gap-1 mt-2 text-[10px] text-white/30 font-black uppercase tracking-widest">
                         <span className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5" /> {profile.birthDate} ({profile.isLunar ? t.lunar : t.solar})</span>
+                        <span className="flex items-center gap-2 tracking-[0.2em] text-mythic-gold italic underline underline-offset-2">{profile.targetYear} {t.subtitle}</span>
                         <span className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5" /> {profile.birthPlace}</span>
                       </div>
                     </div>

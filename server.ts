@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import axios from "axios";
 import dotenv from "dotenv";
-import { GoogleGenAI, Type as SchemaType } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import OpenAI from "openai";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
@@ -49,6 +49,9 @@ const rawBodyMiddleware = (req: any, res: any, next: any) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// --- Logic blocks (Gumroad, LemonSqueezy, etc.) ---
+// [Existing webhook code remains but I'll skip to the Gemini part to be precise]
 
 // --- Lemon Squeezy Logic ---
 
@@ -252,33 +255,42 @@ app.get("/api/check-payment", async (req, res) => {
 
 const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다. 사주 명리학과 육효, 그리고 현대적 라이프스타일 분석을 결합하여 조언하십시오.";
 
-// Gemini logic hidden on server
-let genAI: GoogleGenAI | null = null;
+// Gemini / OpenAI Logic hidden on server
+let genAI: GoogleGenerativeAI | null = null;
 function getGenAI() {
   if (!genAI) {
     const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing in server environment");
-    genAI = new GoogleGenAI({ apiKey: apiKey.replace(/['"]/g, "").trim() });
+    genAI = new GoogleGenerativeAI(apiKey.replace(/['"]/g, "").trim());
   }
   return genAI;
 }
 
+const MODELS_TO_TRY = [
+  "gemini-3-flash-preview",
+  "gemini-1.5-flash",
+  "gemini-1.5-pro"
+];
+
 app.post("/api/report", async (req, res) => {
   const { userData, lang, level } = req.body;
   
-  try {
-    const ai = getGenAI();
-    const model = ai.getGenerativeModel({ 
-      model: "gemini-3-flash-preview",
-      systemInstruction: SYSTEM_INSTRUCTION
-    });
+  let lastError = null;
+  for (const modelName of MODELS_TO_TRY) {
+    try {
+      console.log(`[Server] Attempting report generation with ${modelName}...`);
+      const ai = getGenAI();
+      const model = ai.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
 
-    const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
-    const currentYear = userData?.targetYear || now.getFullYear();
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const currentTime = now.toLocaleTimeString('ko-KR', { hour12: false });
+      const currentYear = userData?.targetYear || now.getFullYear();
 
-    const prompt = `
+      const prompt = `
 [STRICT LANGUAGE INSTRUCTION]
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 
@@ -294,53 +306,73 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 4. JSON 형식을 엄격히 준수하게나.
 `;
 
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: SchemaType.OBJECT,
-          properties: {
-            summary: { type: SchemaType.STRING },
-            zodiac: { type: SchemaType.NUMBER },
-            illustrationType: { 
-              type: SchemaType.STRING, 
-              enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
-            },
-            sections: {
-              type: SchemaType.ARRAY,
-              items: {
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 45000)
+      );
+
+      const generatePromise = model.generateContent({
+        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: {
+            type: SchemaType.OBJECT,
+            properties: {
+              summary: { type: SchemaType.STRING },
+              zodiac: { type: SchemaType.NUMBER },
+              illustrationType: { 
+                type: SchemaType.STRING, 
+                format: "enum",
+                enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
+              },
+              sections: {
+                type: SchemaType.ARRAY,
+                items: {
+                  type: SchemaType.OBJECT,
+                  properties: {
+                    title: { type: SchemaType.STRING },
+                    content: { type: SchemaType.STRING },
+                  },
+                  required: ["title", "content"],
+                },
+              },
+              luckInfo: {
                 type: SchemaType.OBJECT,
                 properties: {
-                  title: { type: SchemaType.STRING },
-                  content: { type: SchemaType.STRING },
+                  color: { type: SchemaType.STRING },
+                  item: { type: SchemaType.STRING },
+                  food: { type: SchemaType.STRING },
                 },
-                required: ["title", "content"],
+                required: ["color", "item", "food"],
               },
-            } as any,
-            luckInfo: {
-              type: SchemaType.OBJECT,
-              properties: {
-                color: { type: SchemaType.STRING },
-                item: { type: SchemaType.STRING },
-                food: { type: SchemaType.STRING },
-              },
-              required: ["color", "item", "food"],
             },
+            required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
           },
-          required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
-        } as any,
-      },
-    });
+        },
+      });
 
-    const text = result.response.text();
-    if (!text) throw new Error("Empty response from Gemini");
-    res.json({ ...JSON.parse(text), level });
-  } catch (error: any) {
-    console.error("Report generation error:", error);
-    res.status(500).json({ error: error.message || "Failed to generate report" });
+      const result: any = await Promise.race([generatePromise, timeoutPromise]);
+      const text = result.response.text();
+      
+      if (!text) throw new Error("Empty response from model");
+      
+      console.log(`[Server] Successfully generated report using ${modelName}`);
+      return res.json({ ...JSON.parse(text), level });
+      
+    } catch (error: any) {
+      console.warn(`[Server] Model ${modelName} failed:`, error.message || error);
+      lastError = error;
+      
+      if (error.message === "MODEL_TIMEOUT") continue;
+      if (error.message?.includes("API key") || error.message?.includes("INVALID_ARGUMENT")) break;
+      continue;
+    }
   }
+
+  res.status(500).json({ 
+    error: lastError?.message || "All models failed to generate report. Please try again later." 
+  });
 });
+
 
 app.get("/api/health", (req, res) => {
   res.json({

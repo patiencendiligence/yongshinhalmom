@@ -495,9 +495,7 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
                       onClick={onUpgrade}
                       className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
                     >
-                      {report.level === 'loading' ? (
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      ) : <RotateCcw className="w-4 h-4" />}
+                      <RotateCcw className="w-4 h-4" />
                       {lang === 'ko' ? "심층 분석 내용 보기" : "View Detailed Analysis"}
                     </button>
                   ) : (

@@ -96,20 +96,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const checkPaymentStatus = async (reportHash: string) => {
-    if (!user) return false;
-    if (user.email === 'patiencendiligence@gmail.com') return true;
+    console.log("[AuthContext] checkPaymentStatus starting...", reportHash);
+    if (!user) {
+      console.log("[AuthContext] No user, returning false");
+      return false;
+    }
+    if (user.email === 'patiencendiligence@gmail.com') {
+      console.log("[AuthContext] Admin user detected, returning true");
+      return true;
+    }
     
     try {
+      console.log("[AuthContext] Querying getPaymentStatus...");
       const result = await getPaymentStatus(user.id, reportHash);
+      console.log("[AuthContext] getPaymentStatus result:", result);
       return result;
     } catch (error: any) {
-      // Check if it's the lock error or other common Supabase transient errors
-      const isLockError = error?.message?.includes('lock') || error?.details?.includes('lock');
-      if (isLockError) {
-        console.warn("[AuthContext] Supabase lock error encountered during payment check. Skipping this check.");
-      } else {
-        console.error("Error checking specific payment:", error);
-      }
+      console.error("[AuthContext] Error in checkPaymentStatus:", error);
       return false;
     }
   };

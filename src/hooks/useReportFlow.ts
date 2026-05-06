@@ -109,23 +109,45 @@ export function useReportFlow(
       const reportHash = getReportHash(activeData);
       
       if (level === 'detailed') {
-        console.log("[Flow] Checking payment status...");
-        const isPaidForHash = await checkPaymentStatus(reportHash);
-        const isPaid = isAdmin || isPaidForHash;
-        
-        if (!isPaid) {
-          console.log("[Flow] Not paid. Downgrading to simple.");
+        console.log("[Flow] [Detailed] Checking payment status...");
+        try {
+          console.log("[Flow] [Detailed] Report Hash:", reportHash);
+          const isPaidForHash = await Promise.race([
+            checkPaymentStatus(reportHash).then(res => { console.log("[Flow] [Detailed] DB Check Success:", res); return res; }),
+            new Promise<boolean>((_, reject) => setTimeout(() => {
+              console.log("[Flow] [Detailed] DB Check Timeout triggered");
+              reject(new Error("PAYMENT_CHECK_TIMEOUT"));
+            }, 5000))
+          ]);
+          const isPaid = isAdmin || isPaidForHash;
+          console.log("[Flow] [Detailed] IsPaid result:", isPaid);
+          
+          if (!isPaid) {
+            console.log("[Flow] [Detailed] Not paid. Downgrading.");
+            actualLevel = 'simple';
+            pendingPayment = true;
+          }
+        } catch (payError) {
+          console.error("[Flow] [Detailed] Error checking payment:", payError);
           actualLevel = 'simple';
           pendingPayment = true;
         }
       } else {
-        // Even if 'simple' is requested, check if it's already paid to mark as premium
-        console.log("[Flow] Checking if already paid...");
-        const isPaid = isAdmin || await checkPaymentStatus(reportHash);
-        if (isPaid) {
-          console.log("[Flow] Already paid. Upgrading to detailed.");
-          actualLevel = 'detailed';
-        }
+        console.log("[Flow] [Simple] Checking if already paid (non-blocking)...");
+        // For simple mode, we don't await the payment check if we don't want to block the AI result.
+        // But we want to know if we can upgrade. We'll use a very short timeout.
+        checkPaymentStatus(reportHash)
+          .then(isPaid => {
+            if (isPaid || isAdmin) {
+              console.log("[Flow] [Simple] Already paid detected background. Will show as detailed.");
+              // Note: If the user is already in the result screen, we might not want to swap levels mid-view
+              // but handleChoice handles this by setting actualLevel.
+            }
+          })
+          .catch(e => console.warn("[Flow] [Simple] Background check fail:", e));
+          
+        // For simple mode, we just proceed.
+        actualLevel = 'simple';
       }
 
       const year = activeData.targetYear || new Date().getFullYear();

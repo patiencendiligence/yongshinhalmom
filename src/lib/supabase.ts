@@ -69,24 +69,36 @@ export async function signOut() {
 
 export async function getPaymentStatus(userId: string, reportHash?: string) {
   if (!userId) return false;
+  console.log("[Supabase] getPaymentStatus for:", userId, reportHash);
   const client = getSupabase();
-  if (!client) return false;
+  if (!client) {
+    console.warn("[Supabase] Client not configured in getPaymentStatus");
+    return false;
+  }
 
-  let query = client
-    .from('payments')
-    .select('is_premium')
-    .eq('user_id', userId);
+  try {
+    let query = client
+      .from('payments')
+      .select('is_premium')
+      .eq('user_id', userId);
+      
+    if (reportHash) {
+      query = query.eq('report_hash', reportHash);
+    }
+
+    console.log("[Supabase] Executing query...");
+    const { data, error } = await query.limit(1);
     
-  if (reportHash) {
-    query = query.eq('report_hash', reportHash);
+    if (error) {
+      console.error("[Supabase] Error fetching payment status:", error);
+      return false;
+    }
+    console.log("[Supabase] Query success, data:", data);
+    return data?.[0]?.is_premium || false;
+  } catch (e) {
+    console.error("[Supabase] Fatal error in getPaymentStatus:", e);
+    return false;
   }
-
-  const { data, error } = await query.limit(1);
-  
-  if (error) {
-    console.error("Error fetching payment status:", error);
-  }
-  return data?.[0]?.is_premium || false;
 }
 
 export async function updatePaymentStatus(userId: string, isPremium: boolean, reportHash?: string, checkoutId?: string) {

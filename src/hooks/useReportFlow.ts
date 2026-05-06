@@ -149,11 +149,17 @@ export function useReportFlow(
       setReport({ ...result, level: actualLevel, pendingPayment });
       setState("RESULT");
     } catch (error: any) {
-      console.error(error);
-      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
-      const msg = isQuota ? (translations[lang] as any).quotaExceeded : translations[lang].errorMessage;
-      alert(msg);
+      console.error("Report generation error:", error);
       setState("INPUT");
+      
+      const isQuota = error?.message?.includes("429") || error?.status === 429 || JSON.stringify(error).includes("429");
+      const isKeyError = error?.message?.includes("API key") || error?.message?.includes("Environment settings");
+      
+      let msg = translations[lang].errorMessage;
+      if (isQuota) msg = (translations[lang] as any).quotaExceeded;
+      if (isKeyError) msg = error.message;
+
+      setTimeout(() => alert(msg), 100);
     }
   };
 

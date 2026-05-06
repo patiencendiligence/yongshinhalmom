@@ -168,15 +168,19 @@ const MODELS_TO_TRY = [
   "gemini-1.5-pro"
 ];
 
-console.log("[Server] Gemini models prioritized:", MODELS_TO_TRY.join(", "));
-
 function getApiKey() {
-  const key = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || process.env.VITE_GEMINI_API_KEY || process.env.VITE_GOOGLE_API_KEY || "";
-  return key.replace(/['"]/g, "").trim();
+  const key = process.env.GEMINI_API_KEY || 
+              process.env.GOOGLE_API_KEY || 
+              process.env.VITE_GEMINI_API_KEY || 
+              process.env.VITE_GOOGLE_API_KEY || "";
+  
+  if (!key) return "";
+  // 따옴표, 줄바꿈, 공백 등 보이지 않는 문자 제거
+  return key.replace(/['"]+/g, '').trim();
 }
 
 if (!getApiKey()) {
-  console.warn("[Server] WARNING: No Gemini API key found in environment variables!");
+  console.warn("[Server] ERROR: Gemini API key is missing. Check your environment variables.");
 }
 
 app.post("/api/report", async (req, res) => {
@@ -186,12 +190,13 @@ app.post("/api/report", async (req, res) => {
   const apiKey = getApiKey();
 
   if (!apiKey) {
-    return res.status(500).json({ error: "Gemini API key is not configured on the server." });
+    console.error("[Server] No API Key found in process.env");
+    return res.status(500).json({ error: "서버 API 키가 설정되지 않았습니다. 관리자 도구에서 키 설정을 확인해 주세요." });
   }
 
   for (const modelName of MODELS_TO_TRY) {
     try {
-      console.log(`[Server] [${modelName}] Starting generation...`);
+      console.log(`[Server] [${modelName}] Starting report generation...`);
       const ai = new GoogleGenerativeAI(apiKey);
       const model = ai.getGenerativeModel({ 
         model: modelName,
@@ -202,63 +207,40 @@ app.post("/api/report", async (req, res) => {
       const currentYear = userData?.targetYear || now.getFullYear();
 
       const prompt = `
-[STRICT LANGUAGE INSTRUCTION]
+YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
+STRICTLY RETURN ONLY A VALID JSON OBJECT.
 
 분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
 분석 수준: ${level === 'detailed' ? "심층 분석 (Deep Analysis)" : "기본 분석 (Quick Summary)"}
 
-[분석 요구사항]
-1. ${level === 'detailed' ? "심층 분석 모드이므로, 각 섹션의 내용을 매우 상세하고 풍부하게 작성해주게. 특히 섹션 1, 4, 5, 6, 7에서 구체적인 행동 가이드와 심리적 기제 분석을 깊이 있게 다뤄주게나." : "기본 분석 모드이므로, 각 섹션의 핵심 내용을 명확하고 간결하게 전달해주게."}
-2. 섹션 8 (월별 상세 생활 흐름)은 반드시 1월부터 12월까지의 정보를 모두 포함해야 하네.
-3. 모든 내용은 '용신할멈'의 어투를 유지하며, 신뢰감 있는 데이터 기반의 라이프스타일 분석 리포트로 작성해주게.
-4. JSON 형식을 엄격히 준수하게나.
+REQUIRED JSON STRUCTURE:
+{
+  "summary": "Full fortune summary (min 300 chars)",
+  "zodiac": 1-12,
+  "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
+  "sections": [
+    { "title": "Section Title", "content": "Detailed content" }
+  ],
+  "luckInfo": {
+    "color": "Lucky Color",
+    "item": "Lucky Item",
+    "food": "Lucky Food"
+  }
+}
 `;
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 50000)
+        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 55000)
       );
 
       const generatePromise = model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: "application/json",
-          responseSchema: {
-            type: SchemaType.OBJECT,
-            properties: {
-              summary: { type: SchemaType.STRING },
-              zodiac: { type: SchemaType.NUMBER },
-              illustrationType: { 
-                type: SchemaType.STRING, 
-                format: "enum",
-                enum: ["SUN", "MOON", "TREE", "CANDLE", "DRAGON", "WATER", "MOUNTAIN", "BELLS"] 
-              },
-              sections: {
-                type: SchemaType.ARRAY,
-                items: {
-                  type: SchemaType.OBJECT,
-                  properties: {
-                    title: { type: SchemaType.STRING },
-                    content: { type: SchemaType.STRING },
-                  },
-                  required: ["title", "content"],
-                },
-              },
-              luckInfo: {
-                type: SchemaType.OBJECT,
-                properties: {
-                  color: { type: SchemaType.STRING },
-                  item: { type: SchemaType.STRING },
-                  food: { type: SchemaType.STRING },
-                },
-                required: ["color", "item", "food"],
-              },
-            },
-            required: ["summary", "zodiac", "illustrationType", "sections", "luckInfo"],
-          },
-          maxOutputTokens: 3000,
-          temperature: 0.7,
+          maxOutputTokens: 3500,
+          temperature: 0.82,
         },
       });
 
@@ -266,40 +248,44 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
       const response = await result.response;
       let text = response.text();
       
-      if (!text) throw new Error("Empty text returned from model");
+      if (!text) {
+        console.warn(`[Server] [${modelName}] Empty text response.`);
+        throw new Error("EMPTY_TEXT");
+      }
 
-      // Robust JSON extraction
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (jsonMatch) text = jsonMatch[0];
+      // Robust JSON extraction (find first { and last })
+      const firstCurly = text.indexOf('{');
+      const lastCurly = text.lastIndexOf('}');
+      if (firstCurly !== -1 && lastCurly !== -1) {
+        text = text.substring(firstCurly, lastCurly + 1);
+      }
       
       try {
         const parsed = JSON.parse(text);
         console.log(`[Server] [${modelName}] Success.`);
         return res.json({ ...parsed, level });
-      } catch (e) {
-        console.error(`[Server] [${modelName}] JSON Parse Fail. Text length: ${text.length}`);
-        throw new Error("INVALID_JSON_RESPONSE");
+      } catch (e: any) {
+        console.error(`[Server] [${modelName}] JSON Parse Error: ${e.message}. Text: ${text.substring(0, 100)}...`);
+        throw new Error("JSON_PARSE_FAILED");
       }
       
     } catch (error: any) {
       const errorMsg = error.message || String(error);
-      console.warn(`[Server] [${modelName}] Failed: ${errorMsg}`);
+      console.warn(`[Server] [${modelName}] Generation failed: ${errorMsg}`);
       lastError = error;
       
-      // If the error is a terminal one (auth), don't bother retrying others
       if (errorMsg.includes("API key not valid") || errorMsg.includes("PERMISSION_DENIED")) {
-        return res.status(401).json({ error: "Gemini API key is invalid or lacks permissions." });
+        return res.status(401).json({ error: "Gemini API 키 인증에 실패했습니다." });
       }
 
-      // Otherwise, continue to next model
       continue;
     }
   }
 
   const finalError = lastError?.message || "Unknown error";
-  console.error(`[Server] All models failed. Last error: ${finalError}`);
+  console.error(`[Server] ALL MODELS FAILED. Last error: ${finalError}`);
   res.status(500).json({ 
-    error: `분석 중 오류가 발생했습니다. (마지막 에러: ${finalError}). 잠시 후 다시 시도해 주세요.` 
+    error: `데이터 분석 중 서버 오류가 발생했습니다. (${finalError}). 잠시 후 다시 시도해 주세요.` 
   });
 });
 

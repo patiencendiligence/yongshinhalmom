@@ -37,6 +37,7 @@ export async function getReport(userData: {
   const timeoutId = setTimeout(() => controller.abort(), 180000); // 3 minute timeout
 
   try {
+    console.log(`[GeminiService] Fetching report from: ${window.location.origin}/api/report`);
     const response = await fetch("/api/report", {
       method: "POST",
       headers: {

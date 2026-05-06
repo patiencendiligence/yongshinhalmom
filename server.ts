@@ -162,9 +162,10 @@ function getGenAI() {
 }
 
 const MODELS_TO_TRY = [
-  "gemini-3-flash-preview",
-  "gemini-2.0-flash-exp",
   "gemini-1.5-flash",
+  "gemini-2.0-flash-exp",
+  "gemini-1.5-flash-8b",
+  "gemini-3-flash-preview",
   "gemini-1.5-pro"
 ];
 
@@ -208,10 +209,10 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 `;
 
       const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 40000)
+        setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 50000)
       );
 
-      console.log(`[Server] Prompt prepared for ${modelName}. Waiting for generation...`);
+      console.log(`[Server] Generating report with ${modelName}...`);
       const generatePromise = model.generateContent({
         contents: [{ role: 'user', parts: [{ text: prompt }] }],
         generationConfig: {
@@ -263,19 +264,18 @@ ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
         throw new Error("EMPTY_RESPONSE");
       }
 
-      // Cleanup Markdown formatting if present
-      if (text.includes("```json")) {
-        text = text.split("```json")[1].split("```")[0].trim();
-      } else if (text.includes("```")) {
-        text = text.split("```")[1].split("```")[0].trim();
+      // Robust JSON extraction
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        text = jsonMatch[0];
       }
       
       try {
         const parsed = JSON.parse(text);
-        console.log(`[Server] Successfully generated report using ${modelName}`);
+        console.log(`[Server] Content generated successfully with ${modelName}`);
         return res.json({ ...parsed, level });
       } catch (e) {
-        console.error(`[Server] Model ${modelName} returned invalid JSON:`, text.substring(0, 500));
+        console.error(`[Server] JSON Parse Error from ${modelName}. Text:`, text.substring(0, 200));
         throw new Error("INVALID_JSON_RESPONSE");
       }
       

@@ -22,25 +22,31 @@ export function useReportFlow(
 
   // Restore state after redirect or reload
   useEffect(() => {
-    const savedState = sessionStorage.getItem("yongshin_pending_state");
-    if (savedState) {
-      try {
-        const { state: s, userData: ud, report: r, pendingAction } = JSON.parse(savedState);
-        // Important: Only restore if we don't already have live data to avoid overriding
-        if (!userData && ud) setUserData(ud);
-        if (!report && r) setReport(r);
-        if (state === "LANDING" && s) setState(s);
-
-        // If we were in the middle of a detailed choice, and now have user, try to resume
-        if (pendingAction === 'detailed' && ud && user && state === "LANDING") {
-          handleChoice('detailed', ud);
-          sessionStorage.removeItem("yongshin_pending_state"); // Clear once resumed
+    // Only restore if we are at home path and have zero data
+    if (window.location.hash.length <= 2 && !userData && !report) {
+      const savedState = sessionStorage.getItem("yongshin_pending_state");
+      if (savedState) {
+        try {
+          const { state: s, userData: ud, report: r, pendingAction } = JSON.parse(savedState);
+          // Only auto-restore if it's a resume-friendly state
+          if (ud) setUserData(ud);
+          if (r) setReport(r);
+          if (s === "RESULT") {
+            setState("RESULT");
+            sessionStorage.removeItem("yongshin_pending_state"); // Clear once restored
+          }
+          
+          // Handle pending detailed action
+          if (pendingAction === 'detailed' && ud && user) {
+            handleChoice('detailed', ud);
+            sessionStorage.removeItem("yongshin_pending_state");
+          }
+        } catch (e) {
+          console.error("Failed to restore state", e);
         }
-      } catch (e) {
-        console.error("Failed to restore state", e);
       }
     }
-  }, [user]);
+  }, [user, userData, report]);
 
   // Handle success redirect context
   useEffect(() => {
@@ -49,6 +55,8 @@ export function useReportFlow(
       if (savedHash && user) {
         markAsPaid(savedHash);
         sessionStorage.removeItem("yongshin_pending_pay_hash");
+        // Clear success from URL if possible
+        window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
   }, [user, markAsPaid]);
@@ -88,15 +96,25 @@ export function useReportFlow(
     let actualLevel = level;
     let pendingPayment = false;
     
+    const isAdmin = user?.email === 'patiencendiligence@gmail.com' || user?.email === 'test@example.com';
+    const reportHash = getReportHash(activeData);
+    
     if (level === 'detailed') {
-      const isAdmin = user?.email === 'patiencendiligence@gmail.com';
-      const reportHash = getReportHash(activeData);
       const isPaidForHash = await checkPaymentStatus(reportHash);
       const isPaid = isAdmin || isPaidForHash;
       
       if (!isPaid) {
         actualLevel = 'simple';
         pendingPayment = true;
+      }
+    } else {
+      // Even if 'simple' is requested, check if it's already paid to mark as premium
+      const isPaid = isAdmin || await checkPaymentStatus(reportHash);
+      if (isPaid) {
+        // Option: we could auto-upgrade to detailed here if paid, 
+        // but user requested to go to results (basic info) first?
+        // Actually, if it's paid, showing detailed is better.
+        actualLevel = 'detailed';
       }
     }
 
@@ -149,8 +167,8 @@ export function useReportFlow(
   };
 
   const handleSelectProfile = (profile: any) => {
-    setPreFilledData(profile);
-    setState("INPUT");
+    setUserData(profile);
+    handleChoice('simple', profile);
   };
 
   const handleBack = () => {

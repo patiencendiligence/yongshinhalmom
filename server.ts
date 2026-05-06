@@ -169,14 +169,23 @@ const MODELS_TO_TRY = [
 ];
 
 function getApiKey() {
-  const key = process.env.GEMINI_API_KEY || 
-              process.env.GOOGLE_API_KEY || 
-              process.env.VITE_GEMINI_API_KEY || 
-              process.env.VITE_GOOGLE_API_KEY || "";
+  const key = (process.env.GEMINI_API_KEY || 
+               process.env.GOOGLE_API_KEY || 
+               process.env.VITE_GEMINI_API_KEY || 
+               process.env.VITE_GOOGLE_API_KEY || "").toString();
   
   if (!key) return "";
-  // 따옴표, 줄바꿈, 공백 등 보이지 않는 문자 제거
-  return key.replace(/['"]+/g, '').trim();
+  
+  // Clean the key from common corruption characters (quotes, backslashes, whitespace, newlines)
+  const cleaned = key.replace(/['"\\\r\n\t]+/g, '').trim();
+  
+  if (cleaned.length > 0) {
+    const firstChar = cleaned.charAt(0);
+    const lastChar = cleaned.charAt(cleaned.length - 1);
+    console.log(`[Server] API Key loaded. Length: ${cleaned.length}, Starts: ${firstChar}..., Ends: ...${lastChar}`);
+  }
+  
+  return cleaned;
 }
 
 if (!getApiKey()) {

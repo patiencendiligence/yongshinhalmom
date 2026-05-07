@@ -1,5 +1,6 @@
 import { Language } from "../lib/translations";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 
 export interface ReportSection {
   title: string;
@@ -88,15 +89,19 @@ REQUIRED JSON STRUCTURE:
     try {
       console.log(`[GeminiService] Attempting generation with ${modelName}...`);
       
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: prompt,
-        config: {
-          systemInstruction: SYSTEM_INSTRUCTION,
-          responseMimeType: "application/json",
-          temperature: 0.8,
-        }
-      });
+      // Use race for a per-model timeout
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: modelName,
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            responseMimeType: "application/json",
+            temperature: 0.8,
+          }
+        }),
+        new Promise<any>((_, reject) => setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 60000))
+      ]);
 
       let text = response.text || "";
       if (!text) throw new Error("EMPTY_RESPONSE");
@@ -129,5 +134,41 @@ REQUIRED JSON STRUCTURE:
     }
   }
 
-  throw new Error(`분석 실패: ${lastError?.message || "모든 모델 시도 실패"}`);
+  try {
+    return await tryOpenAI(prompt, level);
+  } catch (openAiError: any) {
+    console.error("[GeminiService] OpenAI fallback also failed:", openAiError.message);
+    throw new Error(`분석 실패: ${lastError?.message || "모든 모델 시도 실패"} (OpenAI: ${openAiError.message})`);
+  }
+}
+
+async function tryOpenAI(prompt: string, level: string): Promise<ReportResult> {
+  const env = typeof process !== 'undefined' ? process.env : {};
+  const apiKeyRaw = (env.OPENAI_API_KEY || import.meta.env.VITE_OPENAI_API_KEY || "").toString();
+  const apiKey = apiKeyRaw.replace(/['"\\\r\n\t]+/g, '').trim();
+
+  if (!apiKey) {
+    throw new Error("OpenAI API key is missing. Please set VITE_OPENAI_API_KEY.");
+  }
+
+  const openai = new OpenAI({ apiKey, dangerouslyAllowBrowser: true });
+  
+  console.log(`[GeminiService] Attempting OpenAI fallback with gpt-4o-mini...`);
+  
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: import.meta.env.VITE_SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈입니다." },
+      { role: "user", content: prompt }
+    ],
+    response_format: { type: "json_object" },
+    temperature: 0.8,
+  });
+
+  const text = completion.choices[0].message.content || "";
+  if (!text) throw new Error("OPENAI_EMPTY_RESPONSE");
+
+  const parsed = JSON.parse(text);
+  console.log(`[GeminiService] Success with OpenAI`);
+  return { ...parsed, level };
 }

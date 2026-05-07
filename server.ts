@@ -214,6 +214,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+app.all("/api/ping", (req, res) => {
+  res.send("pong");
+});
+
 app.post("/api/report-issue", async (req, res) => {
   const { content, userData, lang } = req.body;
   const token = process.env.GITHUB_TOKEN;

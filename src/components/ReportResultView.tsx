@@ -146,15 +146,21 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
 
   const handleManualCheck = async () => {
     setIsCheckingPayment(true);
-    const paid = await checkPaymentStatus(reportHash);
-    if (paid) {
-      setIsCurrentlyPaid(true);
+    try {
+      const paid = await checkPaymentStatus(reportHash);
+      if (paid) {
+        setIsCurrentlyPaid(true);
+        // setIsCheckingPayment(false) will be handled by useEffect or here
+        setIsCheckingPayment(false);
+        storageService.setPaidHash(reportHash);
+        if (report.level === 'simple' && onUpgrade) onUpgrade();
+      } else {
+        console.log("Still not verified...");
+        setIsCheckingPayment(false);
+      }
+    } catch (e) {
+      console.error("Manual check error:", e);
       setIsCheckingPayment(false);
-      storageService.setPaidHash(reportHash);
-      if (report.level === 'simple' && onUpgrade) onUpgrade();
-    } else {
-      // Just a quick nudge, don't alert unless it's a hard error
-      console.log("Still not verified...");
     }
   };
 

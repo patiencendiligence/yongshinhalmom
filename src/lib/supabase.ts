@@ -87,7 +87,17 @@ export async function getPaymentStatus(userId: string, reportHash?: string) {
     }
 
     console.log("[Supabase] Executing query...");
-    const { data, error } = await query.limit(1);
+    
+    // Add a 10s timeout to the query to prevent infinite hanging
+    const queryPromise = query.limit(1);
+    const timeoutPromise = new Promise<{data: any, error: any}>((_, reject) => 
+      setTimeout(() => reject(new Error("SUPABASE_QUERY_TIMEOUT")), 10000)
+    );
+
+    const { data, error } = await Promise.race([
+      queryPromise,
+      timeoutPromise as any
+    ]);
     
     if (error) {
       console.error("[Supabase] Error fetching payment status:", error);
@@ -95,8 +105,8 @@ export async function getPaymentStatus(userId: string, reportHash?: string) {
     }
     console.log("[Supabase] Query success, data:", data);
     return data?.[0]?.is_premium || false;
-  } catch (e) {
-    console.error("[Supabase] Fatal error in getPaymentStatus:", e);
+  } catch (e: any) {
+    console.error(`[Supabase] ${e.message === 'SUPABASE_QUERY_TIMEOUT' ? 'Query Timed Out' : 'Fatal error'} in getPaymentStatus:`, e);
     return false;
   }
 }

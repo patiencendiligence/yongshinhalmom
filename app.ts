@@ -30,9 +30,6 @@ function getSupabaseAdmin() {
       auth: {
         autoRefreshToken: false,
         persistSession: false
-      },
-      db: {
-        schema: 'public'
       }
     });
   }
@@ -168,7 +165,7 @@ app.post("/api/webhook/gumroad", async (req: any, res: any) => {
       report_hash: report_hash,
       is_premium: true,
       checkout_id: sale_id || "gumroad_direct"
-    }, { onConflict: 'user_id,report_hash' });
+    }, { onConflict: 'user_id' }); // Primary Key is likely just user_id
     
     if (payErr) console.error("[Gumroad Webhook] Payment insert error detail:", JSON.stringify(payErr));
 

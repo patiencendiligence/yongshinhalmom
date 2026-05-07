@@ -55,45 +55,86 @@ app.get("/purchase.html", (req, res) => {
 
 // --- Gumroad Logic ---
 app.post("/api/webhook/gumroad", async (req: any, res) => {
-  console.log(`[Gumroad Webhook] Received payload:`, JSON.stringify(req.body));
-
+  // Gumroad sends application/x-www-form-urlencoded by default
+  console.log(`[Gumroad Webhook] Received payload keys:`, Object.keys(req.body));
+  
   const getParam = (name: string) => {
+    // 1. Direct body
     if (req.body[name]) return req.body[name];
+    
+    // 2. Nested url_params object (if extended:true works)
     if (req.body.url_params && req.body.url_params[name]) return req.body.url_params[name];
+    
+    // 3. Nested custom_fields object
     if (req.body.custom_fields && req.body.custom_fields[name]) return req.body.custom_fields[name];
+    
+    // 4. Flattened notation (common in x-www-form-urlencoded)
     if (req.body[`url_params[${name}]`]) return req.body[`url_params[${name}]`];
     if (req.body[`custom_fields[${name}]`]) return req.body[`custom_fields[${name}]`];
     
+    // 5. Check if custom_fields is a JSON string
     if (typeof req.body.custom_fields === 'string') {
       try {
         const parsed = JSON.parse(req.body.custom_fields);
         if (parsed[name]) return parsed[name];
       } catch (e) {}
     }
+
+    // 6. Check if url_params is a JSON string
+    if (typeof req.body.url_params === 'string') {
+      try {
+        const parsed = JSON.parse(req.body.url_params);
+        if (parsed[name]) return parsed[name];
+      } catch (e) {}
+    }
+
     return req.query[name];
   };
 
-  const user_id = getParam("user_id");
+  let user_id = getParam("user_id");
   const report_hash = getParam("report_hash");
-  const { sale_id } = req.body;
+  const email = getParam("email") || req.body.email;
+  const sale_id = req.body.sale_id || req.body.order_number;
+  
+  console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, email=${email}, sale_id=${sale_id}`);
+  
+  const supabaseAdmin = getSupabaseAdmin();
+
+  // Fallback: Try to find user_id by email if missing
+  if (!user_id && email) {
+    console.log(`[Gumroad Webhook] Missing user_id, trying to resolve by email: ${email}`);
+    const { data: userDataByEmail } = await supabaseAdmin
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .limit(1)
+      .single();
+    
+    if (userDataByEmail?.id) {
+      user_id = userDataByEmail.id;
+      console.log(`[Gumroad Webhook] Resolved user_id: ${user_id}`);
+    }
+  }
   
   if (!user_id || !report_hash) {
-    console.warn(`[Gumroad Webhook] Missing identifiers: user_id=${user_id}, report_hash=${report_hash}`);
+    console.warn(`[Gumroad Webhook] Missing identifiers (user_id/report_hash). Body snippet:`, JSON.stringify(req.body).substring(0, 200));
     return res.status(200).send("Acknowledged but incomplete");
   }
 
   try {
-    const supabaseAdmin = getSupabaseAdmin();
     // 1. Update Profile
-    await supabaseAdmin.from("profiles").update({ is_premium: true }).eq("id", user_id);
+    const { error: profileError } = await supabaseAdmin.from("profiles").update({ is_premium: true }).eq("id", user_id);
+    if (profileError) console.error("[Gumroad Webhook] Profile update error:", profileError);
 
     // 2. Mark Payment
-    await supabaseAdmin.from("payments").upsert({ 
+    const { error: payError } = await supabaseAdmin.from("payments").upsert({ 
       user_id: user_id,
       report_hash: report_hash,
       is_premium: true,
       checkout_id: sale_id || "gumroad_sale"
     }, { onConflict: 'user_id,report_hash' });
+    
+    if (payError) console.error("[Gumroad Webhook] Payment insert error:", payError);
 
     console.log(`[Gumroad Webhook] Success for user ${user_id}`);
     res.status(200).send("OK");

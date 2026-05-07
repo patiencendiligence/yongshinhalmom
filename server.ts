@@ -59,44 +59,62 @@ app.post("/api/webhook/gumroad", async (req: any, res) => {
   console.log(`[Gumroad Webhook] Received payload keys:`, Object.keys(req.body));
   
   const getParam = (name: string) => {
-    // 1. Direct body
+    console.log(`[Gumroad Webhook] Checking param: ${name}`);
+    
+    // 1. Root body
     if (req.body[name]) return req.body[name];
     
-    // 2. Nested url_params object (if extended:true works)
-    if (req.body.url_params && req.body.url_params[name]) return req.body.url_params[name];
+    // 2. Flattened patterns
+    const patterns = [`url_params[${name}]`, `url_parameters[${name}]`, `custom_fields[${name}]` ];
+    for (const p of patterns) {
+      if (req.body[p]) return req.body[p];
+    }
     
-    // 3. Nested custom_fields object
-    if (req.body.custom_fields && req.body.custom_fields[name]) return req.body.custom_fields[name];
-    
-    // 4. Flattened notation (common in x-www-form-urlencoded)
-    if (req.body[`url_params[${name}]`]) return req.body[`url_params[${name}]`];
-    if (req.body[`custom_fields[${name}]`]) return req.body[`custom_fields[${name}]`];
-    
-    // 5. Check if custom_fields is a JSON string
-    if (typeof req.body.custom_fields === 'string') {
-      try {
-        const parsed = JSON.parse(req.body.custom_fields);
-        if (parsed[name]) return parsed[name];
-      } catch (e) {}
+    // 3. Deep search inside containers (with JSON parsing)
+    const containers = ["url_params", "url_parameters", "custom_fields"];
+    for (const container of containers) {
+      const val = req.body[container];
+      if (val) {
+        if (typeof val === "string") {
+          try {
+            const parsed = JSON.parse(val);
+            if (parsed[name]) return parsed[name];
+          } catch (e) {}
+        } else if (typeof val === "object" && val[name]) {
+          return val[name];
+        }
+      }
     }
 
-    // 6. Check if url_params is a JSON string
-    if (typeof req.body.url_params === 'string') {
-      try {
-        const parsed = JSON.parse(req.body.url_params);
-        if (parsed[name]) return parsed[name];
-      } catch (e) {}
+    // 4. Search within line_items (as seen in user payload)
+    if (req.body.line_items && Array.isArray(req.body.line_items)) {
+      for (const item of req.body.line_items) {
+        // Try direct key in item
+        if (item[name]) return item[name];
+        // Try url_parameters string inside item
+        if (item.url_parameters && typeof item.url_parameters === "string") {
+          try {
+            const parsed = JSON.parse(item.url_parameters);
+            if (parsed[name]) return parsed[name];
+          } catch (e) {}
+        }
+      }
     }
 
     return req.query[name];
   };
 
-  let user_id = getParam("user_id");
+  const user_id = getParam("user_id");
   const report_hash = getParam("report_hash");
   const email = getParam("email") || req.body.email;
-  const sale_id = req.body.sale_id || req.body.order_number;
+  const sale_id = req.body.sale_id || req.body.order_number || req.body.order_id;
   
-  console.log(`[Gumroad Webhook] Extracted: user_id=${user_id}, report_hash=${report_hash}, email=${email}, sale_id=${sale_id}`);
+  console.log(`[Gumroad Webhook] RESULTS -> user_id: ${user_id}, hash: ${report_hash}, email: ${email}, sale: ${sale_id}`);
+
+  // Critical: If we STILL don't have it, log the full body keys for debugging in Vercel
+  if (!user_id || !report_hash) {
+    console.warn(`[Gumroad Webhook] FAILED to extract identifiers. Full body keys: ${Object.keys(req.body).join(", ")}`);
+  }
   
   const supabaseAdmin = getSupabaseAdmin();
 

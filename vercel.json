@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/(.*)", "destination": "server.ts" },
     { "source": "/policies.html", "destination": "/policies.html" },
     { "source": "/purchase.html", "destination": "/purchase.html" },
     { "source": "/(.*)", "destination": "/index.html" }

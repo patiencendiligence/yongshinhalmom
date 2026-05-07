@@ -22,8 +22,8 @@ export interface ReportResult {
   abuseMessage?: string;
 }
 
-const DEFAULT_SYSTEM_INSTRUCTION = "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다. 사주 명리학과 육효, 그리고 현대적 라이프스타일 분석을 결합하여 조언하십시오.";
-const SYSTEM_INSTRUCTION = import.meta.env.VITE_SYSTEM_INSTRUCTION || DEFAULT_SYSTEM_INSTRUCTION;
+
+const SYSTEM_INSTRUCTION = import.meta.env.VITE_SYSTEM_INSTRUCTION || import.meta.env.SYSTEM_INSTRUCTION;
 
 // Note: Use models from gemini-api skill
 const MODELS_TO_TRY = [
@@ -75,9 +75,9 @@ REQUIRED JSON STRUCTURE:
     { "title": "Section Title", "content": "Detailed analysis content" }
   ],
   "luckInfo": {
-    "color": "Lucky Color",
-    "item": "Lucky Item",
-    "food": "Lucky Food"
+    "color": "Today Lucky Color",
+    "item": "Today Lucky Item",
+    "food": "Today Lucky Food"
   }
 }
 `;

@@ -126,7 +126,7 @@ export async function updatePaymentStatus(userId: string, isPremium: boolean, re
 
   const { error } = await client
     .from('payments')
-    .upsert(payload, { onConflict: 'user_id,report_hash' });
+    .upsert(payload, { onConflict: 'user_id' });
   
   if (error) throw error;
 }

@@ -144,32 +144,23 @@ app.post("/api/webhook/gumroad", async (req: any, res: any) => {
   }
 
   try {
-    // 1. Update Profile to Premium
-    console.log(`[Gumroad Webhook] Updating profile: ${resolvedUserId}`);
-    const { data: pData, error: pErr } = await supabaseAdmin.from("profiles").update({ is_premium: true }).eq("id", resolvedUserId).select();
+    // We rely entirely on the 'payments' table since 'profiles' does not exist in the schema.
+    console.log(`[Gumroad Webhook] Upserting payment record: user=${resolvedUserId}, hash=${report_hash}`);
     
-    if (pErr) {
-      console.error("[Gumroad Webhook] Profile update error detail:", JSON.stringify(pErr));
-      // Special check: if table is missing, log it clearly
-      if (pErr.code === 'PGRST205') {
-        console.error("[Gumroad Webhook] CRITICAL: 'profiles' table not found. Please check Supabase project and schema.");
-      }
-    } else {
-      console.log(`[Gumroad Webhook] Profile updated successfully. Data:`, pData);
-    }
-
-    // 2. Insert/Update Payment Record
-    console.log(`[Gumroad Webhook] Upserting payment for user: ${resolvedUserId}, hash: ${report_hash}`);
     const { error: payErr } = await supabaseAdmin.from("payments").upsert({ 
       user_id: resolvedUserId,
       report_hash: report_hash,
       is_premium: true,
-      checkout_id: sale_id || "gumroad_direct"
-    }, { onConflict: 'user_id' }); // Primary Key is likely just user_id
+      checkout_id: sale_id || "gumroad_direct",
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
     
-    if (payErr) console.error("[Gumroad Webhook] Payment insert error detail:", JSON.stringify(payErr));
+    if (payErr) {
+      console.error("[Gumroad Webhook] Payment upsert error:", JSON.stringify(payErr));
+    } else {
+      console.log(`[Gumroad Webhook] Successfully processed payment for user ${resolvedUserId}`);
+    }
 
-    console.log(`[Gumroad Webhook] Finished processing for user ${resolvedUserId}`);
     res.status(200).send("OK");
   } catch (err) {
     console.error("[Gumroad Webhook] Unexpected process error:", err);
@@ -179,20 +170,25 @@ app.post("/api/webhook/gumroad", async (req: any, res: any) => {
 
 
 app.get("/api/check-payment", async (req, res) => {
-  const { userId } = req.query;
+  const { userId, reportHash } = req.query;
   if (!userId) return res.status(400).json({ error: "userId required" });
   
   try {
     const supabaseAdmin = getSupabaseAdmin();
-    const { data, error } = await supabaseAdmin
-      .from("profiles")
+    let query = supabaseAdmin
+      .from("payments")
       .select("is_premium")
-      .eq("id", userId)
-      .single();
+      .eq("user_id", userId);
+      
+    if (reportHash) {
+      query = query.eq("report_hash", reportHash as string);
+    }
 
+    const { data, error } = await query.limit(1).maybeSingle();
     if (error) throw error;
     res.json({ isPremium: !!data?.is_premium });
   } catch (err) {
+    console.error("[Check Payment API] Error:", err);
     res.status(500).json({ error: "Check failed" });
   }
 });

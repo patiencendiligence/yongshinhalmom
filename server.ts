@@ -54,113 +54,116 @@ app.get("/purchase.html", (req, res) => {
 });
 
 // --- Gumroad Logic ---
-app.post("/api/webhook/gumroad", async (req: any, res) => {
+app.post("/api/webhook/gumroad", async (req: any, res: any) => {
   // Gumroad sends application/x-www-form-urlencoded by default
-  console.log(`[Gumroad Webhook] Received payload keys:`, Object.keys(req.body));
+  console.log(`[Gumroad Webhook] Received request at ${new Date().toISOString()}. Body keys:`, Object.keys(req.body));
   
   const getParam = (name: string) => {
-    console.log(`[Gumroad Webhook] Checking param: ${name}`);
-    
     // 1. Root body
     if (req.body[name]) return req.body[name];
     
-    // 2. Flattened patterns
+    // 2. Flattened patterns (common in Gumroad form data)
     const patterns = [`url_params[${name}]`, `url_parameters[${name}]`, `custom_fields[${name}]` ];
     for (const p of patterns) {
       if (req.body[p]) return req.body[p];
     }
     
-    // 3. Deep search inside containers (with JSON parsing)
+    // 3. Deep search inside common containers (can be objects or JSON strings)
     const containers = ["url_params", "url_parameters", "custom_fields"];
-    for (const container of containers) {
-      const val = req.body[container];
-      if (val) {
-        if (typeof val === "string") {
+    for (const containerName of containers) {
+      const container = req.body[containerName];
+      if (container) {
+        if (typeof container === "string") {
           try {
-            const parsed = JSON.parse(val);
+            const parsed = JSON.parse(container);
             if (parsed[name]) return parsed[name];
           } catch (e) {}
-        } else if (typeof val === "object" && val[name]) {
-          return val[name];
+        } else if (typeof container === "object" && container[name]) {
+          return container[name];
         }
       }
     }
 
-    // 4. Search within line_items (as seen in user payload)
+    // 4. Search within line_items (based on user's real payload logs)
     if (req.body.line_items && Array.isArray(req.body.line_items)) {
       for (const item of req.body.line_items) {
         // Try direct key in item
         if (item[name]) return item[name];
-        // Try url_parameters string inside item
-        if (item.url_parameters && typeof item.url_parameters === "string") {
-          try {
-            const parsed = JSON.parse(item.url_parameters);
-            if (parsed[name]) return parsed[name];
-          } catch (e) {}
+        
+        // Items often have stringified JSON in these fields
+        const subFields = ["url_parameters", "url_params", "custom_fields"];
+        for (const f of subFields) {
+          const val = item[f];
+          if (val && typeof val === "string") {
+            try {
+              const parsed = JSON.parse(val);
+              if (parsed[name]) return parsed[name];
+            } catch (e) {}
+          } else if (val && typeof val === "object" && val[name]) {
+            return val[name];
+          }
         }
       }
     }
 
-    return req.query[name];
+    return req.query ? req.query[name] : undefined;
   };
 
   const user_id = getParam("user_id");
   const report_hash = getParam("report_hash");
   const email = getParam("email") || req.body.email;
-  const sale_id = req.body.sale_id || req.body.order_number || req.body.order_id;
+  const sale_id = req.body.sale_id || req.body.order_number || req.body.order_id || req.body.order_number_string;
   
-  console.log(`[Gumroad Webhook] RESULTS -> user_id: ${user_id}, hash: ${report_hash}, email: ${email}, sale: ${sale_id}`);
+  console.log(`[Gumroad Webhook] Extraction results -> user_id: ${user_id}, hash: ${report_hash}, email: ${email}, sale: ${sale_id}`);
 
-  // Critical: If we STILL don't have it, log the full body keys for debugging in Vercel
+  // If extraction fails, log the full body for manual inspection in Vercel
   if (!user_id || !report_hash) {
-    console.warn(`[Gumroad Webhook] FAILED to extract identifiers. Full body keys: ${Object.keys(req.body).join(", ")}`);
+    console.warn(`[Gumroad Webhook] MISSED identifiers. Body:`, JSON.stringify(req.body));
   }
   
   const supabaseAdmin = getSupabaseAdmin();
 
-  // Fallback: Try to find user_id by email if missing
-  if (!user_id && email) {
-    console.log(`[Gumroad Webhook] Missing user_id, trying to resolve by email: ${email}`);
-    const { data: userDataByEmail } = await supabaseAdmin
-      .from("profiles")
-      .select("id")
-      .eq("email", email)
-      .limit(1)
-      .single();
-    
-    if (userDataByEmail?.id) {
-      user_id = userDataByEmail.id;
-      console.log(`[Gumroad Webhook] Resolved user_id: ${user_id}`);
-    }
+  let resolvedUserId = user_id;
+  // Fallback: Try to find user_id by email if the explicit ID was lost
+  if (!resolvedUserId && email) {
+    try {
+      console.log(`[Gumroad Webhook] attempting email fallback: ${email}`);
+      const { data } = await supabaseAdmin.from("profiles").select("id").eq("email", email).limit(1).single();
+      if (data?.id) {
+        resolvedUserId = data.id;
+        console.log(`[Gumroad Webhook] email fallback success -> ${resolvedUserId}`);
+      }
+    } catch (e) {}
   }
   
-  if (!user_id || !report_hash) {
-    console.warn(`[Gumroad Webhook] Missing identifiers (user_id/report_hash). Body snippet:`, JSON.stringify(req.body).substring(0, 200));
-    return res.status(200).send("Acknowledged but incomplete");
+  if (!resolvedUserId || !report_hash) {
+    console.warn(`[Gumroad Webhook] Incomplete data. user_id=${resolvedUserId}, hash=${report_hash}`);
+    return res.status(200).send("Extraction failed");
   }
 
   try {
-    // 1. Update Profile
-    const { error: profileError } = await supabaseAdmin.from("profiles").update({ is_premium: true }).eq("id", user_id);
-    if (profileError) console.error("[Gumroad Webhook] Profile update error:", profileError);
+    // 1. Update Profile to Premium
+    const { error: pErr } = await supabaseAdmin.from("profiles").update({ is_premium: true }).eq("id", resolvedUserId);
+    if (pErr) console.error("[Gumroad Webhook] Profile update error:", pErr);
 
-    // 2. Mark Payment
-    const { error: payError } = await supabaseAdmin.from("payments").upsert({ 
-      user_id: user_id,
+    // 2. Insert/Update Payment Record
+    const { error: payErr } = await supabaseAdmin.from("payments").upsert({ 
+      user_id: resolvedUserId,
       report_hash: report_hash,
       is_premium: true,
-      checkout_id: sale_id || "gumroad_sale"
+      checkout_id: sale_id || "gumroad_direct"
     }, { onConflict: 'user_id,report_hash' });
     
-    if (payError) console.error("[Gumroad Webhook] Payment insert error:", payError);
+    if (payErr) console.error("[Gumroad Webhook] Payment insert error:", payErr);
 
-    console.log(`[Gumroad Webhook] Success for user ${user_id}`);
+    console.log(`[Gumroad Webhook] Success for user ${resolvedUserId}`);
     res.status(200).send("OK");
   } catch (err) {
-    console.error("[Gumroad Webhook] DB error:", err);
-    res.status(200).send("DB Error but Acknowledged");
+    console.error("[Gumroad Webhook] Process error:", err);
+    res.status(200).send("Internal processing error");
   }
 });
+
 
 app.get("/api/check-payment", async (req, res) => {
   const { userId } = req.query;
@@ -234,12 +237,15 @@ async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);
+    app.listen(PORT, "0.0.0.0", () => console.log(`Server running on port ${PORT}`));
   } else {
     const distPath = path.join(process.cwd(), 'dist');
     app.use(express.static(distPath));
     app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
   }
-  app.listen(PORT, "0.0.0.0", () => console.log(`Server running on port ${PORT}`));
 }
 
 startServer();
+
+// For Vercel Serverless Functions
+export default app;

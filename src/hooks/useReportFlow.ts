@@ -253,12 +253,22 @@ export function useReportFlow(
     // Append user context
     const checkoutUrl = new URL(gumroadUrl);
     if (user?.email) checkoutUrl.searchParams.set("email", user.email);
+    
+    // Use report_hash and user_id in multiple ways to ensure Gumroad captures them
     checkoutUrl.searchParams.set("report_hash", reportHash);
     checkoutUrl.searchParams.set("user_id", user.id);
     
+    // Standard Gumroad custom fields notation
+    checkoutUrl.searchParams.set("custom_fields[report_hash]", reportHash);
+    checkoutUrl.searchParams.set("custom_fields[user_id]", user.id);
+    
+    // Also use url_params notation
+    checkoutUrl.searchParams.set("url_params[report_hash]", reportHash);
+    checkoutUrl.searchParams.set("url_params[user_id]", user.id);
+    
     // Use current URL path (e.g., pricing.html) instead of just origin
     const currentBase = window.location.href.split('#')[0];
-    const successUrl = `${currentBase}#/success`;
+    const successUrl = `${currentBase}#/success?sale_id=[[sale_id]]&order_id=[[order_id]]`;
     checkoutUrl.searchParams.set("redirect_url", successUrl);
     
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");

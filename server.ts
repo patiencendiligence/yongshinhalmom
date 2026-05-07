@@ -156,6 +156,21 @@ app.post("/api/report-issue", async (req, res) => {
 });
 
 async function startServer() {
+  // Explicitly serve static HTML files requested by user
+  app.get("/policies.html", (req, res) => {
+    const filePath = process.env.NODE_ENV === "production" 
+      ? path.join(process.cwd(), "dist", "policies.html")
+      : path.join(process.cwd(), "public", "policies.html");
+    res.sendFile(filePath);
+  });
+
+  app.get("/purchase.html", (req, res) => {
+    const filePath = process.env.NODE_ENV === "production" 
+      ? path.join(process.cwd(), "dist", "purchase.html")
+      : path.join(process.cwd(), "public", "purchase.html");
+    res.sendFile(filePath);
+  });
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: "spa" });
     app.use(vite.middlewares);

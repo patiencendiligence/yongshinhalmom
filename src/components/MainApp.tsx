@@ -74,6 +74,7 @@ export default function MainApp() {
             <PolicyView onBack={handleBack} lang={lang} />
           </motion.div>
         } />
+        
         <Route path="/pricing" element={
           <motion.div key="pricing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
             <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />

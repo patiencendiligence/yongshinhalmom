@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import ReactMarkdown from 'react-markdown';
-import { getReport, ReportResult } from "../services/geminiService";
+import { getReport, ReportResult, getTodaysFortune, ReportSection } from "../services/geminiService";
 import { Language, translations } from "../lib/translations";
 import { useAuth } from "../lib/AuthContext";
 import { Link } from "react-router-dom";
@@ -53,6 +53,41 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
   const reportHash = React.useMemo(() => getReportHash(userData), [userData]);
   const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
+  const [dailySection, setDailySection] = useState<ReportSection | null>(null);
+  const [isRefreshingDaily, setIsRefreshingDaily] = useState(false);
+
+  // Re-generate Section 3 (Today's Condition) if it's a different day
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Section 3 is at original index 2 (swapped to idx 1 in displaySections)
+    const originalDailySection = report.sections[2];
+    
+    // Check if the content already starts with today's date
+    if (originalDailySection && !originalDailySection.content.split('\n')[0].includes(today)) {
+      console.log("[ReportResultView] Daily section is stale or needs date prepending. Refreshing...");
+      
+      const refreshDaily = async () => {
+        setIsRefreshingDaily(true);
+        try {
+          const fresh = await getTodaysFortune(userData, lang);
+          // Add the date at the beginning explicitly if AI missed it 
+          // or just ensure it's there as per user request
+          const todayFormatted = `### ${today}`;
+          if (!fresh.content.includes(today)) {
+            fresh.content = `${todayFormatted}\n\n${fresh.content}`;
+          }
+          setDailySection(fresh);
+        } catch (error) {
+          console.error("[ReportResultView] Failed to refresh daily section:", error);
+        } finally {
+          setIsRefreshingDaily(false);
+        }
+      };
+      
+      refreshDaily();
+    }
+  }, [report.sections, userData, lang]);
 
   // Sync isCheckingPayment with isCurrentlyPaid
   React.useEffect(() => {
@@ -121,6 +156,12 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
 
   // Swap Sections 2 (idx 1) and 3 (idx 2)
   const displaySections = [...report.sections];
+  
+  // Replace Section 3 with re-generated dailySection if available
+  if (dailySection && displaySections.length > 2) {
+    displaySections[2] = dailySection;
+  }
+
   if (displaySections.length > 2) {
     const temp = displaySections[1];
     displaySections[1] = displaySections[2];
@@ -432,37 +473,51 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
             ? displaySections 
             : displaySections.slice(0, 3);
           
-          const rendered = visibleSections.map((section, idx) => {
-            const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6;
-            const isRed = idx === 5;
-            
-            return (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: idx * 0.05 }}
-                className={`bg-black p-12 md:p-16 flex flex-col relative group ${getSlotClass(idx)}`}
-              >
-                <div className="mb-12">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic chapter-label">
-                      {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
-                    </div>
-                  </div>
-                  <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white`}>
-                    {section.title}
-                  </h3>
-                </div>
+  const rendered = visibleSections.map((section, idx) => {
+    const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6;
+    const isRed = idx === 5;
+    const isRefreshing = idx === 1 && isRefreshingDaily;
+    
+    return (
+      <motion.div
+        key={idx}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: idx * 0.05 }}
+        className={`bg-black p-12 md:p-16 flex flex-col relative group ${getSlotClass(idx)}`}
+      >
+        <div className="mb-12">
+          <div className="flex items-center gap-4 mb-8">
+            <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic chapter-label">
+              {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
+            </div>
+            {isRefreshing && (
+              <span className="text-[10px] text-mythic-gold animate-pulse font-sans font-bold tracking-widest">
+                REFRESHING...
+              </span>
+            )}
+          </div>
+          <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white ${isRefreshing ? 'opacity-30' : ''}`}>
+            {section.title}
+          </h3>
+        </div>
 
-                <div className="text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container text-white/70">
-                  <ReactMarkdown>
-                    {section.content}
-                  </ReactMarkdown>
-                </div>
-              </motion.div>
-            );
-          });
+        <div className={`text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container text-white/70 ${isRefreshing ? 'opacity-30' : ''}`}>
+          {isRefreshing ? (
+             <div className="space-y-4">
+               <div className="h-4 bg-white/10 rounded w-full animate-pulse" />
+               <div className="h-4 bg-white/10 rounded w-5/6 animate-pulse" />
+               <div className="h-4 bg-white/10 rounded w-4/6 animate-pulse" />
+             </div>
+          ) : (
+            <ReactMarkdown>
+              {section.content}
+            </ReactMarkdown>
+          )}
+        </div>
+      </motion.div>
+    );
+  });
 
           // Append one locked box if not showing detailed content (Hides in PDF)
           if (!displayDetailed) {

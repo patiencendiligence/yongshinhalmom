@@ -59,17 +59,17 @@ export async function getReport(userData: {
   const currentYear = userData.targetYear || new Date().getFullYear();
   
   const prompt = `
-YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
 STRICTLY RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN CODE BLOCKS.
 
 분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
 분석 수준: ${level === 'detailed' ? "심격 분석 (Detailed)" : "기본 분석 (Standard)"}
+현재 날짜: ${new Date().toISOString().split('T')[0]}
 
 REQUIRED JSON STRUCTURE:
 {
-  "summary": "Full fortune summary (min 400 characters, mystical/traditional tone)",
+  "summary": "Full fortune summary (min 400 characters)",
   "zodiac": 1-12,
   "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
   "sections": [
@@ -81,6 +81,9 @@ REQUIRED JSON STRUCTURE:
     "food": "Today Lucky Food"
   }
 }
+
+NOTE: The third section (sections[2]) MUST be the "Today's Condition Guide". 
+In the content of sections[2], you MUST start with the current date (e.g. "### 2026-05-11\n\n...").
 `;
 
   let lastError: any = null;
@@ -140,6 +143,79 @@ REQUIRED JSON STRUCTURE:
     console.error("[GeminiService] OpenAI fallback also failed:", openAiError.message);
     throw new Error(`분석 실패: ${lastError?.message || "모든 모델 시도 실패"} (OpenAI: ${openAiError.message})`);
   }
+}
+
+export async function getTodaysFortune(
+  userData: {
+    birthDate: string;
+    birthTime: string;
+    isLunar: boolean;
+    gender: string;
+    birthPlace: string;
+  },
+  lang: Language = "ko"
+): Promise<{ title: string; content: string }> {
+  const env = typeof process !== 'undefined' ? process.env : {};
+  const apiKeyRaw = (env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || "").toString();
+  const apiKey = apiKeyRaw.replace(/['"\\\r\n\t]+/g, '').trim();
+
+  if (!apiKey) {
+    throw new Error("API key is missing.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey });
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const prompt = `
+YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
+ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
+STRICTLY RETURN ONLY A VALID JSON OBJECT.
+
+의뢰인 사주 정보: ${JSON.stringify(userData)}
+현재 날짜: ${formattedToday}
+
+이 의뢰인의 사주와 '현재 날짜'의 일진(日辰)을 분석하여 '오늘의 컨디션 가이드'를 작성하세요.
+내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하세요.
+
+REQUIRED JSON STRUCTURE:
+{
+  "title": "오늘의 컨디션 가이드 (또는 언어에 맞는 제목)",
+  "content": "분석 내용 (첫 줄에 날짜 포함)"
+}
+`;
+
+  for (const modelName of MODELS_TO_TRY) {
+    try {
+      const response = await Promise.race([
+        ai.models.generateContent({
+          model: modelName,
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          config: {
+            systemInstruction: SYSTEM_INSTRUCTION,
+            responseMimeType: "application/json",
+            temperature: 0.8,
+          }
+        }),
+        new Promise<any>((_, reject) => setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 30000))
+      ]);
+
+      let text = response.text || "";
+      const firstCurly = text.indexOf('{');
+      const lastCurly = text.lastIndexOf('}');
+      if (firstCurly !== -1 && lastCurly !== -1) {
+        text = text.substring(firstCurly, lastCurly + 1);
+      }
+      
+      const parsed = JSON.parse(text);
+      return parsed;
+    } catch (e) {
+      console.warn(`[TodaysFortune] ${modelName} failed, trying next...`);
+      continue;
+    }
+  }
+
+  throw new Error("Failed to generate today's fortune.");
 }
 
 async function tryOpenAI(prompt: string, level: string): Promise<ReportResult> {

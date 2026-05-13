@@ -26,12 +26,11 @@ export interface ReportResult {
 
 const SYSTEM_INSTRUCTION = import.meta.env.VITE_SYSTEM_INSTRUCTION || import.meta.env.SYSTEM_INSTRUCTION;
 
-// Note: Use models from gemini-api skill
+// Note: Use latest stable models
 const MODELS_TO_TRY = [
-  "gemini-3-flash-preview",
-  "gemini-3.1-pro-preview",
-  "gemini-2.0-flash-exp",
-  "gemini-1.5-flash-latest"
+  "gemini-2.0-flash",
+  "gemini-1.5-pro",
+  "gemini-1.5-flash"
 ];
 
 export async function getReport(userData: {

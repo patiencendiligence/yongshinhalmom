@@ -22,16 +22,6 @@ export interface ReportResult {
 }
 
 
-const SYSTEM_INSTRUCTION = import.meta.env.VITE_SYSTEM_INSTRUCTION || import.meta.env.SYSTEM_INSTRUCTION;
-
-// Note: Use latest stable models
-const MODELS_TO_TRY = [
-  "gemini-3.1-flash-lite",
-  "gemini-3.1-flash",
-  "gemini-3.1-pro",
-  "gemini-3-flash"
-];
-
 export async function getReport(userData: {
   name: string;
   birthDate: string;

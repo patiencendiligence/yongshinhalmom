@@ -91,7 +91,8 @@ export const storageService = {
       isLunar: data.isLunar,
       gender: data.gender
     });
-    const today = new Date().toISOString().split('T')[0];
+    const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+    const today = kstNow.toISOString().split('T')[0];
     const cache = storageService.getReportCache();
     const entry = cache.find(e => e.inputHash === hash && e.year === year && e.date === today && (e.level === level || e.level === 'detailed'));
     return entry ? entry.result : null;

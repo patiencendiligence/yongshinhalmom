@@ -221,9 +221,17 @@ app.post("/api/generate-report", async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const currentYear = userData.targetYear || new Date().getFullYear();
+  
+  // Use KST (UTC+9) for current date to match user expectations (May 18 vs May 17)
+  const now = new Date();
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstNow = new Date(now.getTime() + kstOffset);
+  const kstToday = kstNow.toISOString().split('T')[0];
+  
+  const currentYear = userData.targetYear || kstNow.getFullYear();
   
   // Calculate correct zodiac index to assist AI and ensure accuracy
+  // Base year 1924 is Rat (index 0).
   const birthYear = parseInt(userData.birthDate.split('-')[0]);
   const correctZodiacIndex = (birthYear - 1924) % 12;
 
@@ -234,7 +242,7 @@ STRICTLY RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN CODE BLOCKS.
 분석 대상 연도: ${currentYear}년
 의뢰인 정보: ${JSON.stringify(userData)}
 분석 수준: ${level === 'detailed' ? "심격 분석 (Detailed)" : "기본 분석 (Standard)"}
-현재 날짜: ${new Date().toISOString().split('T')[0]}
+현재 날짜: ${kstToday}
 
 REQUIRED JSON STRUCTURE:
 {
@@ -251,8 +259,9 @@ REQUIRED JSON STRUCTURE:
   }
 }
 
-NOTE: The third section (sections[2]) MUST be the "Today's Condition Guide". 
-In the content of sections[2], you MUST start with the current date (e.g. "### 2026-05-11\n\n...").
+NOTE: The zodiac index MUST be ${correctZodiacIndex}.
+The third section (sections[2]) MUST be the "Today's Condition Guide". 
+In the content of sections[2], you MUST start with the current date: "### ${kstToday}\n\n...".
 `;
 
   for (const modelName of MODELS_TO_TRY) {
@@ -300,8 +309,9 @@ app.post("/api/generate-daily", async (req, res) => {
   if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
 
   const genAI = new GoogleGenerativeAI(apiKey);
-  const today = new Date();
-  const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstTodayDate = new Date(new Date().getTime() + kstOffset);
+  const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
   const prompt = `
 YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".

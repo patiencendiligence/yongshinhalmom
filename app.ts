@@ -196,10 +196,10 @@ app.get("/api/check-payment", async (req, res) => {
 const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다.";
 
 const MODELS_TO_TRY = [
-  "gemini-1.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash-8b",
-  "gemini-1.5-pro"
+  "gemini-3.1-flash-lite",
+  "gemini-3.1-flash",
+  "gemini-3.1-pro",
+  "gemini-3-flash"
 ];
 
 function getApiKey() {
@@ -212,8 +212,149 @@ function getApiKey() {
   return String(key).replace(/['"\\\r\n\t]+/g, '').trim();
 }
 
-// Gemini report API is now handled client-side in geminiService.ts
-// to comply with platform guidelines.
+// Gemini report API
+app.post("/api/generate-report", async (req, res) => {
+  const { userData, lang, level } = req.body;
+  if (!userData?.birthDate) return res.status(400).json({ error: "birthDate required" });
+
+  const apiKey = getApiKey();
+  if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const currentYear = userData.targetYear || new Date().getFullYear();
+  
+  // Calculate correct zodiac index to assist AI and ensure accuracy
+  const birthYear = parseInt(userData.birthDate.split('-')[0]);
+  const correctZodiacIndex = (birthYear - 1924) % 12;
+
+  const prompt = `
+ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
+STRICTLY RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN CODE BLOCKS.
+
+분석 대상 연도: ${currentYear}년
+의뢰인 정보: ${JSON.stringify(userData)}
+분석 수준: ${level === 'detailed' ? "심격 분석 (Detailed)" : "기본 분석 (Standard)"}
+현재 날짜: ${new Date().toISOString().split('T')[0]}
+
+REQUIRED JSON STRUCTURE:
+{
+  "summary": "Full fortune summary (min 400 characters)",
+  "zodiac": ${correctZodiacIndex},
+  "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
+  "sections": [
+    { "title": "Section Title", "content": "Detailed analysis content" }
+  ],
+  "luckInfo": {
+    "color": "Today Lucky Color",
+    "item": "Today Lucky Item",
+    "food": "Today Lucky Food"
+  }
+}
+
+NOTE: The third section (sections[2]) MUST be the "Today's Condition Guide". 
+In the content of sections[2], you MUST start with the current date (e.g. "### 2026-05-11\n\n...").
+`;
+
+  for (const modelName of MODELS_TO_TRY) {
+    try {
+      console.log(`[Gemini Server] Trying ${modelName}...`);
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.8,
+        }
+      });
+
+      const response = await result.response;
+      let text = response.text();
+      
+      const firstCurly = text.indexOf('{');
+      const lastCurly = text.lastIndexOf('}');
+      if (firstCurly !== -1 && lastCurly !== -1) {
+        text = text.substring(firstCurly, lastCurly + 1);
+      }
+      
+      const parsed = JSON.parse(text);
+      // Ensure zodiac is ALWAYS the correct one from calculation
+      parsed.zodiac = correctZodiacIndex;
+      
+      return res.json(parsed);
+    } catch (e: any) {
+      console.error(`[Gemini Server] ${modelName} failed:`, e.message);
+      continue;
+    }
+  }
+
+  res.status(500).json({ error: "All Gemini models failed" });
+});
+
+app.post("/api/generate-daily", async (req, res) => {
+  const { userData, lang } = req.body;
+  const apiKey = getApiKey();
+  if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const today = new Date();
+  const formattedToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+  const prompt = `
+YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
+ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
+STRICTLY RETURN ONLY A VALID JSON OBJECT.
+
+의뢰인 사주 정보: ${JSON.stringify(userData)}
+현재 날짜: ${formattedToday}
+
+이 의뢰인의 사주와 '현재 날짜'의 일진(日辰)을 분석하여 '오늘의 컨디션 가이드'를 작성하세요.
+내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하세요.
+
+REQUIRED JSON STRUCTURE:
+{
+  "title": "오늘의 컨디션 가이드 (또는 언어에 맞는 제목)",
+  "content": "분석 내용 (첫 줄에 날짜 포함)"
+}
+`;
+
+  for (const modelName of MODELS_TO_TRY) {
+    try {
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: SYSTEM_INSTRUCTION
+      });
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.8,
+        }
+      });
+
+      const response = await result.response;
+      let text = response.text();
+      
+      const firstCurly = text.indexOf('{');
+      const lastCurly = text.lastIndexOf('}');
+      if (firstCurly !== -1 && lastCurly !== -1) {
+        text = text.substring(firstCurly, lastCurly + 1);
+      }
+      
+      const parsed = JSON.parse(text);
+      return res.json(parsed);
+    } catch (e: any) {
+      console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
+      continue;
+    }
+  }
+
+  res.status(500).json({ error: "Daily generation failed" });
+});
 
 app.get("/api/health", (req, res) => {
   res.json({

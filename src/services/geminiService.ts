@@ -28,9 +28,9 @@ const SYSTEM_INSTRUCTION = import.meta.env.VITE_SYSTEM_INSTRUCTION || import.met
 
 // Note: Use latest stable models
 const MODELS_TO_TRY = [
-  "gemini-2.0-flash",
-  "gemini-1.5-pro",
-  "gemini-1.5-flash"
+  "gemini-3.1-flash",
+  "gemini-3.1-flash-lite",
+  "gemini-3.1-pro"
 ];
 
 export async function getReport(userData: {

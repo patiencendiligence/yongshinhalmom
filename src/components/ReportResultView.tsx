@@ -58,7 +58,8 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
 
   // Re-generate Section 3 (Today's Condition) if it's a different day
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
+    const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+    const today = kstNow.toISOString().split('T')[0];
     
     // Section 3 is at original index 2 (swapped to idx 1 in displaySections)
     const originalDailySection = report.sections[2];

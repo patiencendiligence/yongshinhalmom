@@ -1,84 +1,52 @@
+
 import { Solar, Lunar } from 'lunar-javascript';
 
 const STANDARD_MERIDIAN = 135;
-const DEFAULT_LONGITUDE = 126.9780; // 서울
+const DEFAULT_LONGITUDE = 126.9780; // 서울 기준
 
 /**
- * 한국 DST 기간
+ * 대한민국 DST 기간
  */
 const KOREAN_DST_RANGES = [
-  {
-    start: '1948-06-01T00:00:00+09:00',
-    end: '1948-09-12T23:59:59+09:00',
-  },
-  {
-    start: '1949-04-03T00:00:00+09:00',
-    end: '1949-09-11T23:59:59+09:00',
-  },
-  {
-    start: '1950-04-01T00:00:00+09:00',
-    end: '1950-09-10T23:59:59+09:00',
-  },
-  {
-    start: '1951-05-06T00:00:00+09:00',
-    end: '1951-09-09T23:59:59+09:00',
-  },
-  {
-    start: '1955-05-05T00:00:00+09:00',
-    end: '1955-09-08T23:59:59+09:00',
-  },
-  {
-    start: '1956-05-20T00:00:00+09:00',
-    end: '1956-09-30T23:59:59+09:00',
-  },
-  {
-    start: '1957-05-05T00:00:00+09:00',
-    end: '1957-09-22T23:59:59+09:00',
-  },
-  {
-    start: '1958-05-04T00:00:00+09:00',
-    end: '1958-09-21T23:59:59+09:00',
-  },
-  {
-    start: '1959-05-03T00:00:00+09:00',
-    end: '1959-09-20T23:59:59+09:00',
-  },
-  {
-    start: '1960-05-01T00:00:00+09:00',
-    end: '1960-09-18T23:59:59+09:00',
-  },
-  {
-    start: '1987-05-10T02:00:00+09:00',
-    end: '1987-10-11T02:59:59+09:00',
-  },
-  {
-    start: '1988-05-08T02:00:00+09:00',
-    end: '1988-10-09T02:59:59+09:00',
-  },
-];
+  ['1948-06-01T00:00:00+09:00', '1948-09-12T23:59:59+09:00'],
+  ['1949-04-03T00:00:00+09:00', '1949-09-11T23:59:59+09:00'],
+  ['1950-04-01T00:00:00+09:00', '1950-09-10T23:59:59+09:00'],
+  ['1951-05-06T00:00:00+09:00', '1951-09-09T23:59:59+09:00'],
+  ['1955-05-05T00:00:00+09:00', '1955-09-08T23:59:59+09:00'],
+  ['1956-05-20T00:00:00+09:00', '1956-09-30T23:59:59+09:00'],
+  ['1957-05-05T00:00:00+09:00', '1957-09-22T23:59:59+09:00'],
+  ['1958-05-04T00:00:00+09:00', '1958-09-21T23:59:59+09:00'],
+  ['1959-05-03T00:00:00+09:00', '1959-09-20T23:59:59+09:00'],
+  ['1960-05-01T00:00:00+09:00', '1960-09-18T23:59:59+09:00'],
+  ['1987-05-10T02:00:00+09:00', '1987-10-11T02:59:59+09:00'],
+  ['1988-05-08T02:00:00+09:00', '1988-10-09T02:59:59+09:00'],
+] as const;
 
-function isKoreanDST(date: Date) {
-  return KOREAN_DST_RANGES.some((range) => {
-    const start = new Date(range.start);
-    const end = new Date(range.end);
+/**
+ * DST 여부
+ */
+function isKoreanDST(date: Date): boolean {
+  const time = date.getTime();
 
-    return date >= start && date <= end;
+  return KOREAN_DST_RANGES.some(([start, end]) => {
+    return (
+      time >= new Date(start).getTime() &&
+      time <= new Date(end).getTime()
+    );
   });
 }
 
 /**
- * 균시차(EOT) 근사 계산
+ * 균시차(EOT)
  * 단위: 분
  */
-function getEquationOfTime(date: Date) {
-  const start = new Date(date.getFullYear(), 0, 0);
+function getEquationOfTime(date: Date): number {
+  const startOfYear = new Date(date.getFullYear(), 0, 1);
 
-  const diff =
-    date.getTime() - start.getTime();
+  const diffMs = date.getTime() - startOfYear.getTime();
 
-  const oneDay = 1000 * 60 * 60 * 24;
-
-  const dayOfYear = Math.floor(diff / oneDay);
+  const dayOfYear =
+    Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
 
   const B =
     ((360 / 365) * (dayOfYear - 81)) *
@@ -92,17 +60,26 @@ function getEquationOfTime(date: Date) {
 }
 
 /**
- * 진태양시 계산
+ * 진태양시 보정
  */
-function normalizeTrueSolarTime(
-  year: number,
-  month: number,
-  day: number,
-  hour: number,
-  minute: number,
-  longitude = DEFAULT_LONGITUDE
-) {
-  const originalDate = new Date(
+function normalizeTrueSolarTime(params: {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  longitude?: number;
+}) {
+  const {
+    year,
+    month,
+    day,
+    hour,
+    minute,
+    longitude = DEFAULT_LONGITUDE,
+  } = params;
+
+  const date = new Date(
     year,
     month - 1,
     day,
@@ -111,39 +88,47 @@ function normalizeTrueSolarTime(
     0
   );
 
-  const correctedDate = new Date(originalDate);
-
-  // DST 보정
-  if (isKoreanDST(correctedDate)) {
-    correctedDate.setHours(
-      correctedDate.getHours() - 1
-    );
+  // invalid date 방지
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid birth date/time');
   }
 
-  // 경도 보정
-  // 1도 = 4분
-  const longitudeOffsetMinutes =
+  /**
+   * 1. DST 보정
+   */
+  if (isKoreanDST(date)) {
+    date.setHours(date.getHours() - 1);
+  }
+
+  /**
+   * 2. 경도 보정
+   * 1도 = 4분
+   */
+  const longitudeOffset =
     (longitude - STANDARD_MERIDIAN) * 4;
 
-  correctedDate.setMinutes(
-    correctedDate.getMinutes() + longitudeOffsetMinutes
+  date.setMinutes(
+    date.getMinutes() + longitudeOffset
   );
 
-  // 균시차(EOT)
-  const eot = getEquationOfTime(correctedDate);
+  /**
+   * 3. 균시차(EOT)
+   */
+  const eot = getEquationOfTime(date);
 
-  correctedDate.setMinutes(
-    correctedDate.getMinutes() + eot
+  date.setMinutes(
+    date.getMinutes() + Math.round(eot)
   );
 
-  return correctedDate;
+  return date;
 }
 
 /**
- * 경계값 검사
+ * 경계 시간 검사
  */
-function isBoundaryTime(hour: number, minute: number) {
-  const total = hour * 60 + minute;
+function isBoundaryTime(date: Date): boolean {
+  const totalMinutes =
+    date.getHours() * 60 + date.getMinutes();
 
   const boundaries = [
     60,
@@ -160,64 +145,85 @@ function isBoundaryTime(hour: number, minute: number) {
     1380,
   ];
 
-  return boundaries.some(
-    (b) => Math.abs(total - b) <= 40
-  );
+  return boundaries.some((boundary) => {
+    return Math.abs(totalMinutes - boundary) <= 40;
+  });
 }
 
 export function getManseRyeok(
   birthDate: string,
   birthTime: string,
-  isLunar: boolean,
+  isLunar = false,
   longitude = DEFAULT_LONGITUDE
 ) {
   try {
-    const [year, month, day] = birthDate
-      .split('-')
-      .map(Number);
+    if (!birthDate || !birthTime) {
+      throw new Error('birthDate/birthTime required');
+    }
 
-    const [hour, minute] = birthTime
-      .split(':')
-      .map(Number);
+    const [year, month, day] =
+      birthDate.split('-').map(Number);
 
-    const correctedDate = normalizeTrueSolarTime(
-      year,
-      month,
-      day,
-      hour,
-      minute,
-      longitude
-    );
+    const [hour, minute] =
+      birthTime.split(':').map(Number);
 
-    // 경계값 로그
-    if (isBoundaryTime(
-      correctedDate.getHours(),
-      correctedDate.getMinutes()
-    )) {
+    if (
+      [year, month, day, hour, minute].some(
+        (v) => Number.isNaN(v)
+      )
+    ) {
+      throw new Error('Invalid numeric input');
+    }
+
+    /**
+     * 진태양시 보정
+     */
+    const correctedDate =
+      normalizeTrueSolarTime({
+        year,
+        month,
+        day,
+        hour,
+        minute,
+        longitude,
+      });
+
+    /**
+     * 경계값 경고
+     */
+    if (isBoundaryTime(correctedDate)) {
       console.warn(
-        'Boundary time detected. Revalidation recommended.'
+        '[Manse] Boundary time detected:',
+        correctedDate.toISOString()
       );
     }
+
+    const y = correctedDate.getFullYear();
+    const m = correctedDate.getMonth() + 1;
+    const d = correctedDate.getDate();
+    const h = correctedDate.getHours();
+    const min = correctedDate.getMinutes();
+    const sec = correctedDate.getSeconds();
 
     let lunar: Lunar;
 
     if (isLunar) {
       lunar = Lunar.fromYmdHms(
-        correctedDate.getFullYear(),
-        correctedDate.getMonth() + 1,
-        correctedDate.getDate(),
-        correctedDate.getHours(),
-        correctedDate.getMinutes(),
-        correctedDate.getSeconds()
+        y,
+        m,
+        d,
+        h,
+        min,
+        sec
       );
     } else {
       const solar = Solar.fromYmdHms(
-        correctedDate.getFullYear(),
-        correctedDate.getMonth() + 1,
-        correctedDate.getDate(),
-        correctedDate.getHours(),
-        correctedDate.getMinutes(),
-        correctedDate.getSeconds()
+        y,
+        m,
+        d,
+        h,
+        min,
+        sec
       );
 
       lunar = solar.getLunar();
@@ -226,19 +232,24 @@ export function getManseRyeok(
     const eightChar = lunar.getEightChar();
 
     return {
-      originalTime: `${birthDate} ${birthTime}`,
+      original: {
+        birthDate,
+        birthTime,
+      },
 
-      correctedTime:
-        `${correctedDate.getFullYear()}-` +
-        `${String(correctedDate.getMonth() + 1).padStart(2, '0')}-` +
-        `${String(correctedDate.getDate()).padStart(2, '0')} ` +
-        `${String(correctedDate.getHours()).padStart(2, '0')}:` +
-        `${String(correctedDate.getMinutes()).padStart(2, '0')}`,
+      corrected: {
+        date:
+          `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`,
+        time:
+          `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`,
+      },
 
-      year: eightChar.getYear() + '년',
-      month: eightChar.getMonth() + '월',
-      day: eightChar.getDay() + '일',
-      time: eightChar.getTime() + '시',
+      pillars: {
+        year: eightChar.getYear(),
+        month: eightChar.getMonth(),
+        day: eightChar.getDay(),
+        time: eightChar.getTime(),
+      },
 
       full:
         `${eightChar.getYear()}년 ` +
@@ -247,7 +258,11 @@ export function getManseRyeok(
         `${eightChar.getTime()}시`,
     };
   } catch (error) {
-    console.error('ManseRyeok calculation error:', error);
+    console.error(
+      '[getManseRyeok Error]',
+      error
+    );
+
     return null;
   }
 }

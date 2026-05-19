@@ -22,9 +22,6 @@ const KOREAN_DST_RANGES = [
   ['1988-05-08T02:00:00+09:00', '1988-10-09T02:59:59+09:00'],
 ] as const;
 
-/**
- * DST 여부
- */
 function isKoreanDST(date: Date): boolean {
   const time = date.getTime();
 
@@ -37,98 +34,44 @@ function isKoreanDST(date: Date): boolean {
 }
 
 /**
- * 균시차(EOT)
- * 단위: 분
+ * 실무 한국 만세력 스타일 시간 보정
+ *
+ * 핵심:
+ * - DST만 반영
+ * - 과도한 진태양시 보정 제거
+ * - 경도/EOT 제거
+ * - 한국 실무 역술 결과에 최대한 맞춤
  */
-function getEquationOfTime(date: Date): number {
-  const startOfYear = new Date(date.getFullYear(), 0, 1);
-
-  const diffMs = date.getTime() - startOfYear.getTime();
-
-  const dayOfYear =
-    Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1;
-
-  const B =
-    ((360 / 365) * (dayOfYear - 81)) *
-    (Math.PI / 180);
-
-  return (
-    9.87 * Math.sin(2 * B) -
-    7.53 * Math.cos(B) -
-    1.5 * Math.sin(B)
-  );
-}
-
-/**
- * 진태양시 보정
- */
-function normalizeTrueSolarTime(params: {
-  year: number;
-  month: number;
-  day: number;
-  hour: number;
-  minute: number;
-  longitude?: number;
-}) {
-  const {
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    longitude = DEFAULT_LONGITUDE,
-  } = params;
-
+function normalizeKoreanManseTime(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number
+): Date {
   const date = new Date(
-    year,
-    month - 1,
-    day,
-    hour,
-    minute,
-    0
+    `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+09:00`
   );
 
-  // invalid date 방지
   if (isNaN(date.getTime())) {
-    throw new Error('Invalid birth date/time');
+    throw new Error('Invalid date');
   }
 
   /**
-   * 1. DST 보정
+   * 한국 DST만 적용
    */
   if (isKoreanDST(date)) {
     date.setHours(date.getHours() - 1);
   }
 
-  /**
-   * 2. 경도 보정
-   * 1도 = 4분
-   */
-  const longitudeOffset =
-    (longitude - STANDARD_MERIDIAN) * 4;
-
-  date.setMinutes(
-    date.getMinutes() + longitudeOffset
-  );
-
-  /**
-   * 3. 균시차(EOT)
-   */
-  const eot = getEquationOfTime(date);
-
-  date.setMinutes(
-    date.getMinutes() + Math.round(eot)
-  );
-
   return date;
 }
 
 /**
- * 경계 시간 검사
+ * 경계값 로그
  */
-function isBoundaryTime(date: Date): boolean {
-  const totalMinutes =
-    date.getHours() * 60 + date.getMinutes();
+function isBoundaryTime(hour: number, minute: number) {
+  const total = hour * 60 + minute;
 
   const boundaries = [
     60,
@@ -145,16 +88,15 @@ function isBoundaryTime(date: Date): boolean {
     1380,
   ];
 
-  return boundaries.some((boundary) => {
-    return Math.abs(totalMinutes - boundary) <= 40;
-  });
+  return boundaries.some(
+    (b) => Math.abs(total - b) <= 40
+  );
 }
 
 export function getManseRyeok(
   birthDate: string,
   birthTime: string,
-  isLunar = false,
-  longitude = DEFAULT_LONGITUDE
+  isLunar = false
 ) {
   try {
     if (!birthDate || !birthTime) {
@@ -176,45 +118,40 @@ export function getManseRyeok(
     }
 
     /**
-     * 진태양시 보정
+     * 실무 만세력 기준 시간 보정
      */
     const correctedDate =
-      normalizeTrueSolarTime({
+      normalizeKoreanManseTime(
         year,
         month,
         day,
         hour,
-        minute,
-        longitude,
-      });
-
-    /**
-     * 경계값 경고
-     */
-    if (isBoundaryTime(correctedDate)) {
-      console.warn(
-        '[Manse] Boundary time detected:',
-        correctedDate.toISOString()
+        minute
       );
-    }
 
     const y = correctedDate.getFullYear();
     const m = correctedDate.getMonth() + 1;
     const d = correctedDate.getDate();
     const h = correctedDate.getHours();
     const min = correctedDate.getMinutes();
-    const sec = correctedDate.getSeconds();
 
-    let lunar: Lunar;
+    if (isBoundaryTime(h, min)) {
+      console.warn(
+        '[Manse] Boundary time:',
+        `${h}:${min}`
+      );
+    }
+
+    let lunarData: Lunar;
 
     if (isLunar) {
-      lunar = Lunar.fromYmdHms(
+      lunarData = Lunar.fromYmdHms(
         y,
         m,
         d,
         h,
         min,
-        sec
+        0
       );
     } else {
       const solar = Solar.fromYmdHms(
@@ -223,13 +160,21 @@ export function getManseRyeok(
         d,
         h,
         min,
-        sec
+        0
       );
 
-      lunar = solar.getLunar();
+      if (!solar) {
+        throw new Error('Solar creation failed');
+      }
+
+      lunarData = solar.getLunar();
     }
 
-    const eightChar = lunar.getEightChar();
+    if (!lunarData) {
+      throw new Error('Lunar conversion failed');
+    }
+
+    const ec = lunarData.getEightChar();
 
     return {
       original: {
@@ -245,17 +190,17 @@ export function getManseRyeok(
       },
 
       pillars: {
-        year: eightChar.getYear(),
-        month: eightChar.getMonth(),
-        day: eightChar.getDay(),
-        time: eightChar.getTime(),
+        year: ec.getYear(),
+        month: ec.getMonth(),
+        day: ec.getDay(),
+        time: ec.getTime(),
       },
 
       full:
-        `${eightChar.getYear()}년 ` +
-        `${eightChar.getMonth()}월 ` +
-        `${eightChar.getDay()}일 ` +
-        `${eightChar.getTime()}시`,
+        `${ec.getYear()}년 ` +
+        `${ec.getMonth()}월 ` +
+        `${ec.getDay()}일 ` +
+        `${ec.getTime()}시`,
     };
   } catch (error) {
     console.error(

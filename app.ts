@@ -313,23 +313,7 @@ app.post("/api/generate-daily", async (req, res) => {
   const kstTodayDate = new Date(new Date().getTime() + kstOffset);
   const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
-  const prompt = `
-YOU ARE THE FORTUNE TELLER "YONGSHIN HALMOM".
-ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
-STRICTLY RETURN ONLY A VALID JSON OBJECT.
-
-의뢰인 사주 정보: ${JSON.stringify(userData)}
-현재 날짜: ${formattedToday}
-
-이 의뢰인의 사주와 '현재 날짜'의 일진(日辰)을 분석하여 '오늘의 컨디션 가이드'를 작성하세요.
-내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하세요.
-
-REQUIRED JSON STRUCTURE:
-{
-  "title": "오늘의 컨디션 가이드 (또는 언어에 맞는 제목)",
-  "content": "분석 내용 (첫 줄에 날짜 포함)"
-}
-`;
+  const prompt = SYSTEM_INSTRUCTION;
 
   for (const modelName of MODELS_TO_TRY) {
     try {

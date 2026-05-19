@@ -154,6 +154,9 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
   // They only see details if they are premium AND selected (or upgraded to) 'detailed'.
   const displayDetailed = isPremiumUser && report.level === 'detailed';
   const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
+  
+  // A safe fallback if calculation fails
+  const safeManseRyeok = manseRyeok || { full: "" };
 
   // Swap Sections 2 (idx 1) and 3 (idx 2)
   const displaySections = [...report.sections];
@@ -461,7 +464,7 @@ export default function ReportResultView({ report, onReset, onUpgrade, onOpenPol
         <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8 manse-ryeok-badge">
           <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em]">{t.manseRyeok}</div>
           <div className="text-3xl md:text-5xl font-serif font-black italic text-white/80 tracking-tighter">
-            {manseRyeok.full}
+            {safeManseRyeok.full}
           </div>
         </div>
 

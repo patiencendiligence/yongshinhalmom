@@ -330,6 +330,8 @@ REQUIRED JSON STRUCTURE:
   "content": "분석 내용 (첫 줄에 날짜 포함)"
 }
 `;
+
+  for (const modelName of MODELS_TO_TRY) {
     try {
       const model = genAI.getGenerativeModel({ 
         model: modelName,

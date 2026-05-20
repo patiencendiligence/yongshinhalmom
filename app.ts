@@ -4,6 +4,7 @@ import axios from "axios";
 import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
+import OpenAI from "openai";
 
 dotenv.config();
 
@@ -197,9 +198,9 @@ const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SY
 
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
-  "gemini-3.1-flash",
-  "gemini-3.1-pro",
-  "gemini-3-flash"
+  "gemini-3.5-flash",
+  "gemini-2.5-flash",
+  "gemini-flash-latest"
 ];
 
 function getApiKey() {
@@ -212,17 +213,33 @@ function getApiKey() {
   return String(key).replace(/['"\\\r\n\t]+/g, '').trim();
 }
 
-// Gemini report API
+async function tryOpenAI(prompt: string, systemInstruction: string): Promise<string> {
+  const openAiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || "";
+  const cleanedKey = String(openAiKey).replace(/['"\\\r\n\t]+/g, '').trim();
+  if (!cleanedKey) {
+    throw new Error("OpenAI API key missing from environment");
+  }
+  const openai = new OpenAI({ apiKey: cleanedKey });
+  console.log("[OpenAI Fallback] Initiating ChatGPT request with gpt-4o-mini...");
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemInstruction },
+      { role: "user", content: prompt }
+    ],
+    response_format: { type: "json_object" }
+  });
+  return completion.choices[0]?.message?.content || "";
+}
+
+// Gemini report API with OpenAI fallback
 app.post("/api/generate-report", async (req, res) => {
   const { userData, lang, level } = req.body;
   if (!userData?.birthDate) return res.status(400).json({ error: "birthDate required" });
 
   const apiKey = getApiKey();
-  if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
-
-  const genAI = new GoogleGenerativeAI(apiKey);
   
-  // Use KST (UTC+9) for current date to match user expectations (May 18 vs May 17)
+  // Use KST (UTC+9) for current date to match user expectations
   const now = new Date();
   const kstOffset = 9 * 60 * 60 * 1000;
   const kstNow = new Date(now.getTime() + kstOffset);
@@ -264,51 +281,70 @@ The third section (sections[2]) MUST be the "Today's Condition Guide".
 In the content of sections[2], you MUST start with the current date: "### ${kstToday}\n\n...".
 `;
 
-  for (const modelName of MODELS_TO_TRY) {
-    try {
-      console.log(`[Gemini Server] Trying ${modelName}...`);
-      const model = genAI.getGenerativeModel({ 
-        model: modelName,
-        systemInstruction: SYSTEM_INSTRUCTION
-      });
+  let parsed: any = null;
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.8,
+  if (apiKey) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    for (const modelName of MODELS_TO_TRY) {
+      try {
+        console.log(`[Gemini Server] Trying ${modelName}...`);
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          systemInstruction: SYSTEM_INSTRUCTION
+        });
+
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.8,
+          }
+        });
+
+        const response = await result.response;
+        let text = response.text();
+        
+        const firstCurly = text.indexOf('{');
+        const lastCurly = text.lastIndexOf('}');
+        if (firstCurly !== -1 && lastCurly !== -1) {
+          text = text.substring(firstCurly, lastCurly + 1);
         }
-      });
-
-      const response = await result.response;
-      let text = response.text();
-      
-      const firstCurly = text.indexOf('{');
-      const lastCurly = text.lastIndexOf('}');
-      if (firstCurly !== -1 && lastCurly !== -1) {
-        text = text.substring(firstCurly, lastCurly + 1);
+        
+        parsed = JSON.parse(text);
+        break;
+      } catch (e: any) {
+        console.error(`[Gemini Server] ${modelName} failed:`, e.message);
       }
-      
-      const parsed = JSON.parse(text);
-      // Ensure zodiac is ALWAYS the correct one from calculation
-      parsed.zodiac = correctZodiacIndex;
-      
-      return res.json(parsed);
-    } catch (e: any) {
-      console.error(`[Gemini Server] ${modelName} failed:`, e.message);
-      continue;
+    }
+  } else {
+    console.warn("[Gemini Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
+  }
+
+  // Fallback to OpenAI
+  if (!parsed) {
+    try {
+      console.log("[Gemini Server] Initiating OpenAI fallback...");
+      const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+      parsed = JSON.parse(text);
+    } catch (err: any) {
+      console.error("[Gemini Server] OpenAI fallback failed:", err.message);
     }
   }
 
-  res.status(500).json({ error: "All Gemini models failed" });
+  if (parsed) {
+    // Ensure zodiac is ALWAYS the correct one from calculation
+    parsed.zodiac = correctZodiacIndex;
+    return res.json(parsed);
+  }
+
+  res.status(500).json({ error: "All AI model generation attempts failed (Gemini and OpenAI)" });
 });
 
+// Daily guide API with OpenAI fallback
 app.post("/api/generate-daily", async (req, res) => {
   const { userData, lang } = req.body;
   const apiKey = getApiKey();
-  if (!apiKey) return res.status(500).json({ error: "Gemini API key missing" });
 
-  const genAI = new GoogleGenerativeAI(apiKey);
   const kstOffset = 9 * 60 * 60 * 1000;
   const kstTodayDate = new Date(new Date().getTime() + kstOffset);
   const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
@@ -331,39 +367,61 @@ REQUIRED JSON STRUCTURE:
 }
 `;
 
-  for (const modelName of MODELS_TO_TRY) {
-    try {
-      const model = genAI.getGenerativeModel({ 
-        model: modelName,
-        systemInstruction: SYSTEM_INSTRUCTION
-      });
+  let parsed: any = null;
 
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.8,
+  if (apiKey) {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    for (const modelName of MODELS_TO_TRY) {
+      try {
+        console.log(`[Gemini Daily Server] Trying ${modelName}...`);
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          systemInstruction: SYSTEM_INSTRUCTION
+        });
+
+        const result = await model.generateContent({
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.8,
+          }
+        });
+
+        const response = await result.response;
+        let text = response.text();
+        
+        const firstCurly = text.indexOf('{');
+        const lastCurly = text.lastIndexOf('}');
+        if (firstCurly !== -1 && lastCurly !== -1) {
+          text = text.substring(firstCurly, lastCurly + 1);
         }
-      });
-
-      const response = await result.response;
-      let text = response.text();
-      
-      const firstCurly = text.indexOf('{');
-      const lastCurly = text.lastIndexOf('}');
-      if (firstCurly !== -1 && lastCurly !== -1) {
-        text = text.substring(firstCurly, lastCurly + 1);
+        
+        parsed = JSON.parse(text);
+        break;
+      } catch (e: any) {
+        console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
       }
-      
-      const parsed = JSON.parse(text);
-      return res.json(parsed);
-    } catch (e: any) {
-      console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
-      continue;
+    }
+  } else {
+    console.warn("[Gemini Daily Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
+  }
+
+  // Fallback to OpenAI
+  if (!parsed) {
+    try {
+      console.log("[Gemini Daily Server] Initiating OpenAI fallback...");
+      const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+      parsed = JSON.parse(text);
+    } catch (err: any) {
+      console.error("[Gemini Daily Server] OpenAI fallback failed:", err.message);
     }
   }
 
-  res.status(500).json({ error: "Daily generation failed" });
+  if (parsed) {
+    return res.json(parsed);
+  }
+
+  res.status(500).json({ error: "All AI model daily generation attempts failed (Gemini and OpenAI)" });
 });
 
 app.get("/api/health", (req, res) => {

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Playfair Display", "Noto Serif KR", serif;
-  --font-sans: "Plus Jakarta Sans", "Noto Sans KR", sans-serif;
+  --font-serif: "Noto Serif KR", serif;
+  --font-sans: "Noto Sans KR", sans-serif;
   --color-mythic-dark: #000000;
   --color-mythic-card: #0a0a0a;
   --color-mythic-red: #ff3b30;

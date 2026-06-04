@@ -269,6 +269,7 @@ export default function ReportResultView({
     displaySections,
     handlePayment,
     handleManualCheck,
+    swappedReport,
   } = useReportResult({
     report,
     userData,
@@ -277,6 +278,8 @@ export default function ReportResultView({
     onLogin,
     triggerPayment,
   });
+
+  const activeReport = swappedReport || report;
 
   const handleSavePdf = async () => {
     if (isGeneratingPdf) return;
@@ -298,10 +301,10 @@ export default function ReportResultView({
 
   const parsedFortune = React.useMemo(() => {
     if (viewMode !== "today") return null;
-    const dailySection = report.sections[2] || report.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"));
+    const dailySection = activeReport.sections[2] || activeReport.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"));
     const dailyContent = dailySection ? dailySection.content : "";
     return parseDailyFortune(dailyContent);
-  }, [viewMode, report.sections]);
+  }, [viewMode, activeReport.sections]);
 
   if (viewMode === "today" && parsedFortune) {
     return (
@@ -365,9 +368,9 @@ export default function ReportResultView({
         {/* Lucky info row */}
         <div className="grid grid-cols-3 gap-4 md:gap-6 mb-16 relative z-10">
           {[
-            { label: t.luckyColor || "행운 색상", value: report.luckInfo.color },
-            { label: t.luckyItem || "행운 아이템", value: report.luckInfo.item },
-            { label: t.luckyFood || "행운 음식", value: report.luckInfo.food }
+            { label: t.luckyColor || "행운 색상", value: activeReport.luckInfo.color },
+            { label: t.luckyItem || "행운 아이템", value: activeReport.luckInfo.item },
+            { label: t.luckyFood || "행운 음식", value: activeReport.luckInfo.food }
           ].map((item, idx) => (
             <div key={idx} className="p-6 md:p-8 bg-white/40 dark:bg-black/20 border border-ink-black/10 dark:border-white/5 backdrop-blur-sm flex flex-col gap-2 text-center text-ink-black dark:text-white">
               <span className="text-[9px] font-sans font-black uppercase tracking-[0.3em] text-ink-black/40 dark:text-white/30">
@@ -416,7 +419,7 @@ export default function ReportResultView({
         {/* Editorial Astronomic Header */}
         <ReportHeader
           t={t}
-          report={report}
+          report={activeReport}
           lang={lang}
           userData={userData}
           manseRyeok={manseRyeok}
@@ -460,7 +463,7 @@ export default function ReportResultView({
         </div>
 
         {/* Medical / Disclaimer Warning Box */}
-        {report.medicalAdvice && (
+        {activeReport.medicalAdvice && (
           <div className="mb-16 p-6 bg-white/10 dark:bg-white/5 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-ink-black/10 dark:border-white/20">
             <div className="w-24 h-24 bg-ink-black dark:bg-black/40 flex-shrink-0 flex items-center justify-center text-white border border-ink-black/20 dark:border-white/20">
               <AlertTriangle className="w-10 h-10 text-mythic-red" />
@@ -470,7 +473,7 @@ export default function ReportResultView({
                 {t.disclaimer}
               </div>
               <p className="text-ink-black/80 dark:text-white/80 font-sans leading-relaxed text-xl max-w-4xl italic font-bold">
-                {report.medicalAdvice}
+                {activeReport.medicalAdvice}
               </p>
             </div>
           </div>

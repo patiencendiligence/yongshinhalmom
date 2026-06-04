@@ -35,14 +35,14 @@ export function LoadingView({ lang }: LoadingViewProps) {
         
         {/* Dynamic random loading graphic cell inside modern aesthetic frame */}
         <div 
-          className=" rounded-xl border border-white/10 bg-transparent shadow-2xl relative z-10 select-none animate-pulse"
+          className="rounded-xl border border-white/10 bg-transparent shadow-2xl relative z-10 select-none animate-pulse"
           style={{
             backgroundImage: 'url("/assets/loading.png")',
             backgroundSize: "400% 200%",
             backgroundPosition: `${colPercent}% ${rowPercent}%`,
             backgroundRepeat: "no-repeat",
-            width: "265px",
-            height: "482px"
+            width: "132px",
+            height: "241px"
           }}
         />
       </div>

@@ -99,6 +99,7 @@ export const translations = {
     manseRyeok: "Data Pattern",
     policy: "정책 및 약관",
     coffee: "복채는 커피면 되네",
+    copiedShareText: "공유하려는 매체에 붙여넣기 하시게",
     policyView: {
       back: "돌아가기",
       label: "고시",
@@ -350,5 +351,6 @@ export const translations = {
   policy:
     "Policies & Terms",
   coffee: "Buy me a coffee",
+  copiedShareText: "Please paste it into the medium you want to share it on.",
 }
 };

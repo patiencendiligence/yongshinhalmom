@@ -57,6 +57,7 @@ app.get("/purchase.html", (req, res) => {
   res.sendFile(filePath);
 });
 
+
 // --- Gumroad Logic ---
 app.post("/api/webhook/gumroad", async (req: any, res: any) => {
   // Gumroad sends application/x-www-form-urlencoded by default

@@ -108,7 +108,10 @@ export function useReportResult({
 
   const isPremiumUser = isCurrentlyPaid;
   const displayDetailed = isPremiumUser && report.level === 'detailed';
-  const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
+  const manseRyeok = useMemo(() => {
+    if (!userData?.birthDate) return { full: "" };
+    return getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
+  }, [userData?.birthDate, userData?.birthTime, userData?.isLunar]);
   const safeManseRyeok = manseRyeok || { full: "" };
 
   // Generate sections list with swapped / re-formatted chapters

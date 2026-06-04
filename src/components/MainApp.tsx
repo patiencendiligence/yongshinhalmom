@@ -9,6 +9,7 @@ import InfoModal from "./InfoModal";
 import PolicyView from "./PolicyView";
 import PricingView from "./PricingView";
 import SuccessView from "./SuccessView";
+import SeoPage from "../pages/SeoPage";
 import { HeaderActions } from "./HeaderActions";
 import { LoadingView } from "./LoadingView";
 import { translations } from "../lib/translations";
@@ -88,6 +89,7 @@ export default function MainApp() {
             <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />
           </motion.div>
         } />
+        <Route path="/:category/:slug" element={<SeoPage onBack={handleBack} lang={lang} />}/>
         <Route path="/success" element={<SuccessView lang={lang} />} />
         <Route path="*" element={
           <AnimatePresence mode="wait">
@@ -134,6 +136,7 @@ export default function MainApp() {
             )}
           </AnimatePresence>
         } />
+        
       </Routes>
 
       <ProfileModal 

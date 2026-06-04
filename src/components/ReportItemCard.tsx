@@ -144,8 +144,13 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
   const isRed = idx === 5;
   const isRefreshing = idx === 0 && isRefreshingDaily;
 
+  const parsedFortune = React.useMemo(() => {
+    if (idx !== 0) return null;
+    return parseDailyFortune(section.content);
+  }, [idx, section.content]);
+
   if (idx === 0) {
-    const parsedFortune = parseDailyFortune(section.content);
+    if (!parsedFortune) return null;
     const dateMatch = section.content.match(/(?:###\s*)?(\d{4}-\d{2}-\d{2})/);
     const dateStr = dateMatch ? dateMatch[1] : new Date(new Date().getTime() + 9 * 60 * 60 * 1000).toISOString().split('T')[0];
     

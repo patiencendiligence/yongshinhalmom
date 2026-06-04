@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { FileDown, AlertTriangle, RotateCcw, Coffee } from "lucide-react";
+import { FileDown, AlertTriangle, RotateCcw, Coffee, Share2, X } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { useReportResult } from "../hooks/useReportResult";
 import { generateReportPdf } from "../utils/pdfGenerator";
 import { ReportResult } from "../services/geminiService";
@@ -152,6 +153,109 @@ export default function ReportResultView({
 }: ReportResultViewProps) {
   const t = translations[lang] as any;
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
+  const getStrongestElement = (manseRyeok: any) => {
+    if (!manseRyeok || !manseRyeok.pillars) {
+      return { element: "화", emoji: "🔥" };
+    }
+
+    const { year = "", month = "", day = "", time = "" } = manseRyeok.pillars;
+    
+    const allChars = [
+      year.charAt(0), year.charAt(1),
+      month.charAt(0), month.charAt(1),
+      day.charAt(0), day.charAt(1),
+      time.charAt(0), time.charAt(1)
+    ].filter(Boolean);
+
+    const woodStems = ["甲", "乙"];
+    const fireStems = ["丙", "丁"];
+    const earthStems = ["戊", "己"];
+    const metalStems = ["庚", "辛"];
+    const waterStems = ["壬", "癸"];
+
+    const woodBranches = ["寅", "卯"];
+    const fireBranches = ["巳", "午"];
+    const earthBranches = ["辰", "戌", "丑", "未"];
+    const metalBranches = ["申", "酉"];
+    const waterBranches = ["子", "亥"];
+
+    let woodCount = 0;
+    let fireCount = 0;
+    let earthCount = 0;
+    let metalCount = 0;
+    let waterCount = 0;
+
+    allChars.forEach(char => {
+      if (woodStems.includes(char) || woodBranches.includes(char)) {
+        woodCount++;
+      } else if (fireStems.includes(char) || fireBranches.includes(char)) {
+        fireCount++;
+      } else if (earthStems.includes(char) || earthBranches.includes(char)) {
+        earthCount++;
+      } else if (metalStems.includes(char) || metalBranches.includes(char)) {
+        metalCount++;
+      } else if (waterStems.includes(char) || waterBranches.includes(char)) {
+        waterCount++;
+      }
+    });
+
+    const elements = [
+      { element: "목", emoji: "🪵", count: woodCount },
+      { element: "화", emoji: "🔥", count: fireCount },
+      { element: "토", emoji: "⛰️", count: earthCount },
+      { element: "금", emoji: "🪙", count: metalCount },
+      { element: "수", emoji: "🌊", count: waterCount }
+    ];
+
+    elements.sort((a, b) => b.count - a.count);
+
+    return {
+      element: elements[0].element,
+      emoji: elements[0].emoji
+    };
+  };
+
+  const fallbackCopyText = (text: string) => {
+    try {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (successful) {
+        setShowToast(true);
+      }
+    } catch (err) {
+      console.error("Fallback copy failed:", err);
+    }
+  };
+
+  const handleShareSaju = () => {
+    const strongest = getStrongestElement(safeManseRyeok);
+    const shareUrl = window.location.origin;
+    const copyText = lang === 'ko' ? `자네 아직 자기 팔자를 모르고 사는군.\n${userData.name} 는 ${strongest.element} ${strongest.emoji} 기운이 강하다네.\n생년월일만 넣어보게.이 할멈이 자네 길도 봐줌세.\n${shareUrl}` :
+    `Hmm, you still don't know your own fate, do you?\n${userData.name} carries strong ${strongest.element} ${strongest.emoji} energy. Enter your birth date.\nThis old grandma shall read the path that awaits you.\n${shareUrl}`
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(copyText)
+        .then(() => {
+          setShowToast(true);
+        })
+        .catch((err) => {
+          console.error("navigator.clipboard.writeText failed:", err);
+          fallbackCopyText(copyText);
+        });
+    } else {
+      fallbackCopyText(copyText);
+    }
+  };
 
   const {
     isPaymentModalOpen,
@@ -192,11 +296,14 @@ export default function ReportResultView({
     }
   };
 
-  if (viewMode === "today") {
+  const parsedFortune = React.useMemo(() => {
+    if (viewMode !== "today") return null;
     const dailySection = report.sections[2] || report.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"));
     const dailyContent = dailySection ? dailySection.content : "";
-    const parsedFortune = parseDailyFortune(dailyContent);
+    return parseDailyFortune(dailyContent);
+  }, [viewMode, report.sections]);
 
+  if (viewMode === "today" && parsedFortune) {
     return (
       <div className="max-w-4xl mx-auto px-4 pb-32 relative dragon-pattern min-h-screen text-ink-black dark:text-white pt-24">
         {/* Simplified Header with User Context */}
@@ -276,13 +383,21 @@ export default function ReportResultView({
 
         {/* Expand full report button */}
         <div className="flex flex-col items-center gap-8 relative z-10 hide-in-pdf">
-          <button
-            onClick={() => setViewMode("full")}
-            className="holo-button group flex items-center gap-6 px-16 py-7 bg-ink-black text-white dark:bg-white dark:text-black font-sans font-black text-[12px] uppercase tracking-[0.5em] shadow-xl dark:shadow-2xl hover:scale-102 transition-all cursor-pointer"
-          >
-            {t.expandFullReport || "전체 리포트 보기"}
-          </button>
-          
+          <div className="flex flex-row items-start gap-4">
+            <button
+              onClick={() => setViewMode("full")}
+              className="holo-button group flex items-center gap-6 px-16 py-7 bg-ink-black text-white dark:bg-white dark:text-black font-sans font-black text-[12px] uppercase tracking-[0.5em] shadow-xl dark:shadow-2xl hover:scale-102 transition-all cursor-pointer"
+            >
+              {t.expandFullReport || "전체 리포트 보기"}
+            </button>
+            <button
+              onClick={handleShareSaju}
+              className="group flex items-center gap-6 px-16 py-7 bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all backdrop-blur-md font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-xl dark:shadow-2xl cursor-pointer w-full sm:w-auto"
+            >
+              <Share2 className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" />
+              {lang === "ko" ? "용신할멈 소개하기" : "Recommend Yongshin Halmom"}
+            </button>
+          </div>
             <button
               onClick={onReset}
               className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/40 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all"
@@ -362,17 +477,25 @@ export default function ReportResultView({
         )}
       </div>
 
-      {/* Save PDF CTA Option */}
-      <div className="mt-32 flex justify-center pb-32 hide-in-pdf">
+      {/* Save PDF / Share CTA Option */}
+      <div className="mt-32 flex flex-col sm:flex-row justify-center items-center gap-6 pb-32 hide-in-pdf">
         <button
           onClick={handleSavePdf}
           disabled={isGeneratingPdf}
-          className="holo-button group flex items-center gap-6 px-20 py-8 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-xl dark:shadow-2xl disabled:opacity-55"
+          className="holo-button group flex items-center gap-6 px-12 md:px-16 py-6 md:py-8 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-xl dark:shadow-2xl disabled:opacity-55 cursor-pointer w-full sm:w-auto"
         >
           <FileDown className={`w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity ${isGeneratingPdf ? "animate-bounce" : ""}`} />
           {isGeneratingPdf 
             ? (lang === "ko" ? "PDF 생성 중..." : "Generating PDF...") 
             : t.savePdf}
+        </button>
+
+        <button
+          onClick={handleShareSaju}
+          className="group flex items-center gap-6 px-12 md:px-16 py-6 md:py-8 bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all backdrop-blur-md font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-xl dark:shadow-2xl cursor-pointer w-full sm:w-auto"
+        >
+          <Share2 className="w-5 h-5 opacity-80 group-hover:opacity-100 transition-opacity" />
+          {lang === "ko" ? "용신할멈 소개하기" : "Recommend Yongshin Halmom"}
         </button>
       </div>
 
@@ -397,6 +520,27 @@ export default function ReportResultView({
         onClose={() => setIsPaymentModalOpen(false)}
         lang={lang}
       />
+
+      <AnimatePresence>
+        {showToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 px-6 py-4 bg-ink-black/95 dark:bg-zinc-900 border border-mythic-gold/40 text-white shadow-2xl backdrop-blur-md max-w-sm w-[90%] rounded-lg"
+          >
+            <div className="flex-1 text-sm font-sans font-medium text-left">
+             {t.copiedShareText}
+            </div>
+            <button
+              onClick={() => setShowToast(false)}
+              className="p-1 text-white/50 hover:text-white hover:bg-white/10 rounded-full transition-all cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Multi-language Navigation Sitemap Footer */}
       <footer className="mt-32 pt-20 border-t border-ink-black/5 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10 hide-in-pdf text-ink-black dark:text-white">

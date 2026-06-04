@@ -210,7 +210,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: idx * 0.05 }}
-        className="col-span-12 p-8 md:p-12 flex flex-col relative group bg-white/40 dark:bg-black/30 text-ink-black dark:text-white rounded-none border-b border-ink-black/10 dark:border-zinc-900"
+        className="col-span-12 p-4 md:p-8 flex flex-col relative group bg-white/40 dark:bg-black/30 text-ink-black dark:text-white rounded-none border-b border-ink-black/10 dark:border-zinc-900"
       >
         <div className="mb-10 text-left">
           <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-ink-black/40 dark:text-white/40 italic chat-label mb-4">

@@ -23,12 +23,12 @@ export default function InfoModal({ isOpen, onClose, onOpenReport, lang }: InfoM
             className="w-full max-w-2xl bg-black border border-white/20 rounded-none overflow-hidden shadow-[0_0_100px_rgba(255,255,255,0.05)] dragon-pattern relative"
           >
             <div className="p-10 border-b border-white/10 flex justify-between items-center bg-white/[0.02] relative z-10">
-              <div className="flex items-center gap-6">
+              <div className="flex items-start gap-6">
                 <div className="w-12 h-12 bg-white flex items-center justify-center text-black">
                   <Info className="w-6 h-6" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-serif font-black italic text-white tracking-tight">{t.infoTitle}</h2>
+                  <h2 className="text-2xl font-serif font-black italic text-white tracking-tight">{t.infoTitle}</h2>
                   <p className="text-[10px] text-white/30 tracking-[0.6em] uppercase font-sans font-black mt-1">About Yongshin Halmom</p>
                 </div>
               </div>
@@ -37,7 +37,7 @@ export default function InfoModal({ isOpen, onClose, onOpenReport, lang }: InfoM
               </button>
             </div>
 
-            <div className="p-10 md:p-14 space-y-12 max-h-[70vh] overflow-y-auto no-scrollbar relative z-10">
+            <div className="p-6 md:p-8 space-y-12 max-h-[70vh] overflow-y-auto no-scrollbar relative z-10">
               <div className="space-y-6">
                 <p className="text-xl text-white/70 font-serif italic leading-relaxed">
                   {t.appIntro}
@@ -45,11 +45,11 @@ export default function InfoModal({ isOpen, onClose, onOpenReport, lang }: InfoM
               </div>
 
               <div className="space-y-8">
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4">
                   <GraduationCap className="w-6 h-6 text-white/40" />
                   <h3 className="text-2xl font-serif font-black italic text-white tracking-widest">{t.calcStandards}</h3>
                 </div>
-                
+              
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {[t.standard1, t.standard2, t.standard3, t.standard4].map((standard, i) => (
                     <div key={i} className="p-8 bg-white/[0.03] border border-white/10 flex flex-col justify-center">

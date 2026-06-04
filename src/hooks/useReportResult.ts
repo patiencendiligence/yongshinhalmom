@@ -114,9 +114,22 @@ export function useReportResult({
   }, [userData?.birthDate, userData?.birthTime, userData?.isLunar]);
   const safeManseRyeok = manseRyeok || { full: "" };
 
+  const swappedReport = useMemo(() => {
+    const cloned = { ...report, sections: [...report.sections] };
+    if (cloned.sections && cloned.sections.length > 1) {
+      const tempSummary = cloned.summary;
+      cloned.summary = cloned.sections[1].content;
+      cloned.sections[1] = {
+        ...cloned.sections[1],
+        content: tempSummary
+      };
+    }
+    return cloned;
+  }, [report]);
+
   // Generate sections list with swapped / re-formatted chapters
   const displaySections = useMemo(() => {
-    const list = [...report.sections];
+    const list = [...swappedReport.sections];
     if (dailySection && list.length > 2) {
       list[2] = dailySection;
     }
@@ -129,7 +142,7 @@ export function useReportResult({
       list[2] = original0; // Your Lifestyle Report (Saju) at the bottom
     }
     return list;
-  }, [report.sections, dailySection]);
+  }, [swappedReport.sections, dailySection]);
 
   const handlePayment = () => {
     if (!user) {
@@ -181,6 +194,7 @@ export function useReportResult({
     displaySections,
     reportHash,
     handlePayment,
-    handleManualCheck
+    handleManualCheck,
+    swappedReport
   };
 }

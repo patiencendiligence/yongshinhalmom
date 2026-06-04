@@ -259,7 +259,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ delay: idx * 0.05 }}
-      className={`p-12 md:p-16 flex flex-col relative group ${
+      className={`p-4 md:p-12 flex flex-col relative group ${
         isRed 
           ? "bg-mythic-red/90 text-white" 
           : "bg-white/60 dark:bg-black text-ink-black dark:text-white"

@@ -350,7 +350,7 @@ export default function ReportResultView({
           ].map((item, i) => (
             <div 
               key={i} 
-              className={`p-8 md:p-10 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}
+              className={`p-4 md:p-6 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}
             >
               <div className="md:w-1/4 shrink-0 flex flex-col items-start gap-1">
                 <span className={`text-xl font-serif font-black italic ${item.titleStyle || "text-ink-black dark:text-white"}`}>

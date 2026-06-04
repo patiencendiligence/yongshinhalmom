@@ -101,6 +101,7 @@ export default function SeoPage({
         {/* Mobile Explorer Drawer Trigger */}
         <button
           onClick={() => setIsMobileExplorerOpen(true)}
+          style={{ marginTop: '60px'}}
           className={`lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-lg bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 text-xs font-sans font-bold hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black dark:text-white`}
         >
           <Menu className="w-4 h-4 shrink-0" />

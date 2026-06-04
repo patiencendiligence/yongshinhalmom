@@ -16,17 +16,17 @@ export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: HeaderAc
   const t = translations[lang];
 
   return (
-    <div className="fixed top-8 right-8 z-50 flex items-center gap-4">
+    <div className="fixed top-8 right-8 z-50 flex flex-row items-center gap-4">
       {/* Auth State */}
-      <div className="hidden md:flex items-center gap-2">
+      <div className="md:flex items-center gap-2">
         {user ? (
           <div className="flex items-center gap-3">
-            <div className="flex flex-col items-end">
+            <div className="hidden md:flex flex-col items-end">
               <span className="text-[9px] font-black tracking-widest text-ink-black/40 dark:text-white/40 uppercase leading-none mb-1">Authenticated</span>
               <span className="text-[10px] text-ink-black/60 dark:text-white/60 font-serif italic whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px] text-right">{user.email}</span>
             </div>
             {profile?.isPremium && (
-              <span className="px-2 py-0.5 bg-ink-black/5 dark:bg-white/5 border border-ink-black/20 dark:border-white/20 rounded-none text-[8px] font-black text-ink-black dark:text-white uppercase tracking-tighter italic">PREMIUM</span>
+              <span className="hidden md:flex px-2 py-0.5 bg-ink-black/5 dark:bg-white/5 border border-ink-black/20 dark:border-white/20 rounded-none text-[8px] font-black text-ink-black dark:text-white uppercase tracking-tighter italic">PREMIUM</span>
             )}
             <motion.button
               whileHover={{ scale: 1.05 }}

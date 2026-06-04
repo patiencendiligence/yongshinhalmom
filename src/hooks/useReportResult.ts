@@ -124,6 +124,14 @@ export function useReportResult({
     if (dailySection && list.length > 2) {
       list[2] = dailySection;
     }
+    if (list.length > 2) {
+      const sec0 = list[0];
+      const sec1 = list[1];
+      const sec2 = list[2];
+      list[0] = sec0; // Section 1 remains first
+      list[1] = sec2; // Today's Fortune placed between Section 1 and Section 2
+      list[2] = sec1; // Section 2 placed third
+    }
     return list;
   }, [swappedReport.sections, dailySection]);
 

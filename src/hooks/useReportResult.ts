@@ -115,16 +115,7 @@ export function useReportResult({
   const safeManseRyeok = manseRyeok || { full: "" };
 
   const swappedReport = useMemo(() => {
-    const cloned = { ...report, sections: [...report.sections] };
-    if (cloned.sections && cloned.sections.length > 1) {
-      const tempSummary = cloned.summary;
-      cloned.summary = cloned.sections[1].content;
-      cloned.sections[1] = {
-        ...cloned.sections[1],
-        content: tempSummary
-      };
-    }
-    return cloned;
+    return report;
   }, [report]);
 
   // Generate sections list with swapped / re-formatted chapters
@@ -132,14 +123,6 @@ export function useReportResult({
     const list = [...swappedReport.sections];
     if (dailySection && list.length > 2) {
       list[2] = dailySection;
-    }
-    if (list.length > 2) {
-      const original0 = list[0];
-      const original1 = list[1];
-      const original2 = list[2];
-      list[0] = original2; // Today's Condition Guide at the very top
-      list[1] = original1; // Overall Fortune (총운) in the middle
-      list[2] = original0; // Your Lifestyle Report (Saju) at the bottom
     }
     return list;
   }, [swappedReport.sections, dailySection]);

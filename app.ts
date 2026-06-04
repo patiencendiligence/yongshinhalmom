@@ -196,7 +196,12 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION;
+const rawInstruction = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "";
+const ohangContent = process.env.VITE_OHANG || process.env.OHANG || "";
+const SYSTEM_INSTRUCTION = rawInstruction
+  .replace(/\$\{env\.VITE_OHANG\}/g, ohangContent)
+  .replace(/\$\{VITE_OHANG\}/g, ohangContent)
+  .replace(/\{\{VITE_OHANG\}\}/g, ohangContent);
 
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",

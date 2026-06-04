@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
+import { getManseRyeok } from "./src/lib/manseRyeok.js";
 
 dotenv.config();
 
@@ -194,7 +195,7 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "당신은 영험한 용신할멈으로, 사용자의 기초 정보를 바탕으로 한 해의 운세를 아주 상세하고 문학적으로 풀이해주는 점술가입니다.";
+const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION;
 
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
@@ -247,10 +248,11 @@ app.post("/api/generate-report", async (req, res) => {
   
   const currentYear = userData.targetYear || kstNow.getFullYear();
   
-  // Calculate correct zodiac index to assist AI and ensure accuracy
-  // Base year 1924 is Rat (index 0).
-  const birthYear = parseInt(userData.birthDate.split('-')[0]);
-  const correctZodiacIndex = (birthYear - 1924) % 12;
+  // Calculate correct zodiac index to assist AI and ensure accuracy (Lipchun-aware via getManseRyeok)
+  const manse = getManseRyeok(userData.birthDate, userData.birthTime || "12:00", userData.isLunar || false);
+  const correctZodiacIndex = (manse && manse.zodiac !== undefined) 
+    ? manse.zodiac 
+    : ((parseInt(userData.birthDate.split('-')[0]) - 1924) % 12);
 
   const prompt = `
 ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
@@ -279,6 +281,24 @@ REQUIRED JSON STRUCTURE:
 NOTE: The zodiac index MUST be ${correctZodiacIndex}.
 The third section (sections[2]) MUST be the "Today's Condition Guide". 
 In the content of sections[2], you MUST start with the current date: "### ${kstToday}\n\n...".
+In the content of sections[2], you MUST strictly organize the text using the following headers matching the language requested:
+### ${lang === "ko" ? "오늘의 전반적인 흐름" : "Today's Overall Flow"} [Score] / [Evaluation], [Saju Tag]
+[content]
+### ${lang === "ko" ? "오늘 조심할 것" : "What to Watch Out For Today"}
+[content]
+### ${lang === "ko" ? "오늘 좋은 기운" : "Good Energies of Today"}
+[content]
+### ${lang === "ko" ? "오늘의 성공운/재물운" : "Success and Wealth of Today"}
+[content]
+### ${lang === "ko" ? "오늘의 애정운" : "Love Fortune of Today"}
+### ${lang === "ko" ? "오늘의 로또운" : "Lotto Fortune of Today"}
+[content]
+
+NOTE for headers:
+- [Score] must be a calculated score between 0 and 100 based on the hexagram/star.
+- [Evaluation] must be one of: [아주 좋음, 좋음, 비교적 좋음, 보통, 비교적 좋지 않음, 좋지 않음, 주의] (or English equivalents: [Excellent, Good, Fairly Good, Normal, Fairly Bad, Bad, Caution]).
+- [Saju Tag] must be a relevant Saju star/influence "살" (e.g. 천을, 도화, 화개, 역마, 망신, 반안, 귀인, 지살 등) for the day. (e.g. "### 오늘의 전반적인 흐름 60 / 보통, 천을" or "### Today's Overall Flow 90 / Excellent, Dohwa").
+
 `;
 
   let parsed: any = null;
@@ -358,7 +378,25 @@ STRICTLY RETURN ONLY A VALID JSON OBJECT.
 현재 날짜: ${formattedToday}
 
 이 의뢰인의 사주와 '현재 날짜'의 일진(日辰)을 분석하여 '오늘의 컨디션 가이드'를 작성하세요.
-내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하세요.
+내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하고, 다음과 같은 헤더를 사용하여 본문을 정확히 구분하여 작성하세요:
+### ${lang === "ko" ? "오늘의 전반적인 흐름" : "Today's Overall Flow"} [Score] / [Evaluation], [Saju Tag]
+[content]
+### ${lang === "ko" ? "오늘 조심할 것" : "What to Watch Out For Today"}
+[content]
+### ${lang === "ko" ? "오늘 좋은 기운" : "Good Energies of Today"}
+[content]
+### ${lang === "ko" ? "오늘의 성공운/재물운" : "Success and Wealth of Today"}
+[content]
+### ${lang === "ko" ? "오늘의 애정운" : "Love Fortune of Today"}
+[content]
+### ${lang === "ko" ? "오늘의 로또운" : "Lotto Fortune of Today"}
+[content]
+
+NOTE for headers:
+- [Score] must be a calculated score between 0 and 100 based on the hexagram/star.
+- [Evaluation] must be one of: [아주 좋음, 좋음, 비교적 좋음, 보통, 비교적 좋지 않음, 좋지 않음, 주의] (or English equivalents: [Excellent, Good, Fairly Good, Normal, Fairly Bad, Bad, Caution]).
+- [Saju Tag] must be a relevant Saju star/influence "살" (e.g. 천을, 도화, 화개, 역마, 망신, 반안, 귀인, 지살 등) for the day. (e.g. "### 오늘의 전반적인 흐름 60 / 보통, 천을" or "### Today's Overall Flow 90 / Excellent, Dohwa").
+
 
 REQUIRED JSON STRUCTURE:
 {

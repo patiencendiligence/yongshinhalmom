@@ -176,7 +176,25 @@ export function getManseRyeok(
 
     const ec = lunarData.getEightChar();
 
+    const branch = ec.getYear().charAt(1);
+    const BRANCH_TO_ZODIAC: Record<string, number> = {
+      '子': 0, // 쥐 (Rat)
+      '丑': 1, // 소 (Ox)
+      '寅': 2, // 호랑이 (Tiger)
+      '卯': 3, // 토끼 (Rabbit)
+      '辰': 4, // 용 (Dragon)
+      '巳': 5, // 뱀 (Snake)
+      '午': 6, // 말 (Horse)
+      '未': 7, // 양 (Sheep)
+      '申': 8, // 원숭이 (Monkey)
+      '酉': 9, // 닭 (Rooster)
+      '戌': 10, // 개 (Dog)
+      '亥': 11, // 돼지 (Pig)
+    };
+    const zodiacIndex = BRANCH_TO_ZODIAC[branch] !== undefined ? BRANCH_TO_ZODIAC[branch] : 0;
+
     return {
+      zodiac: zodiacIndex,
       original: {
         birthDate,
         birthTime,

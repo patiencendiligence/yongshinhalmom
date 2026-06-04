@@ -10,7 +10,7 @@ interface PricingViewProps {
 
 export default function PricingView({ onBack, onPurchase, lang }: PricingViewProps) {
   const isKo = lang === 'ko';
-  const t = translations[lang].pricingView;
+  const t = (translations[lang] as any).pricingView;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">

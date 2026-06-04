@@ -314,7 +314,7 @@ export default function ReportResultView({
           <div className="text-[10px] uppercase font-sans font-black tracking-[0.6em] text-mythic-gold mb-4">
             {t.todayFortuneTitle}
           </div>
-          <h1 className="text-5xl md:text-7xl font-serif font-black italic tracking-tight text-ink-black dark:text-white leading-tight">
+          <h1 className="text-4xl md:text-7xl font-serif font-black italic tracking-tight text-ink-black dark:text-white leading-tight">
             {userData.name}{lang === "ko" ? "님의 오늘의 운세" : "'s Today's Fortune"}
           </h1>
           <p className="text-sm text-ink-black/40 dark:text-white/30 italic mt-3 font-sans">

@@ -41,10 +41,11 @@ export default function PremiumLockBox({
             {t.premiumBadge}
           </span>
         </div>
-        <h3 className="text-5xl md:text-7xl font-serif font-black italic leading-[0.9] text-ink-black dark:text-white">
+        <h3 className="text-4xl md:text-7xl font-serif font-black italic leading-[0.9] text-ink-black dark:text-white">
           {t.unlockDetailedReport}
         </h3>
       </div>
+      
 
       <div className="flex flex-col items-center gap-12">
         <p className="text-ink-black/55 dark:text-white/40 font-serif italic text-2xl text-center max-w-xl animate-fade-in">

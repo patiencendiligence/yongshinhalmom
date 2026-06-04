@@ -87,7 +87,7 @@ export default function SeoPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
-      <div className="flex items-start justify-between gap-4 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
+      <div className="flex items-start justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
         <motion.button
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -101,7 +101,6 @@ export default function SeoPage({
         {/* Mobile Explorer Drawer Trigger */}
         <button
           onClick={() => setIsMobileExplorerOpen(true)}
-          style={{ marginTop: '60px'}}
           className={`lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-lg bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 text-xs font-sans font-bold hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black dark:text-white`}
         >
           <Menu className="w-4 h-4 shrink-0" />

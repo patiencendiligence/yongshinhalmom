@@ -6,7 +6,7 @@ import {defineConfig, loadEnv} from 'vite';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    base: './',
+    base: '/',
     plugins: [react(), tailwindcss()],
     define: {
       'process.env.TIME_LOGIC': JSON.stringify(env.VITE_TIME_LOGIC || env.TIME_LOGIC || process.env.VITE_TIME_LOGIC || env.TIME_LOGIC || ''),

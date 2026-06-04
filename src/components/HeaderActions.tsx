@@ -16,7 +16,7 @@ export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: HeaderAc
   const t = translations[lang];
 
   return (
-    <div className="fixed top-8 right-8 z-50 flex flex-row items-center gap-4">
+    <div className="fixed top-4 right-4 z-50 flex flex-row items-center gap-4">
       {/* Auth State */}
       <div className="md:flex items-center gap-2">
         {user ? (

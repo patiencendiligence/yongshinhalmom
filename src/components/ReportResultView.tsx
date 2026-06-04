@@ -386,7 +386,7 @@ export default function ReportResultView({
 
         {/* Expand full report button */}
         <div className="flex flex-col items-center gap-8 relative z-10 hide-in-pdf">
-          <div className="flex flex-row items-start gap-4">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
             <button
               onClick={() => setViewMode("full")}
               className="holo-button group flex items-center gap-6 px-16 py-7 bg-ink-black text-white dark:bg-white dark:text-black font-sans font-black text-[12px] uppercase tracking-[0.5em] shadow-xl dark:shadow-2xl hover:scale-102 transition-all cursor-pointer"

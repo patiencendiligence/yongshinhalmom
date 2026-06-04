@@ -301,3 +301,4 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
     </motion.div>
   );
 }
+

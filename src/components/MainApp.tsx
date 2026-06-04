@@ -44,23 +44,31 @@ export default function MainApp() {
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<"today" | "full">("full");
 
   const t = translations[lang];
 
   const handleSubmit = (data: any) => {
+    setViewMode("full");
     setUserData(data);
     saveProfile(data);
     handleChoice('simple', data);
   };
 
-  const onSelectProfileUpdate = (profile: any) => {
+  const onSelectProfileUpdate = (profile: any, selectedViewMode: "today" | "full") => {
+    setViewMode(selectedViewMode);
     handleSelectProfile(profile);
     setIsProfileModalOpen(false);
   };
 
+  const handleResetWithViewMode = () => {
+    setViewMode("full");
+    handleReset();
+  };
+
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center">
-      <div className="fixed inset-0 mythic-gradient -z-10" />
+    <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center bg-cream dark:bg-dark-deep transition-colors duration-300">
+                
 
       <HeaderActions 
         lang={lang} 
@@ -112,7 +120,9 @@ export default function MainApp() {
               <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
                 <ReportResultView 
                    report={report} 
-                   onReset={handleReset} 
+                   viewMode={viewMode}
+                   setViewMode={setViewMode}
+                   onReset={handleResetWithViewMode} 
                    onUpgrade={() => handleChoice('detailed')}
                    onOpenPolicy={() => setState("POLICY" as any)} 
                    onLogin={loginAndPersist}

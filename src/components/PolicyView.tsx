@@ -1,5 +1,6 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Home } from "lucide-react";
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { Language, translations } from "../lib/translations";
 
 interface PolicyViewProps {
@@ -8,19 +9,35 @@ interface PolicyViewProps {
 }
 
 export default function PolicyView({ onBack, lang }: PolicyViewProps) {
-  const t = translations[lang].policyView;
+  const t = (translations[lang] as any).policyView;
+  const mainT = translations[lang] as any;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
-      <motion.button
-        initial={{ opacity: 0, x: -10 }}
-        animate={{ opacity: 1, x: 0 }}
-        onClick={onBack}
-        className="flex items-center gap-3 text-white/40 hover:text-white transition-all mb-16 uppercase tracking-[0.5em] text-[10px] font-black group"
-      >
-        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" />
-        {t.back}
-      </motion.button>
+      <div className="flex justify-between items-center mb-16">
+        <motion.button
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          onClick={onBack}
+          className="flex items-center gap-3 text-white/40 hover:text-white transition-all uppercase tracking-[0.5em] text-[10px] font-black group"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-2 transition-transform" />
+          {t.back}
+        </motion.button>
+
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <Link
+            to="/"
+            className="flex items-center gap-3 text-mythic-gold/60 hover:text-mythic-gold transition-all uppercase tracking-[0.5em] text-[10px] font-black group"
+          >
+            <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            {mainT.backToHome}
+          </Link>
+        </motion.div>
+      </div>
 
       <div className="space-y-16 bg-black border border-white/20 p-8 md:p-20 relative overflow-hidden shadow-2xl dragon-pattern">
         <section className="relative z-10">
@@ -85,6 +102,16 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
           <p className="text-sm text-white/50 leading-relaxed max-w-3xl">
             {t.termsText}
           </p>
+        </section>
+
+        <section className="pt-16 border-t border-white/10 relative z-10 flex flex-col items-center gap-4">
+          <Link
+            to="/"
+            className="flex items-center gap-3 text-mythic-gold/60 hover:text-mythic-gold transition-all uppercase tracking-[0.5em] text-[10px] font-black group px-8 py-4 border border-white/10 hover:border-mythic-gold/30 rounded bg-white/[0.02]"
+          >
+            <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            {mainT.backToHome}
+          </Link>
         </section>
 
         <footer className="text-[10px] uppercase tracking-[0.5em] font-sans text-white/10 text-center pt-16 relative z-10">

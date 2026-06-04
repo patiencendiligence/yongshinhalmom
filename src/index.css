@@ -1,44 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Cookie&display=swap');
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme {
-  --font-serif: "Noto Serif KR", serif;
-  --font-sans: "Noto Sans KR", sans-serif;
-  --color-mythic-dark: #000000;
-  --color-mythic-card: #0a0a0a;
-  --color-mythic-red: #ff3b30;
-  --color-mythic-blue: #007aff;
-  --color-mythic-green: #34c759;
-  --color-mythic-text: #ffffff;
-  --color-mythic-gold: #33474e;
-  
+  /* Custom Theme Colors */
+  --color-cream: #f9f7f0;
+  --color-ink-black: #1a1a1a;
+  --color-dark-deep: #0a0b10;
+  --color-dark-cool: #1e293b;
   --color-holo-cyan: #00f2ff;
   --color-holo-pink: #ff00ff;
   --color-holo-purple: #9d00ff;
+  
+  --font-serif: "Noto Serif KR", serif;
+  --font-sans: "Noto Sans KR", sans-serif;
+  
+  /* Retained/Adjusted Mythic Colors */
+  --color-mythic-red: #ff3b30;
+  --color-mythic-blue: #007aff;
+  --color-mythic-green: #34c759;
 }
 
 @layer base {
   body {
-    @apply bg-black text-white font-sans overflow-x-hidden antialiased;
+    @apply bg-cream text-ink-black dark:bg-dark-deep dark:text-white font-sans overflow-x-hidden antialiased transition-colors duration-300;
   }
 }
-
-.mythic-gradient-text {
-  @apply bg-clip-text text-transparent bg-gradient-to-r from-[--color-holo-cyan] via-[--color-holo-pink] to-[--color-holo-purple];
+@keyframes najeon-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.mythic-border {
-  @apply border border-white/10;
+.gradient-title {
+  font-weight: bolder;
+  background-image: linear-gradient(
+    135deg, 
+    #ffffff 0%, 
+    #f1f5f9 12%, 
+    #e2f5f1 25%, 
+    #fff1f5 40%, 
+    #f0fdf4 55%, 
+    #e0f2fe 70%, 
+    #fff2fc 85%, 
+    #ffffff 100%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: najeon-shimmer 15s ease infinite;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
 }
 
-.mythic-glass {
-  @apply bg-white/5 backdrop-blur-2xl border border-white/10;
+.dark .gradient-title {
+  background-image: linear-gradient(
+    135deg, 
+    #ffffff 0%, 
+    #cbd5e1 15%, 
+    #d3f4ec 30%, 
+    #fce7f3 45%, 
+    #e2f5e9 60%, 
+    #e0f2fe 75%, 
+    #fae8ff 90%, 
+    #ffffff 100%
+  );
+  filter: drop-shadow(0 2px 10px rgba(255, 255, 255, 0.1)) drop-shadow(0 4px 24px rgba(0, 242, 255, 0.08));
+}
+/* Subtle Najeonchilgi-inspired Pattern */
+.bg-paper-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.text-editorial {
+  @apply font-serif italic text-ink-black/90 dark:text-white/90;
 }
 
 .holo-button {
-  @apply relative overflow-hidden transition-all duration-500 border border-white/20 hover:border-white/40 active:scale-95;
+  @apply relative overflow-hidden transition-all duration-500 border border-ink-black/20 text-dark-cool dark:text-white/90 dark:border-white/20 hover:border-ink-black/40 dark:hover:border-white/40 active:scale-95;
+  background: linear-gradient(135deg, rgba(0, 242, 255, 0.08), rgba(255, 0, 255, 0.08));
+
+}
+.dark .holo-button {
   background: linear-gradient(135deg, rgba(0, 242, 255, 0.1), rgba(255, 0, 255, 0.1));
 }
-
 .holo-button::before {
   content: "";
   @apply absolute inset-0 opacity-0 transition-opacity duration-500 bg-gradient-to-r from-[--color-holo-cyan] via-[--color-holo-pink] to-[--color-holo-purple];
@@ -47,46 +93,4 @@
 
 .holo-button:hover::before {
   @apply opacity-20;
-}
-
-.text-editorial {
-  @apply font-serif italic tracking-tight leading-[0.9];
-}
-
-.dragon-pattern {
-  background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-  background-size: 24px 24px;
-}
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-.markdown-container strong {
-  @apply text-white font-black border-b border-white/20;
-}
-
-.markdown-container p {
-  @apply mb-4 last:mb-0;
-}
-
-.markdown-container ul {
-  @apply list-disc list-inside mb-4;
-}
-
-.bg-\[\#1a1a1a\] .markdown-container strong,
-.bg-mythic-red .markdown-container strong {
-  @apply text-white border-b border-white/30;
 }

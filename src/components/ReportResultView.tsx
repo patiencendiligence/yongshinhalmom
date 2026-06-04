@@ -1,22 +1,135 @@
-import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import ReactMarkdown from 'react-markdown';
-import { getReport, ReportResult, getTodaysFortune, ReportSection } from "../services/geminiService";
-import { Language, translations } from "../lib/translations";
-import { useAuth } from "../lib/AuthContext";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Lock, FileDown, AlertCircle, AlertTriangle, RotateCcw } from "lucide-react";
-import { getManseRyeok } from "../lib/manseRyeok";
-import { getReportHash } from "../lib/hashUtils";
-import { storageService } from "../services/storageService";
+import { FileDown, AlertTriangle, RotateCcw, Coffee } from "lucide-react";
+import { useReportResult } from "../hooks/useReportResult";
+import { generateReportPdf } from "../utils/pdfGenerator";
+import { ReportResult } from "../services/geminiService";
+import { Language, translations } from "../lib/translations";
+import ReportHeader from "./ReportHeader";
+import ReportItemCard from "./ReportItemCard";
+import PremiumLockBox from "./PremiumLockBox";
 import PaymentModal from "./PaymentModal";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
-const zodiacGuardians = "/assets/zodiac_guardians.png";
+function parseDailyFortune(content: string) {
+  const getBlock = (titleKeywords: string[]) => {
+    const lines = content.split('\n');
+    let capture = false;
+    let blockLines: string[] = [];
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith('###') || trimmed.startsWith('##') || trimmed.startsWith('*') || trimmed.startsWith('**') || trimmed.startsWith('- **') || trimmed.startsWith('- ###')) {
+        const isMatch = titleKeywords.some(keyword => trimmed.includes(keyword));
+        if (isMatch) {
+          capture = true;
+          continue;
+        } else if (capture) {
+          break;
+        }
+      }
+      if (capture) {
+        blockLines.push(line);
+      }
+    }
+    let cleaned = blockLines.join('\n').trim();
+    if (cleaned.startsWith('-') || cleaned.startsWith('*')) {
+      cleaned = cleaned.replace(/^[\s-*]+/, '').trim();
+    }
+    return cleaned;
+  };
+
+  let flow = getBlock(['전반적인 흐름', 'Overall Flow', '전반 적인 흐름', '오늘의 흐름']);
+  let watchOut = getBlock(['조심할 것', 'Watch Out', '조심할 사항', '조심']);
+  let goodEnergy = getBlock(['좋은 기운', 'Good Energies', '좋은 기운', '기운']);
+  let wealth = getBlock(['성공운/재물운', '재물운', '성공운', 'Success & Wealth', 'Success and Wealth']);
+  let love = getBlock(['애정운', 'Love Fortune', 'Love']);
+  let lotto = getBlock(['로또운', 'Lotto Fortune', 'Lotto']);
+
+  // Extract score, evaluation, and Saju tag from the flow header
+  let score = 70;
+  let evaluation = "보통";
+  let sajuTag = "";
+
+  const lines = content.split('\n');
+  const flowHeaderLine = lines.find(line => {
+    const l = line.trim();
+    return l.startsWith('###') && (l.includes('전반적인 흐름') || l.includes('Overall Flow') || l.includes('전반 적인 흐름') || l.includes('오늘의 흐름'));
+  });
+
+  if (flowHeaderLine) {
+    const strippedHeader = flowHeaderLine.replace(/^###\s*/, '').replace(/오늘의\s*전반적인\s*흐름|전반적인\s*흐름|Today's\s*Overall\s*Flow/i, '').trim();
+    const match = strippedHeader.match(/(\d+)\s*[\/|:]\s*([^,\n]+)(?:,\s*([^,\n]+))?/);
+    if (match) {
+      score = parseInt(match[1]) || 70;
+      evaluation = match[2]?.trim() || "보통";
+      sajuTag = match[3]?.trim() || "";
+    } else {
+      const parts = strippedHeader.split('/');
+      if (parts.length >= 2) {
+        const parsedScore = parseInt(parts[0].replace(/[^0-9]/g, ''));
+        if (!isNaN(parsedScore)) score = parsedScore;
+        const subParts = parts[1].split(',');
+        evaluation = subParts[0].trim();
+        if (subParts.length >= 2) {
+          sajuTag = subParts[1].trim();
+        }
+      } else {
+        const numbers = strippedHeader.match(/\d+/);
+        if (numbers) {
+          score = parseInt(numbers[0]);
+        }
+        if (strippedHeader.includes('아주 좋음')) evaluation = "아주 좋음";
+        else if (strippedHeader.includes('좋음')) evaluation = "좋음";
+        else if (strippedHeader.includes('비교적 좋음')) evaluation = "비교적 좋음";
+        else if (strippedHeader.includes('비교적 좋지 않음')) evaluation = "비교적 좋지 않음";
+        else if (strippedHeader.includes('좋지 않음')) evaluation = "좋지 않음";
+        else if (strippedHeader.includes('주의')) evaluation = "주의";
+        
+        // Find general Korean chars representing "살" or "귀인" as sajuTag
+        const sajuTags = ['천을', '도화', '화개', '역마', '망신', '귀인', '연살', '겁살', '재살', '천살', '지살', '월살', '반안', '육해'];
+        for (const tag of sajuTags) {
+          if (strippedHeader.includes(tag)) {
+            sajuTag = tag;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  // Fallbacks if some sections are missing (e.g. older files)
+  if (!watchOut) {
+    watchOut = "지나치게 급하게 결정을 내리거나 내면의 자만을 앞세우지 않도록 경계하게나.";
+  }
+  if (!goodEnergy) {
+    goodEnergy = "묵묵히 자기 일을 해나갈 때 예상치 못한 보상과 긍정적인 평가가 따를 기운일세.";
+  }
+  if (!wealth) {
+    wealth = "재물 기운의 흐름이 차분한 편이니 불필요한 지출을 삼가고 자산을 굳건히 지키는 데 힘쓰게나.";
+  }
+  if (!love) {
+    love = "주변 사람이나 소중한 인연에게 따뜻한 덕담을 먼저 건넨다면 기쁨과 애정 지수가 크게 차오를 것이야.";
+  }
+  if (!lotto) {
+    lotto = "뜻밖의 횡재수보다는 일상 속 소소한 공덕이 자네에게 행운의 단비를 가져다줄 일진이니 성실히 임하게.";
+  }
+
+  return {
+    flow: flow || "오늘의 전반적인 흐름을 살피는 중일세. 차분하고 고요한 기운이 자네를 감싸는구나.",
+    watchOut,
+    goodEnergy,
+    wealth,
+    love,
+    lotto,
+    score,
+    evaluation,
+    sajuTag
+  };
+}
 
 interface ReportResultViewProps {
   report: ReportResult;
+  viewMode: "today" | "full";
+  setViewMode: React.Dispatch<React.SetStateAction<"today" | "full">>;
   onReset: () => void;
   onUpgrade?: () => void;
   onOpenPolicy: () => void;
@@ -26,645 +139,291 @@ interface ReportResultViewProps {
   lang: Language;
 }
 
-const Illustration = ({ zodiac, className = "" }: { zodiac: number, className?: string }) => {
-  const col = zodiac % 6;
-  const row = Math.floor(zodiac / 6);
-  
-  return (
-    <div 
-      className={`w-32 h-44 border border-white/10 rounded-lg bg-neutral-900 zodiac-illustration shadow-2xl ${className}`}
-      data-col={col}
-      data-row={row}
-      style={{
-        backgroundImage: `url("${zodiacGuardians}")`,
-        backgroundSize: '600% 200%',
-        backgroundPosition: `${col * 20}% ${row * 100}%`,
-        backgroundRepeat: 'no-repeat'
-      }}
-    />
-  );
-};
+export default function ReportResultView({
+  report,
+  viewMode,
+  setViewMode,
+  onReset,
+  onUpgrade,
+  onLogin,
+  triggerPayment,
+  userData,
+  lang,
+}: ReportResultViewProps) {
+  const t = translations[lang] as any;
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
-export default function ReportResultView({ report, onReset, onUpgrade, onOpenPolicy, onLogin, triggerPayment: propTriggerPayment, userData, lang }: ReportResultViewProps) {
-  const t = (translations[lang] as any);
-  const { user, profile, login, markAsPaid, checkPaymentStatus } = useAuth();
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  
-  const reportHash = React.useMemo(() => getReportHash(userData), [userData]);
-  const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
-  const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-  const [dailySection, setDailySection] = useState<ReportSection | null>(null);
-  const [isRefreshingDaily, setIsRefreshingDaily] = useState(false);
-
-  // Re-generate Section 3 (Today's Condition) if it's a different day
-  useEffect(() => {
-    const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
-    const today = kstNow.toISOString().split('T')[0];
-    
-    // Section 3 is at original index 2 (swapped to idx 1 in displaySections)
-    const originalDailySection = report.sections[2];
-    
-    // Check if the content already starts with today's date
-    if (originalDailySection && !originalDailySection.content.split('\n')[0].includes(today)) {
-      console.log("[ReportResultView] Daily section is stale or needs date prepending. Refreshing...");
-      
-      const refreshDaily = async () => {
-        setIsRefreshingDaily(true);
-        try {
-          const fresh = await getTodaysFortune(userData, lang);
-          // Add the date at the beginning explicitly if AI missed it 
-          // or just ensure it's there as per user request
-          const todayFormatted = `### ${today}`;
-          if (!fresh.content.includes(today)) {
-            fresh.content = `${todayFormatted}\n\n${fresh.content}`;
-          }
-          setDailySection(fresh);
-        } catch (error) {
-          console.error("[ReportResultView] Failed to refresh daily section:", error);
-        } finally {
-          setIsRefreshingDaily(false);
-        }
-      };
-      
-      refreshDaily();
-    }
-  }, [report.sections, userData, lang]);
-
-  // Sync isCheckingPayment with isCurrentlyPaid
-  React.useEffect(() => {
-    if (isCurrentlyPaid) {
-      setIsCheckingPayment(false);
-    }
-  }, [isCurrentlyPaid]);
-
-  // Handle auto-payment trigger if coming from ChoiceModal
-  // REMOVED: Auto-triggering windows in useEffect is usually blocked by browsers.
-  // We now trigger it directly in MainApp.tsx on the ChoiceModal button click.
-
-  // Check if this specific report is paid
-  React.useEffect(() => {
-    if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;
-
-    let isMounted = true;
-    let timerId: ReturnType<typeof setTimeout>;
-
-    const checkStatus = async () => {
-      if (!isMounted) return;
-      
-      try {
-        const paid = await checkPaymentStatus(reportHash);
-        if (paid && isMounted) {
-          setIsCurrentlyPaid(true);
-          setIsCheckingPayment(false);
-          storageService.setPaidHash(reportHash);
-          
-          // If they were looking at a simple report, automatically upgrade to detailed
-          if (report.level === 'simple' && onUpgrade) {
-            onUpgrade();
-          }
-          return; // Stop polling since we're paid
-        }
-      } catch (error: any) {
-        // Handle specific lock error silently - it's a Supabase race condition
-        const isLockError = error?.message?.includes('lock') || error?.details?.includes('lock');
-        if (!isLockError) {
-          console.error("Payment check failed:", error);
-        }
-      }
-
-      // Schedule next check only if still mounted and not paid
-      if (isMounted && !isCurrentlyPaid) {
-        timerId = setTimeout(checkStatus, 3000); // 3 seconds is better for responsive feel
-      }
-    };
-
-    // Initial check
-    checkStatus();
-    
-    return () => {
-      isMounted = false;
-      if (timerId) clearTimeout(timerId);
-    };
-  }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade]);
-
-  // Only the test account or users who paid for THIS specific report (matched by hash) see the detailed content
-  const isPremiumUser = isCurrentlyPaid || user?.email === 'patiencendiligence@gmail.com';
-  
-  // Even if they are premium, if they chose 'simple' (Basic Summary), we show the simple view.
-  // They only see details if they are premium AND selected (or upgraded to) 'detailed'.
-  const displayDetailed = isPremiumUser && report.level === 'detailed';
-  const manseRyeok = getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
-  
-  // A safe fallback if calculation fails
-  const safeManseRyeok = manseRyeok || { full: "" };
-
-  // Swap Sections 2 (idx 1) and 3 (idx 2)
-  const displaySections = [...report.sections];
-  
-  // Replace Section 3 with re-generated dailySection if available
-  if (dailySection && displaySections.length > 2) {
-    displaySections[2] = dailySection;
-  }
-
-  if (displaySections.length > 2) {
-    const temp = displaySections[1];
-    displaySections[1] = displaySections[2];
-    displaySections[2] = temp;
-  }
-
-  const handlePayment = () => {
-    if (!user) {
-      onLogin ? onLogin() : login();
-      return;
-    }
-    
-    if (user?.email === 'patiencendiligence@gmail.com') {
-      setIsCurrentlyPaid(true);
-      storageService.setPaidHash(reportHash);
-      if (report.level === 'simple' && onUpgrade) onUpgrade();
-      return;
-    }
-
-    setIsCheckingPayment(true);
-    propTriggerPayment(reportHash);
-  };
-
-  const handleManualCheck = async () => {
-    setIsCheckingPayment(true);
-    try {
-      const paid = await checkPaymentStatus(reportHash);
-      if (paid) {
-        setIsCurrentlyPaid(true);
-        // setIsCheckingPayment(false) will be handled by useEffect or here
-        setIsCheckingPayment(false);
-        storageService.setPaidHash(reportHash);
-        if (report.level === 'simple' && onUpgrade) onUpgrade();
-      } else {
-        console.log("Still not verified...");
-        setIsCheckingPayment(false);
-      }
-    } catch (e) {
-      console.error("Manual check error:", e);
-      setIsCheckingPayment(false);
-    }
-  };
+  const {
+    isPaymentModalOpen,
+    setIsPaymentModalOpen,
+    isCheckingPayment,
+    isRefreshingDaily,
+    isPremiumUser,
+    displayDetailed,
+    safeManseRyeok,
+    manseRyeok,
+    displaySections,
+    handlePayment,
+    handleManualCheck,
+  } = useReportResult({
+    report,
+    userData,
+    lang,
+    onUpgrade,
+    onLogin,
+    triggerPayment,
+  });
 
   const handleSavePdf = async () => {
-    const element = document.getElementById("report-content");
-    if (!element) return;
-
+    if (isGeneratingPdf) return;
+    setIsGeneratingPdf(true);
     try {
-      const canvas = await html2canvas(element, {
-        backgroundColor: "#000000",
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        onclone: (clonedDoc) => {
-          // 1. Disable ALL original styles to prevent oklab/modern CSS parsing errors
-          for (let i = 0; i < clonedDoc.styleSheets.length; i++) {
-            clonedDoc.styleSheets[i].disabled = true;
-          }
-
-          // 2. Hide Premium lock for PDF
-          const premiumLock = clonedDoc.querySelector('[data-premium-lock="true"]');
-          if (premiumLock) {
-            (premiumLock as HTMLElement).style.display = 'none';
-          }
-          
-          // Hide navigation/buttons in PDF
-          const hideInPdf = clonedDoc.querySelectorAll('.hide-in-pdf');
-          hideInPdf.forEach(node => {
-            (node as HTMLElement).style.display = 'none';
-          });
-
-          // 3. Inject Ultra-Stable PDF Styles (HEX ONLY)
-          const style = clonedDoc.createElement('style');
-          style.innerHTML = `
-            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,700&family=Noto+Serif+KR:wght@700;900&display=swap');
-            
-            * { box-sizing: border-box !important; -webkit-print-color-adjust: exact !important; }
-            body { background: #000000 !important; font-family: sans-serif !important; margin: 0; padding: 0; }
-            #report-content { 
-              background-color: #000000 !important; 
-              background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0) !important;
-              background-size: 24px 24px !important;
-              color: #ffffff !important; 
-              padding: 80px !important; 
-              width: 1200px !important;
-              position: relative !important;
-            }
-            
-            /* Mythic Aesthetic */
-            .font-serif { font-family: 'Playfair Display', 'Noto Serif KR', serif !important; }
-            h1 { color: #ffffff !important; line-height: 0.9 !important; font-size: 84px !important; margin-bottom: 40px !important; font-style: italic !important; font-weight: 900 !important; letter-spacing: -0.05em !important; }
-            h3 { color: #ffffff !important; line-height: 1.2 !important; font-size: 36px !important; margin-bottom: 24px !important; font-style: italic !important; font-weight: 900 !important; }
-            p, div, span { line-height: 1.6 !important; font-size: 18px !important; color: rgba(255,255,255,0.8) !important; }
-            
-            .mythic-gradient-text {
-              color: #ffd60a !important; /* Fallback for PDF */
-              background: linear-gradient(to right, #ffd60a, #ff9f0a) !important;
-              -webkit-background-clip: text !important;
-            }
-            
-            /* Structural Bento Cards */
-            .grid { display: block !important; }
-            .bg-black { 
-              background-color: #0c0c0c !important; 
-              border: 1px solid rgba(255,255,255,0.1) !important;
-              border-radius: 16px !important;
-              padding: 60px !important;
-              margin-bottom: 40px !important;
-              page-break-inside: avoid !important;
-            }
-
-            .bg-\\[\\#1a1a1a\\] { background-color: #1a1a1a !important; }
-            .bg-mythic-red\\/90 { background-color: #ff3b30 !important; }
-            
-            /* Disclaimer styling in PDF */
-            .opacity-30.bg-white {
-              background-color: #1a1a1a !important;
-              opacity: 1 !important;
-              border: 1px solid #ff3b30 !important;
-            }
-            .opacity-30.bg-white p {
-              color: #ff3b30 !important;
-              font-weight: bold !important;
-            }
-            .opacity-30.bg-white .text-black {
-              color: #ffffff !important;
-            }
-            
-            /* Illustration Styling */
-            .zodiac-container {
-              background: rgba(255,255,255,0.02) !important;
-              border: 1px solid rgba(255,255,255,0.05) !important;
-              border-radius: 24px !important;
-              padding: 20px !important;
-              margin-bottom: 30px !important;
-              display: inline-block !important;
-            }
-
-            .zodiac-illustration {
-              width: 128px !important;
-              height: 176px !important;
-              overflow: hidden !important;
-              position: relative !important;
-              border: 1px solid rgba(255,255,255,0.1) !important;
-              border-radius: 8px !important;
-              background-color: #0c0c0c !important;
-            }
-
-            .zodiac-illustration img {
-              max-width: none !important;
-              position: absolute !important;
-              display: block !important;
-            }
-            
-            .manse-ryeok-badge {
-              border-left: 2px solid rgba(255,255,255,0.2) !important;
-              padding-left: 30px !important;
-              margin-bottom: 60px !important;
-            }
-
-            .text-white { color: #ffffff !important; }
-            .text-mythic-gold { color: #ffd60a !important; }
-            
-            /* Ensure text wrapping */
-            .markdown-container { word-break: break-word !important; overflow-wrap: break-word !important; }
-            
-            /* Limit scaling */
-            #report-content { transform-origin: top left !important; }
-            
-            /* Hide animations and shadows for clarity */
-            * { box-shadow: none !important; text-shadow: none !important; backdrop-filter: none !important; transition: none !important; }
-            
-            /* Explicit chapter labeling */
-            .chapter-label {
-               font-size: 12px !important;
-               font-weight: 900 !important;
-               letter-spacing: 0.5em !important;
-               color: rgba(255,255,255,0.3) !important;
-               margin-bottom: 20px !important;
-               text-transform: uppercase !important;
-            }
-          `;
-          clonedDoc.head.appendChild(style);
-
-          // Force clean background
-          const clonedElement = clonedDoc.getElementById("report-content");
-          if (clonedElement) {
-            clonedElement.style.background = "#000000";
-            clonedElement.style.color = "#ffffff";
-          }
-
-          // Handle Illustrations for PDF stability
-          const illustrations = clonedDoc.querySelectorAll('.zodiac-illustration');
-          illustrations.forEach(el => {
-            const htmlEl = el as HTMLElement;
-            const col = parseInt(htmlEl.dataset.col || '0');
-            const row = parseInt(htmlEl.dataset.row || '0');
-
-            htmlEl.style.width = '128px';
-            htmlEl.style.height = '176px';
-            htmlEl.style.display = 'block';
-            htmlEl.style.visibility = 'visible';
-            htmlEl.style.opacity = '1';
-            htmlEl.style.backgroundImage = `url("${zodiacGuardians}")`;
-            htmlEl.style.backgroundSize = '768px 352px';
-            htmlEl.style.backgroundPosition = `-${col * 128}px -${row * 176}px`;
-            htmlEl.style.backgroundRepeat = 'no-repeat';
-          });
-        }
+      await generateReportPdf({
+        displayDetailed,
+        userData,
+        translations,
+        zodiacGuardians: "/assets/zodiac_guardians.png",
+        lang,
       });
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("p", "mm", "a4");
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgProps = pdf.getImageProperties(imgData);
-      const totalImgHeightMm = (imgProps.height * pdfWidth) / imgProps.width;
-      
-      let heightLeft = totalImgHeightMm;
-      let position = 0;
-
-      // Add first page
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, totalImgHeightMm);
-      heightLeft -= pdfHeight;
-
-      // Add subsequent pages if content overflows the first page
-      while (heightLeft > 0) {
-        position = heightLeft - totalImgHeightMm;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, totalImgHeightMm);
-        heightLeft -= pdfHeight;
-      }
-      
-      pdf.save(`yongshin_report_${userData.name}.pdf`);
     } catch (error) {
-      console.error("PDF generation error:", error);
+      console.error("[ReportResultView] Failed to generate report PDF:", error);
+    } finally {
+      setIsGeneratingPdf(false);
     }
   };
 
-  const getSlotClass = (idx: number) => {
-    // Swap 1 and 2 styles as well to maintain visual balance
-    switch (idx) {
-      case 0: return "col-span-12 row-span-auto md:row-span-3 pb-20"; // Detailed Saju
-      case 1: return "col-span-12 md:col-span-6 row-span-2 border-mythic-gold/20"; // Today's Report (Previously Case 2)
-      case 2: return "col-span-12 md:col-span-6 row-span-2 bg-[#1a1a1a]"; // Overview (Previously Case 1)
-      case 3: return "col-span-12 md:col-span-12 row-span-auto"; // Monthly (Solar Detail)
-      case 4: return "col-span-12 md:col-span-4 row-span-2 bg-[#1a1a1a]"; // Health
-      case 5: return "col-span-12 md:col-span-4 row-span-2 bg-mythic-red/90 text-white"; // Love
-      case 6: return "col-span-12 md:col-span-4 row-span-2 bg-[#1a1a1a]"; // Career
-      case 7: return "col-span-12 row-span-2 bg-mythic-gold/5 border-mythic-gold/20"; // Remedy
-      default: return "col-span-12 md:col-span-6 row-span-2";
-    }
+  if (viewMode === "today") {
+    const dailySection = report.sections[2] || report.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"));
+    const dailyContent = dailySection ? dailySection.content : "";
+    const parsedFortune = parseDailyFortune(dailyContent);
+
+    return (
+      <div className="max-w-4xl mx-auto px-4 pb-32 relative dragon-pattern min-h-screen text-ink-black dark:text-white pt-24">
+        {/* Simplified Header with User Context */}
+        <div className="text-center mb-16 relative z-10">
+          <div className="text-[10px] uppercase font-sans font-black tracking-[0.6em] text-mythic-gold mb-4">
+            {t.todayFortuneTitle}
+          </div>
+          <h1 className="text-5xl md:text-7xl font-serif font-black italic tracking-tight text-ink-black dark:text-white leading-tight">
+            {userData.name}{lang === "ko" ? "님의 오늘의 운세" : "'s Today's Fortune"}
+          </h1>
+          <p className="text-sm text-ink-black/40 dark:text-white/30 italic mt-3 font-sans">
+            {userData.birthDate} ({userData.isLunar ? t.lunar : t.solar}) • {safeManseRyeok.full}
+          </p>
+        </div>
+
+        {/* 6 Main Fortune Cards */}
+        <div className="space-y-6 mb-12 relative z-10">
+          {[
+            { 
+              title: t.todayFlow || "오늘의 전반적인 흐름", 
+              content: parsedFortune.flow, 
+              colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30",
+              badges: (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-ink-black/5 dark:bg-white/5 text-ink-black/80 dark:text-white/80 border border-ink-black/10 dark:border-white/10 uppercase tracking-widest rounded-sm">
+                    {parsedFortune.score}점 • {parsedFortune.evaluation}
+                  </span>
+                  {parsedFortune.sajuTag && (
+                    <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-mythic-gold/15 text-mythic-gold dark:text-mythic-gold border border-mythic-gold/30 uppercase tracking-widest rounded-sm">
+                      {parsedFortune.sajuTag}
+                    </span>
+                  )}
+                </div>
+              )
+            },
+            { title: t.todayPrecautions || "오늘 조심할 것", content: parsedFortune.watchOut, colorClass: "border-mythic-red/20 hover:border-mythic-red/40 dark:border-mythic-red/20 dark:hover:border-mythic-red/40", titleStyle: "text-mythic-red dark:text-mythic-red" },
+            { title: t.todayEnergies || "오늘 좋은 기운", content: parsedFortune.goodEnergy, colorClass: "border-mythic-gold/20 hover:border-mythic-gold/40 dark:border-mythic-gold/20 dark:hover:border-mythic-gold/40", titleStyle: "text-mythic-gold dark:text-mythic-gold" },
+            { title: t.todaySuccessWealth || "오늘의 성공운/재물운", content: parsedFortune.wealth, colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30" },
+            { title: t.todayLove || "오늘의 애정운", content: parsedFortune.love, colorClass: "border-pink-500/10 hover:border-pink-500/30 dark:border-pink-500/15 dark:hover:border-pink-500/35", titleStyle: "text-pink-600 dark:text-pink-400" },
+            { title: t.todayLotto || "오늘의 로또운", content: parsedFortune.lotto, colorClass: "border-emerald-500/10 hover:border-emerald-500/30 dark:border-emerald-500/15 dark:hover:border-emerald-500/35", titleStyle: "text-emerald-600 dark:text-emerald-400" },
+          ].map((item, i) => (
+            <div 
+              key={i} 
+              className={`p-8 md:p-10 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}
+            >
+              <div className="md:w-1/4 shrink-0 flex flex-col items-start gap-1">
+                <span className={`text-xl font-serif font-black italic ${item.titleStyle || "text-ink-black dark:text-white"}`}>
+                  {item.title}
+                </span>
+                {"badges" in item ? item.badges : null}
+              </div>
+              <div className="flex-1 text-base md:text-lg text-ink-black/75 dark:text-white/80 leading-relaxed font-sans whitespace-pre-line">
+                {item.content}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Lucky info row */}
+        <div className="grid grid-cols-3 gap-4 md:gap-6 mb-16 relative z-10">
+          {[
+            { label: t.luckyColor || "행운 색상", value: report.luckInfo.color },
+            { label: t.luckyItem || "행운 아이템", value: report.luckInfo.item },
+            { label: t.luckyFood || "행운 음식", value: report.luckInfo.food }
+          ].map((item, idx) => (
+            <div key={idx} className="p-6 md:p-8 bg-white/40 dark:bg-black/20 border border-ink-black/10 dark:border-white/5 backdrop-blur-sm flex flex-col gap-2 text-center text-ink-black dark:text-white">
+              <span className="text-[9px] font-sans font-black uppercase tracking-[0.3em] text-ink-black/40 dark:text-white/30">
+                {item.label}
+              </span>
+              <span className="text-base md:text-xl font-serif italic text-ink-black dark:text-white font-medium">
+                {item.value}
+              </span>
+            </div>
+          ))}
+        </div>
+
+
+        {/* Expand full report button */}
+        <div className="flex flex-col items-center gap-8 relative z-10 hide-in-pdf">
+          <button
+            onClick={() => setViewMode("full")}
+            className="holo-button group flex items-center gap-6 px-16 py-7 bg-ink-black text-white dark:bg-white dark:text-black font-sans font-black text-[12px] uppercase tracking-[0.5em] shadow-xl dark:shadow-2xl hover:scale-102 transition-all cursor-pointer"
+          >
+            {t.expandFullReport || "전체 리포트 보기"}
+          </button>
+          
+            <button
+              onClick={onReset}
+              className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/40 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all"
+            >
+              {t.backToHome}
+            </button>
+
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 pb-32 relative dragon-pattern min-h-screen">
+    <div className="max-w-7xl mx-auto px-4 pb-32 relative dragon-pattern min-h-screen text-ink-black dark:text-white">
       <div id="report-content">
-        {/* Editorial Header */}
-        <header className="pt-32 pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-white/10 mb-16 relative z-10">
-          <div className="max-w-3xl mb-12 md:mb-0">
-            <h1 className="text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-white leading-[0.8] mb-12">
-              {t.yourLifestyleReport.split('Report')[0]} <span className="mythic-gradient-text">Report</span> <br/>
-              {t.yourLifestyleReport.split('Report')[1]}
-            </h1>
-            <p className="text-2xl md:text-3xl font-serif text-white/40 italic leading-snug max-w-2xl">
-              "{report.summary}"
-            </p>
+        {/* Editorial Astronomic Header */}
+        <ReportHeader
+          t={t}
+          report={report}
+          lang={lang}
+          userData={userData}
+          manseRyeok={manseRyeok}
+        />
 
-            <div className="mt-16 flex flex-wrap gap-8">
-              {[
-                { label: lang === "ko" ? "COLOR" : "COLOR", value: report.luckInfo.color },
-                { label: lang === "ko" ? "ITEM" : "ITEM", value: report.luckInfo.item },
-                { label: lang === "ko" ? "FOOD" : "FOOD", value: report.luckInfo.food },
-              ].map((luck, i) => (
-                <div key={i} className="flex flex-col gap-2">
-                  <span className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-white/30">{luck.label}</span>
-                  <span className="text-xl font-serif italic text-white">{luck.value}</span>
-                </div>
-              ))}
-            </div>
+        {/* Manse-Ryeok Museum Badge */}
+        <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-ink-black/20 dark:border-white/20 pl-8 manse-ryeok-badge">
+          <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em] text-ink-black/50 dark:text-white/40">
+            {t.manseRyeok}
           </div>
-          
-          <div className="text-center md:text-right flex flex-col justify-end items-center md:items-end">
-            <div className="mb-8 p-1.5 border border-white/5 rounded-2xl bg-white/[0.02] zodiac-container">
-              <Illustration zodiac={report.zodiac} />
-            </div>
-            <div className="text-[10px] font-sans font-bold tracking-[0.5em] text-white/20 uppercase mb-4">{t.authorizedRecipient}</div>
-            <div className="text-5xl md:text-7xl font-serif font-black text-white italic">{userData.name}</div>
-            <p className="text-xl text-white/20 italic mt-4">{userData.birthDate} ({userData.isLunar ? t.lunar : t.solar})</p>
-          </div>
-        </header>
-
-        {/* Manse-ryeok - Museum Label Style */}
-        <div className="mb-16 flex flex-col md:flex-row items-baseline gap-8 border-l-[1px] border-white/20 pl-8 manse-ryeok-badge">
-          <div className="text-[11px] uppercase font-sans font-black tracking-[0.6em]">{t.manseRyeok}</div>
-          <div className="text-3xl md:text-5xl font-serif font-black italic text-white/80 tracking-tighter">
+          <div className="text-3xl md:text-5xl font-serif font-black italic text-ink-black/80 dark:text-white/80 tracking-tighter">
             {safeManseRyeok.full}
           </div>
         </div>
 
-        {/* Bento Grid with Refined Design */}
-        <div className="grid grid-cols-12 gap-px bg-white/10 mb-32 relative z-10 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
-        {(() => {
-          // If NOT showing detailed content, we only want to show the first 3 sections (0, 1, 2) 
-          // and then ONE single box for the remaining CHAPTERS.
-          const visibleSections = displayDetailed 
-            ? displaySections 
-            : displaySections.slice(0, 3);
-          
-  const rendered = visibleSections.map((section, idx) => {
-    const isDark = idx === 2 || idx === 3 || idx === 4 || idx === 6;
-    const isRed = idx === 5;
-    const isRefreshing = idx === 1 && isRefreshingDaily;
-    
-    return (
-      <motion.div
-        key={idx}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: idx * 0.05 }}
-        className={`bg-black p-12 md:p-16 flex flex-col relative group ${getSlotClass(idx)}`}
-      >
-        <div className="mb-12">
-          <div className="flex items-center gap-4 mb-8">
-            <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic chapter-label">
-              {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, '0')}`}
-            </div>
-            {isRefreshing && (
-              <span className="text-[10px] text-mythic-gold animate-pulse font-sans font-bold tracking-widest">
-                REFRESHING...
-              </span>
-            )}
-          </div>
-          <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] text-white ${isRefreshing ? 'opacity-30' : ''}`}>
-            {section.title}
-          </h3>
-        </div>
+        {/* Structural Bento Grid Layout */}
+        <div id="report-grid" className="grid grid-cols-12 gap-px bg-ink-black/10 dark:bg-white/10 mb-32 relative z-10 border border-ink-black/10 dark:border-white/10 rounded-2xl overflow-hidden shadow-xl dark:shadow-2xl">
+          {displaySections
+            .slice(0, displayDetailed ? undefined : 3)
+            .map((section, idx) => (
+              <ReportItemCard
+                key={idx}
+                idx={idx}
+                section={section}
+                isRefreshingDaily={isRefreshingDaily}
+                lang={lang}
+              />
+            ))}
 
-        <div className={`text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container text-white/70 ${isRefreshing ? 'opacity-30' : ''}`}>
-          {isRefreshing ? (
-             <div className="space-y-4">
-               <div className="h-4 bg-white/10 rounded w-full animate-pulse" />
-               <div className="h-4 bg-white/10 rounded w-5/6 animate-pulse" />
-               <div className="h-4 bg-white/10 rounded w-4/6 animate-pulse" />
-             </div>
-          ) : (
-            <ReactMarkdown>
-              {section.content}
-            </ReactMarkdown>
+          {!displayDetailed && (
+            <PremiumLockBox
+              t={t}
+              lang={lang}
+              isCheckingPayment={isCheckingPayment}
+              isPremiumUser={isPremiumUser}
+              handlePayment={handlePayment}
+              onUpgrade={onUpgrade}
+              handleManualCheck={handleManualCheck}
+            />
           )}
         </div>
-      </motion.div>
-    );
-  });
 
-          // Append one locked box if not showing detailed content (Hides in PDF)
-          if (!displayDetailed) {
-            rendered.push(
-              <motion.div
-                key="locked-premium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                data-premium-lock="true"
-                className="col-span-12 py-32 bg-black/50 p-12 md:p-16 flex flex-col items-center justify-center relative group backdrop-blur-sm border-t border-white/5"
-              >
-                <div className="mb-16 text-center">
-                  <div className="flex items-center justify-center gap-4 mb-8">
-                    <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-white/30 italic">
-                      PREMIUM CONTENT
-                    </div>
-                    <span className="flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/20 rounded-none text-[10px] font-black text-white uppercase tracking-widest">
-                      <Lock className="w-3 h-3" />
-                      {t.premiumBadge}
-                    </span>
-                  </div>
-                   <h3 className="text-5xl md:text-7xl font-serif font-black italic leading-[0.9] text-white">
-                    {t.unlockDetailedReport}
-                  </h3>
-                </div>
-
-                <div className="flex flex-col items-center gap-12">
-                  <p className="text-white/40 font-serif italic text-2xl text-center max-w-xl">
-                    {isCheckingPayment 
-                      ? (lang === 'ko' ? "결제가 완료된 후, 잠시만 기다려 주시면 자동으로 리포트가 생성됩니다. (결제 완료 후 이 창으로 돌아와 주세요)" : "After payment, the report will be generated automatically. (Please return to this window after payment)")
-                      : t.simpleLockNote}
-                  </p>
-                  {isPremiumUser ? (
-                    <button
-                      onClick={onUpgrade}
-                      className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      {lang === 'ko' ? "심층 분석 내용 보기" : "View Detailed Analysis"}
-                    </button>
-                  ) : (
-                    <div className="flex flex-col items-center gap-4">
-                      <button
-                        onClick={handlePayment}
-                        className="holo-button px-20 py-6 bg-black text-white text-[12px] font-black uppercase tracking-[0.5em] transition-all flex items-center gap-4"
-                      >
-                        {isCheckingPayment && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                        {isCheckingPayment 
-                          ? (lang === 'ko' ? "결제 확인 중..." : "Verifying Payment...")
-                          : t.unlockButton}
-                      </button>
-                      
-                      {isCheckingPayment && (
-                        <div className="flex flex-col items-center gap-4">
-                          <button 
-                            onClick={handleManualCheck}
-                            className="text-[10px] text-white/40 uppercase tracking-widest hover:text-white transition-colors underline underline-offset-4"
-                          >
-                            {lang === 'ko' ? "결제 완료 후 클릭 (수동 확인)" : "Click after payment (Manual check)"}
-                          </button>
-                          <button 
-                            onClick={handlePayment}
-                            className="text-[10px] text-white/20 uppercase tracking-[0.2em] hover:text-white transition-colors"
-                          >
-                            {lang === 'ko' ? "결제창이 열리지 않았나요? 결제 다시 시도" : "Popup didn't open? Try again"}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            );
-          }
-
-          return rendered;
-        })()}
-        </div>
-
-        {/* Medical / Warning Banner */}
+        {/* Medical / Disclaimer Warning Box */}
         {report.medicalAdvice && (
-          <div className="mb-16 p-6 bg-white opacity-30 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-white/20">
-            <div className="w-24 h-24 bg-black flex-shrink-0 flex items-center justify-center text-white border border-white/20">
-              <AlertTriangle className="w-10 h-10 text-white" />
+          <div className="mb-16 p-6 bg-white/10 dark:bg-white/5 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-ink-black/10 dark:border-white/20">
+            <div className="w-24 h-24 bg-ink-black dark:bg-black/40 flex-shrink-0 flex items-center justify-center text-white border border-ink-black/20 dark:border-white/20">
+              <AlertTriangle className="w-10 h-10 text-mythic-red" />
             </div>
             <div>
-              <div className="text-[11px] uppercase font-sans font-black tracking-[0.8em] text-black mb-4 italic">{t.disclaimer}</div>
-              <p className="text-black/80 font-sans leading-relaxed text-xl max-w-4xl italic font-black">{report.medicalAdvice}</p>
+              <div className="text-[11px] uppercase font-sans font-black tracking-[0.8em] text-ink-black/40 dark:text-white/40 mb-4 italic">
+                {t.disclaimer}
+              </div>
+              <p className="text-ink-black/80 dark:text-white/80 font-sans leading-relaxed text-xl max-w-4xl italic font-bold">
+                {report.medicalAdvice}
+              </p>
             </div>
           </div>
         )}
       </div>
 
-      {/* Save PDF Button */}
+      {/* Save PDF CTA Option */}
       <div className="mt-32 flex justify-center pb-32 hide-in-pdf">
         <button
           onClick={handleSavePdf}
-          className="holo-button group flex items-center gap-6 px-20 py-8 text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-2xl"
+          disabled={isGeneratingPdf}
+          className="holo-button group flex items-center gap-6 px-20 py-8 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] shadow-xl dark:shadow-2xl disabled:opacity-55"
         >
-          <FileDown className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
-          {t.savePdf}
+          <FileDown className={`w-5 h-5 opacity-60 group-hover:opacity-100 transition-opacity ${isGeneratingPdf ? "animate-bounce" : ""}`} />
+          {isGeneratingPdf 
+            ? (lang === "ko" ? "PDF 생성 중..." : "Generating PDF...") 
+            : t.savePdf}
         </button>
       </div>
 
+     
 
-      {/* Feedback / Contact */}
-      <div className="mt-24 text-center opacity-30 relative z-10 hide-in-pdf">
+      {/* Feedback & Inquiries Footer Label */}
+      <div className="mt-8 text-center opacity-30 relative z-10 hide-in-pdf">
         <p className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase mb-2">
           {lang === "ko" ? "오류 제보 및 문의" : "Bug Reports & Inquiries"}
         </p>
-        <a 
-          href="mailto:patiencendiligence@gmail.com" 
+        <a
+          href="mailto:patiencendiligence@gmail.com"
           className="text-xs font-serif italic hover:text-mythic-gold transition-all"
         >
           patiencendiligence@gmail.com
         </a>
       </div>
 
-      <PaymentModal 
-        isOpen={isPaymentModalOpen} 
-        onClose={() => setIsPaymentModalOpen(false)} 
-        lang={lang} 
+      {/* Lazy Loaded Interactive Payment Confirmation Overlay */}
+      <PaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        lang={lang}
       />
 
-      {/* Footer Navigation */}
-      <footer className="mt-32 pt-20 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10 hide-in-pdf">
+      {/* Multi-language Navigation Sitemap Footer */}
+      <footer className="mt-32 pt-20 border-t border-ink-black/5 dark:border-white/5 flex flex-col md:flex-row justify-between items-center gap-8 opacity-40 relative z-10 hide-in-pdf text-ink-black dark:text-white">
         <div className="flex flex-col items-center md:items-start gap-4">
-          <div className="text-3xl font-serif font-black italic text-white/60 mb-2">{t.title}</div>
-          <div className="text-[10px] uppercase tracking-[0.4em] mb-4">{t.grandmother}</div>
+          <div className="text-3xl font-serif font-black italic text-ink-black/60 dark:text-white/60 mb-2">
+            {t.title}
+          </div>
+          <div className="text-[10px] uppercase tracking-[0.4em] mb-4 text-ink-black/40 dark:text-white/40">
+            {t.grandmother}
+          </div>
           <div className="flex items-center gap-8">
-            <button onClick={onReset} className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all flex items-center gap-4 group">
-              <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" /> {t.backToHome}
+            <button
+              onClick={onReset}
+              className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-ink-black dark:text-white hover:text-mythic-gold dark:hover:text-mythic-gold transition-all flex items-center gap-4 group"
+            >
+              <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+              {t.backToHome}
             </button>
-            <Link 
+            <Link
               to="/policies"
-              className="text-[10px] font-sans font-black uppercase tracking-[0.5em] hover:text-white transition-all"
+              className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-ink-black dark:text-white hover:text-mythic-gold dark:hover:text-mythic-gold transition-all"
             >
               {t.policy}
             </Link>
           </div>
         </div>
-        <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">
+        <div className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase text-ink-black/40 dark:text-white/40">
           © 2026 Yongshinhalmom. LIFESTYLE ANALYSIS REPORT.
         </div>
       </footer>

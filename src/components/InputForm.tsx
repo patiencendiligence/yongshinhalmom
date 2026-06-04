@@ -53,14 +53,14 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
   };
 
   return (
-    <div className="bg-black/40 border border-white/10 p-12 md:p-20 relative overflow-hidden max-w-4xl mx-auto shadow-2xl">
+    <div className="bg-white/40 dark:bg-black/40 border border-ink-black/10 dark:border-white/10 p-12 md:p-20 relative overflow-hidden max-w-4xl mx-auto shadow-xl dark:shadow-2xl transition-all duration-300">
       <div className="absolute inset-0 dragon-pattern opacity-10 pointer-events-none" />
 
       <header className="mb-20 text-center">
-        <h2 className="text-5xl md:text-7xl font-serif font-black text-white italic mb-6 leading-none tracking-tighter">
+        <h2 className="text-5xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic mb-6 leading-none tracking-tighter">
           {t.registryTitle}
         </h2>
-        <div className="text-[10px] uppercase tracking-[0.6em] mythic-gradient-text font-sans font-black italic">
+        <div className="text-[10px] uppercase tracking-[0.6em] text-ink-black/60 dark:text-white/40 font-sans font-black italic">
           {t.registrySubtitle}
         </div>
       </header>
@@ -68,22 +68,22 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
       <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.clientName}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.clientName}</label>
             <input
               type="text"
               placeholder={t.namePlaceholder}
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-white transition-all font-serif text-3xl text-white placeholder:text-white/5"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/10 dark:placeholder:text-white/5"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
           </div>
 
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.birthPlace}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.birthPlace}</label>
             <input
               type="text"
               placeholder={t.placePlaceholder}
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-white transition-all font-serif text-3xl text-white placeholder:text-white/5"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/10 dark:placeholder:text-white/5"
               value={formData.birthPlace}
               onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
             />
@@ -92,19 +92,19 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.birthDate}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.birthDate}</label>
             <input
               type="date"
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-white transition-all font-serif text-3xl text-white h-[70px] appearance-none"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white h-[70px] appearance-none"
               value={formData.birthDate}
               onChange={(e) => setFormData({ ...formData, birthDate: e.target.value })}
             />
           </div>
           <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.birthTime}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.birthTime}</label>
             <input
               type="time"
-              className="w-full bg-transparent border-b border-white/10 px-0 py-4 outline-none focus:border-white transition-all font-serif text-3xl text-white h-[70px] appearance-none"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white h-[70px] appearance-none"
               value={formData.birthTime}
               onChange={(e) => setFormData({ ...formData, birthTime: e.target.value })}
             />
@@ -113,7 +113,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 pt-4">
           <div className="space-y-8">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.calendarType}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.calendarType}</label>
             <div className="flex gap-4">
               {[
                 { value: false, label: "Solar", kr: t.solar },
@@ -125,18 +125,18 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                   onClick={() => setFormData({ ...formData, isLunar: opt.value })}
                   className={`flex-1 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
                     formData.isLunar === opt.value 
-                    ? "bg-white text-black border-white" 
-                    : "bg-transparent text-white/30 border-white/10 hover:border-white/30 hover:text-white"
+                    ? "bg-ink-black text-white border-ink-black dark:bg-white dark:text-black dark:border-white shadow-md dark:shadow-2xl" 
+                    : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
                   }`}
                 >
-                  {opt. kr}
+                  {opt.kr}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="space-y-8">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.gender}</label>
+            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.gender}</label>
             <div className="flex gap-4">
               {[
                 { value: "female", label: "Female", kr: t.female },
@@ -148,8 +148,8 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                   onClick={() => setFormData({ ...formData, gender: opt.value })}
                   className={`flex-1 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
                     formData.gender === opt.value 
-                    ? "bg-white text-black border-white" 
-                    : "bg-transparent text-white/30 border-white/10 hover:border-white/30 hover:text-white"
+                    ? "bg-ink-black text-white border-ink-black dark:bg-white dark:text-black dark:border-white shadow-md dark:shadow-2xl" 
+                    : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
                   }`}
                 >
                   {opt.kr}
@@ -160,7 +160,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
         </div>
 
         <div className="space-y-8 pt-4">
-          <label className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-black italic">{t.selectYear}</label>
+          <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.selectYear}</label>
           <div className="flex gap-4">
             {[
               { value: currentYear, kr: t.thisYear },
@@ -172,8 +172,8 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
                 onClick={() => setFormData({ ...formData, targetYear: opt.value })}
                 className={`flex-1 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
                   formData.targetYear === opt.value 
-                  ? "bg-white text-black border-white shadow-2xl" 
-                  : "bg-transparent text-white/30 border-white/10 hover:border-white/30 hover:text-white"
+                  ? "bg-ink-black text-white border-ink-black dark:bg-white dark:text-black dark:border-white shadow-md dark:shadow-2xl" 
+                  : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
                 }`}
               >
                 {opt.kr}
@@ -184,7 +184,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
         <button
           type="submit"
-          className="holo-button w-full py-8 mt-12 bg-black text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
+          className="holo-button w-full py-8 mt-12 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
         >
           {t.checkData} <ArrowRight className="w-5 h-5" />
         </button>

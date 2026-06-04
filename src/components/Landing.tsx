@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Sparkles, Moon, Sun } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { Language, translations } from "../lib/translations";
 
@@ -14,20 +14,14 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
   const t = translations[lang];
   
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden dragon-pattern">
-      {/* Decorative Accents Inspired by Image 1 */}
+    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
+      
+      {/* Decorative Accents */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
         <motion.div 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2 }}
-          className="absolute -top-20 -left-20 w-[60vw] h-[60vw] rounded-full bg-holo-cyan/5 blur-[120px]" 
-        />
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 2, delay: 0.5 }}
-          className="absolute -bottom-20 -right-20 w-[60vw] h-[60vw] rounded-full bg-holo-pink/5 blur-[120px]" 
+          animate={{ opacity: 0.05 }}
+          className="absolute -top-20 -left-20 w-[60vw] h-[60vw] rounded-full bg-indigo-900/10 blur-[120px] dark:bg-indigo-300/5" 
         />
       </div>
 
@@ -37,8 +31,8 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         transition={{ delay: 0.1, duration: 0.5 }}
         className="relative z-20 mb-8"
       >
-        <div className="inline-block px-4 py-1 border border-white/10 rounded-none bg-black backdrop-blur-sm">
-          <span className="text-[9px] font-sans font-black tracking-[0.5em] uppercase text-white/40 italic">{t.traditionalWisdom}</span>
+        <div className="inline-block px-4 py-1 border border-ink-black/10 dark:border-white/10 rounded-none bg-ink-black/5 dark:bg-white/5 backdrop-blur-sm">
+          <span className="text-[9px] font-sans font-black tracking-[0.5em] uppercase text-ink-black/60 dark:text-white/40 italic">{t.traditionalWisdom}</span>
         </div>
       </motion.div>
 
@@ -49,12 +43,12 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         className="relative z-10"
       >
         <h1 className="flex flex-col items-center mb-12">
-          <span className="text-[11px] font-sans font-black tracking-[0.8em] uppercase mythic-gradient-text mb-6">{t.ancientOracle}</span>
+          <span className="text-[11px] font-sans font-black tracking-[0.8em] uppercase text-ink-black dark:text-white mb-6 opacity-80">{t.ancientOracle}</span>
           <div className="flex flex-col items-center">
-            <span className="text-6xl md:text-[10rem] font-serif font-black italic tracking-tighter leading-[0.85] text-white">
+            <span className="text-6xl md:text-[10rem] font-serif font-black italic tracking-tighter leading-[1.15] py-6 px-4 block overflow-visible gradient-title">
               {t.title}
             </span>
-            <span className="text-2xl md:text-3xl font-serif text-white/20 italic tracking-[0.4em] mt-4 uppercase">
+            <span className="text-2xl md:text-3xl font-serif text-ink-black/40 dark:text-white/20 italic tracking-[0.4em] mt-4 uppercase">
               {t.grandmother}
             </span>
           </div>
@@ -67,7 +61,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         transition={{ delay: 0.3 }}
         className="max-w-xl mx-auto mb-16 relative z-10"
       >
-        <p className="text-white/60 text-sm md:text-base font-sans leading-relaxed tracking-tight max-w-sm">
+        <p className="text-ink-black/70 dark:text-white/60 text-sm md:text-base font-sans leading-relaxed tracking-tight max-w-sm">
           {t.landingQuote}
         </p>
       </motion.div>
@@ -81,7 +75,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <div className="flex flex-col md:flex-row gap-6">
           <button
             onClick={onStart}
-            className="holo-button group px-16 py-5 min-w-[280px] bg-white text-white/50 font-sans font-black text-[11px] uppercase tracking-[0.5em] flex items-center justify-center gap-4"
+            className="holo-button group px-16 py-5 min-w-[280px] bg-ink-black text-white dark:bg-transparent dark:text-white/90 font-sans font-black text-[11px] uppercase tracking-[0.5em] flex items-center justify-center gap-4 transition-all hover:opacity-90"
           >
             {t.enterOracle} <Sparkles className="w-3.5 h-3.5" />
           </button>
@@ -89,20 +83,13 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           {hasProfiles && (
             <button
               onClick={onOpenProfiles}
-              className="px-10 py-5 border border-white/10 bg-black text-white/50 font-sans font-black text-[10px] uppercase tracking-[0.5em] transition-all hover:text-white hover:border-white/30"
+              className="px-10 py-5 border border-ink-black/20 dark:border-white/10 bg-transparent text-ink-black/60 dark:text-white/50 font-sans font-black text-[10px] uppercase tracking-[0.5em] transition-all hover:text-ink-black hover:border-ink-black/40 dark:hover:text-white dark:hover:border-white/30"
             >
               {t.loadProfiles}
             </button>
           )}
         </div>
       </motion.div>
-
-      <div className="absolute top-1/2 left-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
-        Pattern Science • Modern Tech
-      </div>
-      <div className="absolute top-1/2 right-4 -translate-y-1/2 vertical-text text-[9px] font-sans font-black tracking-[0.4em] uppercase opacity-20">
-        User Insight • Life Pattern
-      </div>
     </div>
   );
 }

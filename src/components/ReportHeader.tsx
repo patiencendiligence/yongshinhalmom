@@ -1,0 +1,60 @@
+import React from "react";
+import Illustration from "./Illustration";
+import { ReportResult } from "../services/geminiService";
+import { Language } from "../lib/translations";
+
+interface ReportHeaderProps {
+  t: any;
+  report: ReportResult;
+  lang: Language;
+  userData: any;
+  manseRyeok: any;
+}
+
+export default function ReportHeader({ t, report, lang, userData, manseRyeok }: ReportHeaderProps) {
+  return (
+    <header className="pt-32 pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-ink-black/10 dark:border-white/10 mb-16 relative z-10">
+      <div className="max-w-3xl mb-12 md:mb-0">
+        <h1 className="text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-ink-black dark:text-white leading-[0.8] mb-12">
+          {t.yourLifestyleReport.split("Report")[0]} <span className="mythic-gradient-text">Report</span> <br />
+          {t.yourLifestyleReport.split("Report")[1]}
+        </h1>
+        <p className="text-2xl md:text-3xl font-serif text-ink-black/55 dark:text-white/40 italic leading-snug max-w-2xl">
+          "{report.summary}"
+        </p>
+
+        <div className="mt-16 flex flex-wrap gap-8">
+          {[
+            { label: lang === "ko" ? "COLOR" : "COLOR", value: report.luckInfo.color },
+            { label: lang === "ko" ? "ITEM" : "ITEM", value: report.luckInfo.item },
+            { label: lang === "ko" ? "FOOD" : "FOOD", value: report.luckInfo.food },
+          ].map((luck, i) => (
+            <div key={i} className="flex flex-col gap-2">
+              <span className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30">
+                {luck.label}
+              </span>
+              <span className="text-xl font-serif italic text-ink-black dark:text-white">
+                {luck.value}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="text-center md:text-right flex flex-col justify-end items-center md:items-end">
+        <div className="mb-8 p-1.5 border border-ink-black/5 dark:border-white/5 rounded-2xl bg-ink-black/[0.02] dark:bg-white/[0.02] zodiac-container">
+          <Illustration zodiac={manseRyeok?.zodiac !== undefined ? manseRyeok.zodiac : report.zodiac} />
+        </div>
+        <div className="text-[10px] font-sans font-bold tracking-[0.5em] text-ink-black/20 dark:text-white/20 uppercase mb-4">
+          {t.authorizedRecipient}
+        </div>
+        <div className="text-5xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic">
+          {userData.name}
+        </div>
+        <p className="text-xl text-ink-black/30 dark:text-white/20 italic mt-4">
+          {userData.birthDate} ({userData.isLunar ? t.lunar : t.solar})
+        </p>
+      </div>
+    </header>
+  );
+}

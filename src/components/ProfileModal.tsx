@@ -28,7 +28,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
             exit={{ opacity: 0, scale: 1.05, y: 10 }}
             className="w-full max-w-2xl bg-cream border border-ink-black/20 dark:bg-black dark:border-white/20 rounded-none overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.05)] dark:shadow-[0_0_100px_rgba(255,255,255,0.05)] dragon-pattern relative"
           >
-            <div className="p-10 border-b border-ink-black/10 dark:border-white/10 flex justify-between items-center bg-ink-black/[0.01] dark:bg-white/[0.02] relative z-10">
+            <div className="p-8 border-b border-ink-black/10 dark:border-white/10 flex justify-between items-start bg-ink-black/[0.01] dark:bg-white/[0.02] relative z-10">
               <div>
                 <h2 className="text-3xl font-serif font-black italic text-ink-black dark:text-white tracking-tight">{t.storedProfiles}</h2>
                 <p className="text-[10px] text-ink-black/40 dark:text-white/30 tracking-[0.6em] uppercase mt-2 font-black">{t.storedKnowledge}</p>
@@ -38,7 +38,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
               </button>
             </div>
 
-            <div className="max-h-[55vh] overflow-y-auto p-8 space-y-6 no-scrollbar relative z-10">
+            <div className="max-h-[55vh] overflow-y-auto p-4 space-y-6 no-scrollbar relative z-10">
               {profiles.length === 0 ? (
                 <div className="py-24 text-center text-ink-black/20 dark:text-white/10 italic font-serif text-2xl">
                   {t.noProfiles}

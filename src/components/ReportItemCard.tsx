@@ -126,7 +126,13 @@ function parseDailyFortune(content: string) {
   };
 }
 
-const getSlotClass = (idx: number) => {
+const getSlotClass = (idx: number, title?: string) => {
+  if (title) {
+    const t = title.toLowerCase();
+    if (t.includes("월별") || t.includes("monthly") || t.includes("세운")) {
+      return "col-span-12 bg-white/60 dark:bg-black border-t border-ink-black/10 dark:border-white/10 p-8 md:p-12";
+    }
+  }
   switch (idx) {
     case 0: return "col-span-12 row-span-auto md:row-span-3 pb-20"; // Detailed Saju
     case 1: return "col-span-12 md:col-span-6 row-span-2 border-mythic-gold/20"; // Today's Report
@@ -136,6 +142,7 @@ const getSlotClass = (idx: number) => {
     case 5: return "col-span-12 md:col-span-4 row-span-2 bg-mythic-red/90 text-white"; // Love
     case 6: return "col-span-12 md:col-span-4 row-span-2 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Career
     case 7: return "col-span-12 row-span-2 bg-mythic-gold/5 border-mythic-gold/20"; // Remedy
+    case 8: return "col-span-12 bg-white/60 dark:bg-black border-t border-ink-black/10 dark:border-white/10 p-8 md:p-12";
     default: return "col-span-12 md:col-span-6 row-span-2";
   }
 };
@@ -263,7 +270,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
         isRed 
           ? "bg-mythic-red/90 text-white" 
           : "bg-white/60 dark:bg-black text-ink-black dark:text-white"
-      } ${getSlotClass(idx)}`}
+      } ${getSlotClass(idx, section.title)}`}
     >
       <div className="mb-12">
         <div className="flex items-center gap-4 mb-8">

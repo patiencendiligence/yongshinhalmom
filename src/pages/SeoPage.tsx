@@ -85,7 +85,7 @@ export default function SeoPage({
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-fade-in" style={{minWidth: '98vw'}}>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
       <div className="flex items-start justify-between gap-4 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
         <motion.button

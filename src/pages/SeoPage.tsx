@@ -66,6 +66,24 @@ export default function SeoPage({
     window.scrollTo(0, 0);
   }, [category, slug]);
 
+  // Sprite grid positioning for O-Hang elements (3 columns, 2 rows)
+  const getOHangBackgroundPosition = (elementSlug: string): string => {
+    switch (elementSlug) {
+      case "earth":
+        return "0% 0%"; // Column 1, Row 1
+      case "fire":
+        return "50% 0%"; // Column 2, Row 1
+      case "water":
+        return "100% 0%"; // Column 3, Row 1
+      case "metal":
+        return "0% 100%"; // Column 1, Row 2 (금/금/목 에서 첫번째 금)
+      case "wood":
+        return "100% 100%"; // Column 3, Row 2 (금/금/목 에서 목)
+      default:
+        return "0% 0%";
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-fade-in" style={{minWidth: '98vw'}}>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
@@ -106,9 +124,26 @@ export default function SeoPage({
           <ReactMarkdown
             components={{
               h1: ({ children }) => (
-                <h1 className={`text-3xl sm:text-4xl font-serif font-black mb-8 ${theme.text} tracking-tight border-b ${theme.borderMuted} pb-4`}>
-                  {children}
-                </h1>
+                <>
+                  {category === "element" && (
+                    <div 
+                      className="w-full max-w-[465px] aspect-[465/384] mb-8 overflow-hidden rounded-xl border border-ink-black/10 dark:border-white/10 relative shadow-sm hover:shadow-md transition-shadow duration-300 bg-cream/30 dark:bg-zinc-900/30"
+                    >
+                      <div 
+                        className="absolute inset-0 select-none pointer-events-none"
+                        style={{
+                          backgroundImage: "url('/assets/o-hang.png')",
+                          backgroundSize: "300% 200%",
+                          backgroundPosition: getOHangBackgroundPosition(slug || ""),
+                          backgroundRepeat: "no-repeat"
+                        }}
+                      />
+                    </div>
+                  )}
+                  <h1 className={`text-3xl sm:text-4xl font-serif font-black mb-8 ${theme.text} tracking-tight border-b ${theme.borderMuted} pb-4`}>
+                    {children}
+                  </h1>
+                </>
               ),
 
               h2: ({ children }) => (

@@ -57,7 +57,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
       <div className="absolute inset-0 dragon-pattern opacity-10 pointer-events-none" />
 
       <header className="mb-20 text-center">
-        <h2 className="text-5xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic mb-6 leading-none tracking-tighter">
+        <h2 className="text-4xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic mb-6 leading-none tracking-tighter">
           {t.registryTitle}
         </h2>
         <div className="text-[10px] uppercase tracking-[0.6em] text-ink-black/60 dark:text-white/40 font-sans font-black italic">
@@ -72,7 +72,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
             <input
               type="text"
               placeholder={t.namePlaceholder}
-              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/10 dark:placeholder:text-white/5"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/12 dark:placeholder:text-white/12"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
@@ -83,7 +83,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
             <input
               type="text"
               placeholder={t.placePlaceholder}
-              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/10 dark:placeholder:text-white/5"
+              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/12 dark:placeholder:text-white/12"
               value={formData.birthPlace}
               onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
             />
@@ -159,7 +159,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
           </div>
         </div>
 
-        <div className="space-y-8 pt-4">
+        <div className="space-y-8 sm:space-y-2 pt-4 sm:pt-2">
           <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.selectYear}</label>
           <div className="flex gap-4">
             {[
@@ -184,7 +184,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
         <button
           type="submit"
-          className="holo-button w-full py-8 mt-12 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
+          className="holo-button w-full py-8 sm:py-2 mt-12 sm:mt-6 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
         >
           {t.checkData} <ArrowRight className="w-5 h-5" />
         </button>

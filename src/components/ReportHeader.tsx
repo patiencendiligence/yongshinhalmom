@@ -48,7 +48,7 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
         <div className="text-[9px] sm:text-[10px] font-sans font-bold tracking-[0.5em] text-ink-black/20 dark:text-white/20 uppercase mb-3 md:mb-4">
           {t.authorizedRecipient}
         </div>
-        <div className="text-4xl sm:text-5xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic">
+        <div className="text-4xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic">
           {userData.name}
         </div>
         <p className="text-base sm:text-xl text-ink-black/30 dark:text-white/20 italic mt-3 md:mt-4">

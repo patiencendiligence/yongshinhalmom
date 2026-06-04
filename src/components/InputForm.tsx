@@ -53,7 +53,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
   };
 
   return (
-    <div className="bg-white/40 dark:bg-black/40 border border-ink-black/10 dark:border-white/10 p-12 md:p-20 relative overflow-hidden max-w-4xl mx-auto shadow-xl dark:shadow-2xl transition-all duration-300">
+    <div className="bg-white/40 dark:bg-black/40 border border-ink-black/10 dark:border-white/10 p-6 md:p-12 md:p-20 relative overflow-hidden max-w-4xl mx-auto shadow-xl dark:shadow-2xl transition-all duration-300">
       <div className="absolute inset-0 dragon-pattern opacity-10 pointer-events-none" />
 
       <header className="mb-20 text-center">

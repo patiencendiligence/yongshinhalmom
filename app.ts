@@ -409,6 +409,8 @@ REQUIRED JSON STRUCTURE:
   "title": "오늘의 컨디션 가이드",
   "content": "분석 내용 (첫 줄에 날짜 포함)"
 }
+
+STRICT RULE: Do NOT include any separate [전체적인 오행 균형 설명] (Overall Five Elements Analysis), Saju tables, or other chapters. ONLY output the 6 requested fortune sections under their respective headers. Do NOT append anything after the content of "오늘의 로또운" / "Lotto Fortune of Today".
 `;
 
   let parsed: any = null;

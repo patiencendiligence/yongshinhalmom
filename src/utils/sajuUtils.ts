@@ -27,6 +27,17 @@ export function parseDailyFortune(content: string) {
         }
       }
       if (capture) {
+        // Stop capture if we see Five elements block appended
+        if (
+          trimmed.includes('전체적인 오행') || 
+          trimmed.includes('오행 분포') || 
+          trimmed.includes('오행 균형') || 
+          trimmed.includes('오행 분석') ||
+          trimmed.includes('오행 균형 설명') ||
+          trimmed.startsWith('[전체적')
+        ) {
+          break;
+        }
         blockLines.push(line);
       }
     }

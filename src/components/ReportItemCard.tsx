@@ -31,6 +31,17 @@ function parseDailyFortune(content: string) {
         }
       }
       if (capture) {
+        // Stop capture if we see Five elements block appended
+        if (
+          trimmed.includes('전체적인 오행') || 
+          trimmed.includes('오행 분포') || 
+          trimmed.includes('오행 균형') || 
+          trimmed.includes('오행 분석') ||
+          trimmed.includes('오행 균형 설명') ||
+          trimmed.startsWith('[전체적')
+        ) {
+          break;
+        }
         blockLines.push(line);
       }
     }
@@ -326,11 +337,14 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             <ReactMarkdown>
               {section.content}
             </ReactMarkdown>
-            {isFiveElementsSection && (
+          </>
+        )}
+      </div>
+       {isFiveElementsSection && (
               <div className="mt-8 pt-6 border-t border-ink-black/5 dark:border-white/5 flex flex-col sm:flex-row items-center justify-start gap-4">
                 <Link
                   id="strongest-element-link"
-                  to={`/element/${elementSlug}`}
+                  to={`./element/${elementSlug}`}
                   className="holo-button group flex items-center gap-4 px-8 py-4 bg-mythic-gold/15 hover:bg-mythic-gold/25 border border-mythic-gold/40 hover:border-mythic-gold text-mythic-gold dark:text-mythic-gold font-sans font-black text-[12px] uppercase tracking-[0.2em] shadow-lg hover:scale-102 transition-all cursor-pointer rounded-sm"
                 >
                   <span className="text-base">{strongest.emoji}</span>
@@ -343,9 +357,6 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
                 </Link>
               </div>
             )}
-          </>
-        )}
-      </div>
     </motion.div>
   );
 }

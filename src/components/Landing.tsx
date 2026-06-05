@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { Sparkles } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 
 import { Language, translations } from "../lib/translations";
 
@@ -15,6 +16,11 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
   
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
+      <Helmet>
+        <title>{lang === "en" ? "Yongshin Halmeom - AI Saju Report & Today's Fortune" : "용신할멈 - AI 사주명리 보고서 & 오늘의 운세"}</title>
+        <meta name="description" content={lang === "en" ? "Explore traditional Saju wisdom. Discover your fate, useful elements, daily fortune guidance, and authentic insights." : "용신할멈과 함께 알아보는 전통 사주명리 지혜. 일간, 대운, 용신과 오늘 하루의 길흉화복을 완벽히 분석해드립니다."} />
+        <link rel="canonical" href="https://yongshinhalmom.vercel.app/" />
+      </Helmet>
       
       {/* Decorative Accents */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">

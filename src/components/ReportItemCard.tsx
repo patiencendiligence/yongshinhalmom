@@ -5,7 +5,7 @@ import ReactMarkdown from "react-markdown";
 import { ReportSection } from "../services/geminiService";
 import { Language } from "../lib/translations";
 import { getStrongestElement } from "../utils/sajuUtils";
-
+import {  ArrowRight } from "lucide-react";
 interface ReportItemCardProps {
   idx: number;
   section: ReportSection;

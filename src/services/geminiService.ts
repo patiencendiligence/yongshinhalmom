@@ -19,6 +19,7 @@ export interface ReportResult {
   medicalAdvice?: string;
   isAbuse?: boolean;
   abuseMessage?: string;
+  todaysFortune?: ReportSection;
 }
 
 

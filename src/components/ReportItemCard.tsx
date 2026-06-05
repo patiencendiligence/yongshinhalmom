@@ -1,14 +1,17 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import { ReportSection } from "../services/geminiService";
 import { Language } from "../lib/translations";
+import { getStrongestElement } from "../utils/sajuUtils";
 
 interface ReportItemCardProps {
   idx: number;
   section: ReportSection;
   isRefreshingDaily: boolean;
   lang?: Language;
+  manseRyeok?: any;
 }
 
 function parseDailyFortune(content: string) {
@@ -147,7 +150,7 @@ const getSlotClass = (idx: number, title?: string) => {
   }
 };
 
-export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko" }: ReportItemCardProps) {
+export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko", manseRyeok }: ReportItemCardProps) {
   const isRed = idx === 5;
   const isRefreshing = idx === 0 && isRefreshingDaily;
 
@@ -155,6 +158,25 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
     if (idx !== 0) return null;
     return parseDailyFortune(section.content);
   }, [idx, section.content]);
+
+  const strongest = React.useMemo(() => {
+    return manseRyeok ? getStrongestElement(manseRyeok) : { element: "화", emoji: "🔥" };
+  }, [manseRyeok]);
+
+  const elementEngMap: Record<string, string> = {
+    "목": "wood",
+    "화": "fire",
+    "토": "earth",
+    "금": "metal",
+    "수": "water"
+  };
+  const elementSlug = elementEngMap[strongest.element] || "fire";
+
+  const isFiveElementsSection = 
+    section.title === "전체 오행 분석" || 
+    section.title === "Overall Five Elements Analysis" ||
+    section.title.includes("전체 오행 분석") ||
+    section.title.includes("Overall Five Elements Analysis");
 
   if (idx === 0) {
     if (!parsedFortune) return null;
@@ -300,9 +322,28 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             <div className="h-4 bg-ink-black/10 dark:bg-white/10 rounded w-4/6 animate-pulse" />
           </div>
         ) : (
-          <ReactMarkdown>
-            {section.content}
-          </ReactMarkdown>
+          <>
+            <ReactMarkdown>
+              {section.content}
+            </ReactMarkdown>
+            {isFiveElementsSection && (
+              <div className="mt-8 pt-6 border-t border-ink-black/5 dark:border-white/5 flex flex-col sm:flex-row items-center justify-start gap-4">
+                <Link
+                  id="strongest-element-link"
+                  to={`/element/${elementSlug}`}
+                  className="holo-button group flex items-center gap-4 px-8 py-4 bg-mythic-gold/15 hover:bg-mythic-gold/25 border border-mythic-gold/40 hover:border-mythic-gold text-mythic-gold dark:text-mythic-gold font-sans font-black text-[12px] uppercase tracking-[0.2em] shadow-lg hover:scale-102 transition-all cursor-pointer rounded-sm"
+                >
+                  <span className="text-base">{strongest.emoji}</span>
+                  <span>
+                    {lang === "en"
+                      ? `Characteristics of Strong ${strongest.element} (${elementSlug.toUpperCase()}) Energy`
+                      : `${strongest.element} 기운이 강한 사람 특징`}
+                      <ArrowRight />
+                  </span>
+                </Link>
+              </div>
+            )}
+          </>
         )}
       </div>
     </motion.div>

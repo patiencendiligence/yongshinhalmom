@@ -6,6 +6,8 @@ import { ArrowLeft, Menu, X, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Language } from "../lib/translations";
 import FileExplorer, { getThemeColors } from "../components/FileExplorer";
+import { filterContentByLanguage } from "../utils/sajuUtils";
+
 
 export default function SeoPage({
   onBack,
@@ -48,23 +50,28 @@ export default function SeoPage({
   };
 
   useEffect(() => {
-    const path =
-      `../data/${category}/${slug}.md`;
+    let path = `../data/${category}/${slug}.md`;
+    if (lang === "en") {
+      const enPath = `../data/${category}/${slug}-en.md`;
+      if (markdownModules[enPath]) {
+        path = enPath;
+      }
+    }
 
-    const loader =
-      markdownModules[path];
+    const loader = markdownModules[path];
 
     if (!loader) {
-      setContent("# 없는 문서라네");
+      setContent(lang === "en" ? "# Document not found" : "# 없는 문서라네");
       return;
     }
 
     loader().then((text: any) => {
-      setContent(text);
+      const filtered = filterContentByLanguage(text, lang);
+      setContent(filtered);
     });
     // Scroll back to top whenever active document page shifts
     window.scrollTo(0, 0);
-  }, [category, slug]);
+  }, [category, slug, lang]);
 
   // Sprite grid positioning for O-Hang elements (3 columns, 2 rows)
   const getOHangBackgroundPosition = (elementSlug: string): string => {

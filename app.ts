@@ -275,19 +275,30 @@ REQUIRED JSON STRUCTURE:
   "zodiac": ${correctZodiacIndex},
   "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
   "sections": [
-    { "title": "Section Title", "content": "Detailed analysis content" }
+    // Must contain exactly 8 elements corresponding strictly to the 8 sections in the system instructions (Chapter 1 to Chapter 8):
+    // sections[0] title should be "전체 대운" (or English equivalent)
+    // sections[1] title should be "입력 연도 운세" (or English equivalent)
+    // sections[2] title should be "전체 오행 분석" (or English equivalent) -> MUST contain the full five elements analysis here, do NOT skip or replace this chapter!
+    // sections[3] title should be "전체 건강 관리 습관" (or English equivalent)
+    // sections[4] title should be "전체 관계 및 상호작용 스타일" (or English equivalent)
+    // sections[5] title should be "전체 커리어 및 자원 관리 방향성" (or English equivalent)
+    // sections[6] title should be "전체 생활 개선 가이드" (or English equivalent)
+    // sections[7] title should be "해당 연도 월별 상세 세운" (or English equivalent)
   ],
   "luckInfo": {
     "color": "Today Lucky Color",
     "item": "Today Lucky Item",
     "food": "Today Lucky Food"
+  },
+  "todaysFortune": {
+    "title": "오늘의 컨디션 가이드",
+    "content": "분석 내용 (첫 줄에 날짜 포함)"
   }
 }
 
 NOTE: The zodiac index MUST be ${correctZodiacIndex}.
-The third section (sections[2]) MUST be the "Today's Condition Guide". 
-In the content of sections[2], you MUST start with the current date: "### ${kstToday}\n\n...".
-In the content of sections[2], you MUST strictly organize the text using the following headers matching the language requested:
+The "todaysFortune" content MUST start with the current date: "### ${kstToday}\n\n...".
+In the content of "todaysFortune", you MUST strictly organize the text using the following headers matching the language requested:
 ### ${lang === "ko" ? "오늘의 전반적인 흐름" : "Today's Overall Flow"} [Score] / [Evaluation], [Saju Tag]
 [content]
 ### ${lang === "ko" ? "오늘 조심할 것" : "What to Watch Out For Today"}
@@ -300,11 +311,12 @@ In the content of sections[2], you MUST strictly organize the text using the fol
 ### ${lang === "ko" ? "오늘의 로또운" : "Lotto Fortune of Today"}
 [content]
 
-NOTE for headers:
+NOTE for todaysFortune headers:
 - [Score] must be a calculated score between 0 and 100 based on the hexagram/star.
 - [Evaluation] must be one of: [아주 좋음, 좋음, 비교적 좋음, 보통, 비교적 좋지 않음, 좋지 않음, 주의] (or English equivalents: [Excellent, Good, Fairly Good, Normal, Fairly Bad, Bad, Caution]).
 - [Saju Tag] must be a relevant Saju star/influence "살" (e.g. 천을, 도화, 화개, 역마, 망신, 반안, 귀인, 지살 등) for the day. (e.g. "### 오늘의 전반적인 흐름 60 / 보통, 천을" or "### Today's Overall Flow 90 / Excellent, Dohwa").
 
+STRICT RULE: Do NOT mix or append any [전체적인 오행 균형 설명] (Overall Five Elements Analysis) inside "todaysFortune". Put the five elements analysis ONLY in sections[2] (전체 오행 분석) of the report.
 `;
 
   let parsed: any = null;

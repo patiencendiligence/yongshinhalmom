@@ -35,7 +35,7 @@ export function useReportResult({
   useEffect(() => {
     const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
     const today = kstNow.toISOString().split('T')[0];
-    const originalDailySection = report.sections[2];
+    const originalDailySection = report.todaysFortune || report.sections[2];
 
     if (originalDailySection && !originalDailySection.content.split('\n')[0].includes(today)) {
       console.log("[useReportResult] Daily section is stale or needs date prepending. Refreshing...");
@@ -58,7 +58,7 @@ export function useReportResult({
       
       refreshDaily();
     }
-  }, [report.sections, userData, lang]);
+  }, [report.sections, report.todaysFortune, userData, lang]);
 
   // Sync checking status with payment state
   useEffect(() => {
@@ -120,20 +120,29 @@ export function useReportResult({
 
   // Generate sections list with swapped / re-formatted chapters
   const displaySections = useMemo(() => {
-    const list = [...swappedReport.sections];
-    if (dailySection && list.length > 2) {
-      list[2] = dailySection;
+    if (swappedReport.todaysFortune) {
+      const list = [...swappedReport.sections];
+      const dailySec: ReportSection = dailySection || swappedReport.todaysFortune || {
+        title: lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide",
+        content: ""
+      };
+      return [dailySec, ...list];
+    } else {
+      const list = [...swappedReport.sections];
+      if (dailySection && list.length > 2) {
+        list[2] = dailySection;
+      }
+      if (list.length > 2) {
+        const sec0 = list[0];
+        const sec1 = list[1];
+        const sec2 = list[2];
+        list[0] = sec2; // Today's Fortune is placed first
+        list[1] = sec0; // Overall Daily Saju is placed second
+        list[2] = sec1; // 2026 Saju Forecast is placed third
+      }
+      return list;
     }
-    if (list.length > 2) {
-      const sec0 = list[0];
-      const sec1 = list[1];
-      const sec2 = list[2];
-      list[0] = sec2; // Today's Fortune is placed first
-      list[1] = sec0; // Overall Daily Saju is placed second
-      list[2] = sec1; // 2026 Saju Forecast is placed third
-    }
-    return list;
-  }, [swappedReport.sections, dailySection]);
+  }, [swappedReport.sections, swappedReport.todaysFortune, dailySection, lang]);
 
   const handlePayment = () => {
     if (!user) {

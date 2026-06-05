@@ -124,10 +124,10 @@ export default function ReportResultView({
 
   const parsedFortune = React.useMemo(() => {
     if (viewMode !== "today") return null;
-    const dailySection = activeReport.sections[2] || activeReport.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"));
+    const dailySection = activeReport.todaysFortune || activeReport.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘")) || activeReport.sections[2];
     const dailyContent = dailySection ? dailySection.content : "";
     return parseDailyFortune(dailyContent);
-  }, [viewMode, activeReport.sections]);
+  }, [viewMode, activeReport.sections, activeReport.todaysFortune]);
 
   if (viewMode === "today" && parsedFortune) {
     return (

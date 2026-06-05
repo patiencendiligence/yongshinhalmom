@@ -1,185 +1,227 @@
 <!-- ko -->
-# 정해(丁亥) 일주
+# 정해일주(丁亥日柱)
 
-정해일주는 촛불을 뜻하는 정화(丁火)가 큰 바다인 해수(亥水) 위에 떠 있는 형상이라네.
+## 정해일주란?
 
-겉으로는 온화하고 부드러워 보이지만 내면에는 깊은 감성과 강한 이상을 품고 있는 사람이 많지.
+정해일주는 천간의 정화(丁火)와 지지의 해수(亥水)가 만난 일주라네.
 
-생각이 깊고 직관이 뛰어나며 사람의 마음을 읽는 능력이 좋은 편이라네.
-<!-- /ko -->
+정화는 촛불과 같은 섬세한 불꽃을 의미하고 해수는 큰 바다와 깊은 지혜를 상징하지.
 
-<!-- en -->
-# Jeonghae (丁亥) Day Master
-
-Jeonghae combines Ding Fire (丁火), symbolized by a candlelight, with Hai Water (亥水), represented by the vast ocean.
-
-People born under this pillar often appear gentle and calm on the outside while carrying profound emotions and ideals within.
-
-They are typically intuitive, thoughtful, and highly perceptive of other people's feelings.
-<!-- /en -->
+그래서 정해일주는 따뜻한 감성과 깊은 생각이 함께 존재하는 사람으로 보는 경우가 많다네.
 
 ---
 
-<!-- ko -->
-## 정해일주의 성격
+## 정해일주의 기본 성격
 
-* 감수성이 풍부함
-* 직관력이 뛰어남
-* 배려심이 강함
-* 상상력이 풍부함
-* 이상주의적 성향
+겉으로는 부드럽고 온화해 보이지만 속으로는 생각이 매우 많은 편이라네.
 
-사람을 대할 때 따뜻하지만 혼자만의 시간이 꼭 필요한 사람이기도 하네.
+사람을 잘 이해하고 공감하는 능력이 뛰어나며 감수성이 풍부한 경우가 많지.
 
-겉으로는 조용해 보여도 머릿속에서는 수많은 생각이 오가는 경우가 많다네.
-<!-- /ko -->
-
-<!-- en -->
-## Personality Traits
-
-* Emotionally sensitive
-* Strong intuition
-* Compassionate
-* Imaginative
-* Idealistic
-
-They are warm and considerate toward others, yet they also require personal space and solitude.
-
-Although they may appear quiet, their minds are often filled with deep thoughts and reflections.
-<!-- /en -->
+반면 상처도 깊게 받는 편이라 혼자 고민을 오래 끌고 가기도 한다네.
 
 ---
 
-<!-- ko -->
-## 연애와 인간관계
+## 정해일주의 강점
 
-정해일주는 정이 많고 상대를 깊이 이해하려는 성향이 강하다네.
+* 공감 능력
+* 배려심
+* 창의성
+* 직관력
+* 적응력
 
-한 번 마음을 주면 오래 가는 편이지만 상처도 깊게 받는 경우가 많지.
-
-표현은 서툴러도 진심은 누구보다 깊은 사람이로군.
-
-상대에게 헌신적이지만 때로는 지나친 기대를 품어 실망하는 일도 생길 수 있다네.
-<!-- /ko -->
-
-<!-- en -->
-## Relationships and Love
-
-Jeonghae individuals tend to be affectionate and genuinely seek to understand others on a deeper level.
-
-Once they open their hearts, they remain loyal for a long time, though they can also be deeply hurt.
-
-Even if they struggle to express their feelings, their sincerity often runs deeper than most.
-
-They can be devoted partners but may sometimes become disappointed due to overly idealistic expectations.
-<!-- /en -->
+특히 사람의 마음을 읽는 능력이 뛰어난 편이라네.
 
 ---
 
-<!-- ko -->
-## 잘 맞는 분야
+## 정해일주의 약점
+
+감정 기복이 커질 수 있고 우유부단해질 수 있다네.
+
+생각이 많아 행동이 늦어지는 경우도 종종 있지.
+
+---
+
+## 연애 성향
+
+사랑을 시작하면 진심으로 대하는 편이라네.
+
+다만 상대에게 상처받는 것을 두려워하여 쉽게 마음을 열지 않는 경우도 많지.
+
+---
+
+## 결혼운
+
+친구 같은 배우자를 만날 때 안정감을 느끼는 경우가 많다네.
+
+감정 교류가 잘 되는 관계가 중요하지.
+
+---
+
+## 인간관계
+
+사람을 좋아하지만 혼자만의 시간도 필요하다네.
+
+너무 많은 인간관계는 피곤함을 느끼기 쉽지.
+
+---
+
+## 직업 적성
 
 * 상담
 * 교육
-* 콘텐츠 제작
-* 디자인
-* 예술
-* 연구
 * 기획
+* 개발
+* 디자인
+* 콘텐츠 제작
 
-사람의 감정을 이해하거나 새로운 아이디어를 만들어내는 분야에 재능을 보이는 경우가 많다네.
+사람과 생각을 연결하는 일이 잘 맞는다네.
 
-혼자 깊게 몰입할 수 있는 일도 잘 맞는 편이지.
+---
+
+## 재물운
+
+큰 한탕보다는 꾸준히 쌓는 재물운이 강한 편이라네.
+
+---
+
+## 정해일주 남자 특징
+
+감성적이며 책임감이 강한 경우가 많다네.
+
+---
+
+## 정해일주 여자 특징
+
+섬세하고 배려심이 깊다는 평가를 자주 받지.
+
+---
+
+## 정해일주가 힘들어지는 시기
+
+감정 소모가 심한 인간관계가 반복될 때라네.
+
+---
+
+## 정해일주에게 필요한 오행
+
+부족한 경우 토(土)가 균형을 잡아주는 역할을 하기도 한다네.
+
+---
+
+## 용신할멈 한마디
+
+> 자네는 남의 마음을 잘 보는 사람이로군.
+>
+> 다만 세상 사람 모두를 품으려 하진 말게.
 <!-- /ko -->
 
 <!-- en -->
-## Suitable Careers
+# Ding-Hae Day Pillar (丁亥日柱)
+
+## What is Ding-Hae Day Pillar?
+
+The Ding-Hae Day Pillar combines Ding Fire and Hai Water.
+
+Ding Fire represents candlelight, while Hai Water symbolizes wisdom and depth.
+
+As a result, people born under this pillar often possess both warmth and profound insight.
+
+---
+
+## Core Personality
+
+Ding-Hae individuals appear gentle and approachable but tend to think deeply.
+
+They often possess strong empathy and emotional intelligence.
+
+However, they may internalize stress and overthink situations.
+
+---
+
+## Strengths
+
+* Empathy
+* Creativity
+* Adaptability
+* Intuition
+* Compassion
+
+---
+
+## Weaknesses
+
+Overthinking and emotional sensitivity can become obstacles.
+
+Decision-making may take longer than average.
+
+---
+
+## Love and Relationships
+
+They value emotional connection and sincerity.
+
+Trust is important before they fully open their hearts.
+
+---
+
+## Marriage Potential
+
+A friendship-based partnership often works best.
+
+Strong communication is essential.
+
+---
+
+## Social Style
+
+While they enjoy people, they also require solitude to recharge.
+
+---
+
+## Career Aptitude
 
 * Counseling
 * Education
-* Content Creation
-* Design
-* Arts
-* Research
 * Planning
-
-They often excel in careers that involve understanding people, creativity, and original thinking.
-
-Work that allows deep concentration and independent problem-solving is usually a good fit.
-<!-- /en -->
+* Software Development
+* Design
+* Content Creation
 
 ---
 
-<!-- ko -->
-## 정해일주의 장점
+## Wealth Potential
 
-* 공감 능력이 뛰어남
-* 직관이 좋음
-* 창의적임
-* 인간미가 있음
-* 이해심이 깊음
-
-사람과 사람 사이의 미묘한 감정을 잘 읽는 재능이 있다네.
-<!-- /ko -->
-
-<!-- en -->
-## Strengths
-
-* Highly empathetic
-* Strong intuition
-* Creative mindset
-* Warm-hearted nature
-* Deep understanding of others
-
-They possess a natural talent for recognizing subtle emotions and interpersonal dynamics.
-<!-- /en -->
+They often accumulate wealth steadily rather than through sudden gains.
 
 ---
 
-<!-- ko -->
-## 정해일주의 주의할 점
+## Male Characteristics
 
-* 생각이 지나치게 많아질 수 있음
-* 감정 기복이 커질 수 있음
-* 우유부단해질 수 있음
-* 현실보다 이상을 좇을 수 있음
-
-마음속 파도가 거세질 때는 결정을 서두르지 않는 것이 좋다네.
-
-생각만 하지 말고 작은 행동부터 시작하는 습관을 들이면 더욱 좋아진다네.
-<!-- /ko -->
-
-<!-- en -->
-## Challenges
-
-* Overthinking
-* Emotional fluctuations
-* Indecisiveness
-* Excessive idealism
-
-When emotions become turbulent, it is wise to avoid making rushed decisions.
-
-Taking small practical actions instead of remaining lost in thought often leads to better outcomes.
-<!-- /en -->
+Often responsible, thoughtful, and emotionally aware.
 
 ---
 
-<!-- ko -->
-## 용신할멈 한마디
+## Female Characteristics
 
-> 바다 위의 등불은 멀리까지 비추는 법이라네.
->
-> 허나 파도만 바라보다 보면 앞으로 나아가지 못하지.
->
-> 자네 생각도 좋지만 때로는 한 걸음 먼저 내딛어 보게.
-<!-- /ko -->
+Frequently described as caring, intuitive, and considerate.
 
-<!-- en -->
-## Halmeom's Wise Words
+---
 
-> A lantern upon the sea can guide ships from far away.
+## Challenging Periods
+
+Emotionally draining relationships can be especially difficult.
+
+---
+
+## Helpful Elements
+
+Earth often provides grounding and stability.
+
+---
+
+## Halmeom's Advice
+
+> You understand the hearts of others well.
 >
-> Yet one who watches only the waves never reaches the shore.
->
-> Your thoughts are valuable, but sometimes you must take the first step forward.
+> But remember that you do not need to carry everyone's burdens.
 <!-- /en -->

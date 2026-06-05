@@ -120,6 +120,7 @@ export default function MainApp() {
 
             {state === "RESULT" && report && (
               <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
+                {viewMode === "today" && <div className="yongshin-circle mx-auto"></div>}
                 <ReportResultView 
                    report={report} 
                    viewMode={viewMode}

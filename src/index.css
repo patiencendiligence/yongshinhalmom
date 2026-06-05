@@ -95,3 +95,16 @@
 .holo-button:hover::before {
   @apply opacity-20;
 }
+
+.yongshin-circle {
+  background:url("/assets/yongshin.png") center no-repeat;
+  background-size:cover;
+  position: relative;
+  width: 80vw;
+  height: 80vw;
+  max-width:350px;
+  max-height:350px;
+  border-radius: 100%;
+  margin-bottom:10px;
+}
+

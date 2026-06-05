@@ -187,3 +187,31 @@ export function getStrongestElement(manseRyeok: any) {
     emoji: elements[0].emoji
   };
 }
+
+/**
+ * Filter Markdown content dynamically based on custom language block comments.
+ * Keeps only target language content and strips language markers.
+ * Example of markdown blocks:
+ * <!-- ko -->한국어 문서 내용입니다.<!-- /ko -->
+ * <!-- en -->English content body here.<!-- /en -->
+ */
+export function filterContentByLanguage(rawText: string, lang: "ko" | "en"): string {
+  if (!rawText) return "";
+  let result = rawText;
+  
+  if (lang === "en") {
+    // 1. Remove all KO blocks completely
+    result = result.replace(/<!--\s*ko\s*-->[\s\S]*?<!--\s*\/ko\s*-->/gi, "");
+    // 2. Strip only the EN markers to expose the EN content
+    result = result.replace(/<!--\s*en\s*-->/gi, "").replace(/<!--\s*\/en\s*-->/gi, "");
+  } else {
+    // Default to "ko"
+    // 1. Remove all EN blocks completely
+    result = result.replace(/<!--\s*en\s*-->[\s\S]*?<!--\s*\/en\s*-->/gi, "");
+    // 2. Strip only the KO markers to expose the KO content
+    result = result.replace(/<!--\s*ko\s*-->/gi, "").replace(/<!--\s*\/ko\s*-->/gi, "");
+  }
+  
+  return result;
+}
+

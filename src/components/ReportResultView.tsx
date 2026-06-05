@@ -269,6 +269,7 @@ export default function ReportResultView({
                 section={section}
                 isRefreshingDaily={isRefreshingDaily}
                 lang={lang}
+                manseRyeok={safeManseRyeok}
               />
             ))}
 

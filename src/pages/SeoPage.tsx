@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
+import { Helmet } from "react-helmet-async";
 import { markdownModules } from "../lib/markdownLoader";
 import { ArrowLeft, Menu, X, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -19,6 +20,8 @@ export default function SeoPage({
   const { category, slug } = useParams();
 
   const [content, setContent] = useState("");
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoDesc, setSeoDesc] = useState("");
   const [isMobileExplorerOpen, setIsMobileExplorerOpen] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   
@@ -68,6 +71,19 @@ export default function SeoPage({
     loader().then((text: any) => {
       const filtered = filterContentByLanguage(text, lang);
       setContent(filtered);
+
+      // Extract a clean title and description for SEO
+      const lines = filtered.split('\n').map(l => l.trim());
+      const titleLine = lines.find(line => line.startsWith('# '));
+      const pageTitle = titleLine ? titleLine.replace(/^#\s*/, '').trim() : (slug || "");
+
+      const cleanLines = lines.filter(line => line && !line.startsWith('#') && !line.startsWith('<!--') && !line.startsWith('---') && !line.startsWith('>'));
+      const pageDesc = cleanLines.length > 0 
+        ? cleanLines[0].replace(/[*_`\[\]]/g, '').substring(0, 150) + "..." 
+        : (lang === "en" ? "Explore traditional Saju wisdom with Yongshin Halmeom." : "용신할멈과 함께 알아보는 전통 사주명리 지혜.");
+
+      setSeoTitle(pageTitle);
+      setSeoDesc(pageDesc);
     });
     // Scroll back to top whenever active document page shifts
     window.scrollTo(0, 0);
@@ -93,6 +109,16 @@ export default function SeoPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
+      {seoTitle && (
+        <Helmet>
+          <title>{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
+          <meta name="description" content={seoDesc} />
+          <meta property="og:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />
+          <meta property="og:description" content={seoDesc} />
+          <meta property="og:image" content="/assets/yongshin.png" />
+          <link rel="canonical" href={`https://yongshinhalmom.vercel.app/${category}/${slug}`} />
+        </Helmet>
+      )}
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
       <div className="flex items-start justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
         <motion.button

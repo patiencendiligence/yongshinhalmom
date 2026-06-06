@@ -12,13 +12,63 @@ interface ReportHeaderProps {
 }
 
 export default function ReportHeader({ t, report, lang, userData, manseRyeok }: ReportHeaderProps) {
+  const quotesKo = [
+    "쯧. 또 그러고 있었구나.",
+    "어허. 마음이 먼저 달려갔구나.",
+    "거 보아라. 될 일은 결국 되게 되어 있단다.",
+    "에잉. 쓸데없는 걱정은 거두거라.",
+    "정신 차리거라. 아직 끝난 판도 아니다."
+  ];
+
+  const quotesEn = [
+    "Tsk. At it again, I see.",
+    "Aha. Your mind ran ahead of you.",
+    "See? What's meant to be will eventually happen.",
+    "Hmph. Put away your useless worries.",
+    "Snap out of it. It's not over yet."
+  ];
+
+  const hashInt = React.useMemo(() => {
+    const name = userData?.name || "";
+    let val = 0;
+    for (let i = 0; i < name.length; i++) {
+      val += name.charCodeAt(i);
+    }
+    return val;
+  }, [userData?.name]);
+
+  const quote = React.useMemo(() => {
+    const list = lang === "ko" ? quotesKo : quotesEn;
+    return list[hashInt % list.length];
+  }, [lang, hashInt]);
+
+  const titleContent = React.useMemo(() => {
+    if (lang === "ko") {
+      return (
+        <>
+          할멈의 <span className="mythic-gradient-text">감정서(鑑定書)</span>
+        </>
+      );
+    } else {
+      const parts = t.yourLifestyleReport.split("Report");
+      return (
+        <>
+          {parts[0]} <span className="mythic-gradient-text">Report</span> <br />
+          {parts[1]}
+        </>
+      );
+    }
+  }, [lang, t.yourLifestyleReport]);
+
   return (
     <header className="pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-ink-black/10 dark:border-white/10 mb-16 relative z-10">
       <div className="max-w-3xl mb-12 md:mb-0 w-full">
-        <h1 className="text-5xl sm:text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-ink-black dark:text-white leading-[0.9] md:leading-[0.8] mb-8 md:mb-12 text-left">
-          {t.yourLifestyleReport.split("Report")[0]} <span className="mythic-gradient-text">Report</span> <br />
-          {t.yourLifestyleReport.split("Report")[1]}
+        <h1 className="text-5xl sm:text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-ink-black dark:text-white leading-[0.9] md:leading-[0.8] mb-4 text-left">
+          {titleContent}
         </h1>
+        <p className="mt-5 text-sm font-sans font-medium text-ink-black/45 dark:text-white/35 mb-8 text-left tracking-wide block">
+          {quote}
+        </p>
         <p className="text-lg md:text-3xl font-serif text-ink-black/55 dark:text-white/40 italic leading-relaxed md:leading-snug max-w-2xl text-left">
           "{report.summary}"
         </p>

@@ -345,14 +345,13 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
                 <Link
                   id="strongest-element-link"
                   to={`./element/${elementSlug}`}
-                  className="holo-button group flex items-center gap-4 px-8 py-4 bg-mythic-gold/15 hover:bg-mythic-gold/25 border border-mythic-gold/40 hover:border-mythic-gold text-mythic-gold dark:text-mythic-gold font-sans font-black text-[12px] uppercase tracking-[0.2em] shadow-lg hover:scale-102 transition-all cursor-pointer rounded-sm"
+                  className="button group flex items-center gap-4 px-8 py-4 bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black/60 dark:text-white/60 font-sans font-black text-[11px] uppercase tracking-[0.2em] hover:scale-102 transition-all cursor-pointer rounded-sm"
                 >
                   <span className="text-base">{strongest.emoji}</span>
-                  <span>
+                  <span className="flex items-center">
                     {lang === "en"
                       ? `Characteristics of Strong ${strongest.element} (${elementSlug.toUpperCase()}) Energy`
-                      : `${strongest.element} 기운이 강한 사람 특징`}
-                      <ArrowRight />
+                      : `${strongest.element} 기운이 강한 사람 특징 보러가기`}
                   </span>
                 </Link>
               </div>

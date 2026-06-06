@@ -49,7 +49,7 @@ export const translations = {
     missingFields: "빈틈없이 적어주어야 내 명확히 살펴줄 수 있느니라.",
     loadingSummary: "사주 분석 중...",
     loadingDetail: "자취를 훑어내려가고 있으니, 잠시 마음을 가다듬고 기다려보게.",
-    yourLifestyleReport: "Your Lifestyle Report",
+    yourLifestyleReport: "용신할멈의 감정서(鑑定書)",
     authorizedRecipient: "Authorized Recipient",
     section: "Section",
     askSpirit: "AI 질문하기",
@@ -219,7 +219,7 @@ export const translations = {
     "The old halmeom is tracing the hidden flow tied to your birth. Wait quietly for a moment.",
 
   yourLifestyleReport:
-    "Your Fate Reading",
+    "Yongshin Grandma's Assessment Report",
 
   authorizedRecipient:
     "For the One Who Requested the Reading",

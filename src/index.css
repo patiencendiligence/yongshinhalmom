@@ -107,4 +107,8 @@
   border-radius: 100%;
   margin-bottom:10px;
 }
-
+p {
+    margin-bottom: 15px;
+    word-break: keep-all;
+    line-height: 1.5em;
+}

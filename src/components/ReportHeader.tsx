@@ -13,7 +13,7 @@ interface ReportHeaderProps {
 
 export default function ReportHeader({ t, report, lang, userData, manseRyeok }: ReportHeaderProps) {
   const quotesKo = [
-    "쯧. 또 그러고 있었구나.",
+    "쯧. 네 속이 훤히 보이는구나.",
     "어허. 마음이 먼저 달려갔구나.",
     "거 보아라. 될 일은 결국 되게 되어 있단다.",
     "에잉. 쓸데없는 걱정은 거두거라.",

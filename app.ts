@@ -280,7 +280,8 @@ const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYea
   .replace(/{{monthPillar}}/g, pillars.monthPillar)
   .replace(/{{dayPillar}}/g, pillars.dayPillar)
   .replace(/{{timePillar}}/g, pillars.timePillar)
-  .replace(/{{zodiac}}/g, String(correctZodiacIndex));
+  .replace(/{{zodiac}}/g, String(correctZodiacIndex))
+  .replace(/{{analysisLevel}}/g, level).replace(/{{language}}/g, lang);
 
 console.log(JSON.stringify(pillars), ":::finalPrompt")
   const prompt = `
@@ -365,11 +366,13 @@ ${DAILY_PROMPT_TEMPLATE}
 ${DAILY_PROMPT_PRINT}
 `;
 
-const finalPrompt = promptTemplate.replace(/{{today}}/g, formattedToday)
+const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday)
+  .replace(/{{todayPillar}}/g, todayPillar)
   .replace(/{{yearPillar}}/g, pillars.yearPillar)
   .replace(/{{monthPillar}}/g, pillars.monthPillar)
   .replace(/{{dayPillar}}/g, pillars.dayPillar)
-  .replace(/{{timePillar}}/g, pillars.timePillar);
+  .replace(/{{timePillar}}/g, pillars.timePillar)
+  .replace(/{{language}})/g, lang);
 
   console.log(JSON.stringify(pillars), ":::finalPrompt")
   const prompt = `

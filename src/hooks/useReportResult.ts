@@ -35,28 +35,64 @@ export function useReportResult({
   useEffect(() => {
     const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
     const today = kstNow.toISOString().split('T')[0];
-    const originalDailySection = report.todaysFortune || report.sections[2];
+    const originalDailySection = report.todaysFortune || (report.sections && report.sections[2]);
 
-    if (originalDailySection && !originalDailySection.content.split('\n')[0].includes(today)) {
-      console.log("[useReportResult] Daily section is stale or needs date prepending. Refreshing...");
-      
-      const refreshDaily = async () => {
-        setIsRefreshingDaily(true);
-        try {
-          const fresh = await getTodaysFortune(userData, lang);
-          const todayFormatted = `### ${today}`;
-          if (!fresh.content.includes(today)) {
-            fresh.content = `${todayFormatted}\n\n${fresh.content}`;
+    if (originalDailySection && typeof originalDailySection.content === "string") {
+      const firstLine = originalDailySection.content.split('\n')[0];
+      if (firstLine && !firstLine.includes(today)) {
+        console.log("[useReportResult] Daily section is stale or needs date prepending. Refreshing...");
+        
+        const refreshDaily = async () => {
+          setIsRefreshingDaily(true);
+          try {
+            const fresh = await getTodaysFortune(userData, lang);
+            console.log("[useReportResult] Fresh daily fortune received:", fresh);
+
+            if (!fresh) {
+              throw new Error("Received empty response from daily fortune API");
+            }
+
+            let contentStr = "";
+            if (typeof fresh.content === "string") {
+              contentStr = fresh.content;
+            } else if (typeof (fresh as any).content === "object" && (fresh as any).content !== null) {
+              contentStr = JSON.stringify((fresh as any).content);
+            } else if (typeof fresh === "string") {
+              contentStr = fresh;
+            } else if (typeof (fresh as any).todaysFortune?.content === "string") {
+              contentStr = (fresh as any).todaysFortune.content;
+            } else if (typeof (fresh as any).todaysFortune === "string") {
+              contentStr = (fresh as any).todaysFortune;
+            } else {
+              const keys = Object.keys(fresh);
+              const contentKey = keys.find(k => k.toLowerCase().includes("content") || k.toLowerCase().includes("fortune") || k.toLowerCase().includes("text"));
+              if (contentKey && typeof (fresh as any)[contentKey] === "string") {
+                contentStr = (fresh as any)[contentKey];
+              } else {
+                contentStr = JSON.stringify(fresh);
+              }
+            }
+
+            const todayFormatted = `### ${today}`;
+            if (contentStr && !contentStr.includes(today)) {
+              contentStr = `${todayFormatted}\n\n${contentStr}`;
+            }
+
+            const titleStr = typeof fresh.title === "string" ? fresh.title : (lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide");
+
+            setDailySection({
+              title: titleStr,
+              content: contentStr
+            });
+          } catch (error) {
+            console.error("[useReportResult] Failed to refresh daily fortune section:", error);
+          } finally {
+            setIsRefreshingDaily(false);
           }
-          setDailySection(fresh);
-        } catch (error) {
-          console.error("[useReportResult] Failed to refresh daily fortune section:", error);
-        } finally {
-          setIsRefreshingDaily(false);
-        }
-      };
-      
-      refreshDaily();
+        };
+        
+        refreshDaily();
+      }
     }
   }, [report.sections, report.todaysFortune, userData, lang]);
 

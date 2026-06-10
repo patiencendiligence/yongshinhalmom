@@ -374,7 +374,7 @@ const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday
   .replace(/{{timePillar}}/g, pillars.timePillar)
   .replace(/{{language}}/g, lang);
 
-  console.log(JSON.stringify(pillars), ":::finalPrompt")
+  console.log(finalPrompt, ":::finalPrompt")
   const prompt = `
 ${SYSTEM_INSTRUCTION}
 ${finalPrompt}

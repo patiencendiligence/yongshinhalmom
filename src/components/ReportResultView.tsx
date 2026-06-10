@@ -173,7 +173,7 @@ export default function ReportResultView({
             { title: t.todaySuccessWealth || "오늘의 성공운/재물운", content: parsedFortune.wealth, colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30" },
             { title: t.todayLove || "오늘의 애정운", content: parsedFortune.love, colorClass: "border-pink-500/10 hover:border-pink-500/30 dark:border-pink-500/15 dark:hover:border-pink-500/35", titleStyle: "text-pink-600 dark:text-pink-400" },
             { title: t.todayLotto || "오늘의 로또운", content: parsedFortune.lotto, colorClass: "border-emerald-500/10 hover:border-emerald-500/30 dark:border-emerald-500/15 dark:hover:border-emerald-500/35", titleStyle: "text-emerald-600 dark:text-emerald-400" },
-          ].map((item, i) => (
+          ].filter(item => item.content && item.content.trim() !== "").map((item, i) => (
             <div 
               key={i} 
               className={`p-4 md:p-6 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}

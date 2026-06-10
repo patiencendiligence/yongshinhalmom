@@ -55,6 +55,12 @@ export function parseDailyFortune(content: string) {
   let love = getBlock(['애정운', 'Love Fortune', 'Love']);
   let lotto = getBlock(['로또운', 'Lotto Fortune', 'Lotto']);
 
+  // If we could not find structured markdown blocks but we do have raw content,
+  // we fallback to showing the entire content in the flow block rather than returning empty.
+  if (!flow && content) {
+    flow = content.trim();
+  }
+
   // Extract score, evaluation, and Saju tag from the flow header
   let score = 70;
   let evaluation = "보통";
@@ -107,25 +113,25 @@ export function parseDailyFortune(content: string) {
     }
   }
 
-  // Fallbacks if some sections are missing
+  // Fallbacks if some sections are missing are now cleaned completely of static placeholder content.
   if (!watchOut) {
-    watchOut = "지나치게 급하게 결정을 내리거나 내면의 자만을 앞세우지 않도록 경계하게나.";
+    watchOut = "";
   }
   if (!goodEnergy) {
-    goodEnergy = "묵묵히 자기 일을 해나갈 때 예상치 못한 보상과 긍정적인 평가가 따를 기운일세.";
+    goodEnergy = "";
   }
   if (!wealth) {
-    wealth = "재물 기운의 흐름이 차분한 편이니 불필요한 지출을 삼가고 자산을 굳건히 지키는 데 힘쓰게나.";
+    wealth = "";
   }
   if (!love) {
-    love = "주변 사람이나 소중한 인연에게 따뜻한 덕담을 먼저 건넨다면 기쁨과 애정 지수가 크게 차오를 것이야.";
+    love = "";
   }
   if (!lotto) {
-    lotto = "뜻밖의 횡재수보다는 일상 속 소소한 공덕이 자네에게 행운의 단비를 가져다줄 일진이니 성실히 임하게.";
+    lotto = "";
   }
 
   return {
-    flow: flow || "오늘의 전반적인 흐름을 살피는 중일세. 차분하고 고요한 기운이 자네를 감싸는구나.",
+    flow: flow || "",
     watchOut,
     goodEnergy,
     wealth,

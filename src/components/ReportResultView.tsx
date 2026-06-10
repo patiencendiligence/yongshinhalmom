@@ -102,6 +102,7 @@ export default function ReportResultView({
     onUpgrade,
     onLogin,
     triggerPayment,
+    viewMode,
   });
 
   const activeReport = swappedReport || report;

@@ -13,6 +13,7 @@ interface UseReportResultProps {
   onUpgrade?: () => void;
   onLogin?: () => Promise<void>;
   triggerPayment: (hash: string) => void;
+  viewMode?: "today" | "full";
 }
 
 export function useReportResult({
@@ -21,7 +22,8 @@ export function useReportResult({
   lang,
   onUpgrade,
   onLogin,
-  triggerPayment: propTriggerPayment
+  triggerPayment: propTriggerPayment,
+  viewMode,
 }: UseReportResultProps) {
   const { user, login, checkPaymentStatus } = useAuth();
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -105,6 +107,7 @@ export function useReportResult({
 
   // Status Polling Effect for database sync
   useEffect(() => {
+    if (viewMode === "today") return;
     if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;
 
     let isMounted = true;
@@ -140,7 +143,7 @@ export function useReportResult({
       isMounted = false;
       if (timerId) clearTimeout(timerId);
     };
-  }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade]);
+  }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade, viewMode]);
 
   const isPremiumUser = isCurrentlyPaid;
   const displayDetailed = isPremiumUser && report.level === 'detailed';

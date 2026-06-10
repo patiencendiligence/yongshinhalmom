@@ -268,7 +268,7 @@ app.post("/api/generate-report", async (req, res) => {
   const currentYear = targetYear || kstNow.getFullYear();
   const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
-  console.log(JSON.stringify(pillars));
+
 const promptTemplate = `
 ${PROMPT_TEMPLATE}
 ${PROMPT_PRINT}

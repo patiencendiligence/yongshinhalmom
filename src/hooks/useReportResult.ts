@@ -46,7 +46,7 @@ export function useReportResult({
           setIsRefreshingDaily(true);
           try {
             const fresh = await getTodaysFortune(userData, lang);
-            console.log("[useReportResult] Fresh daily fortune received:", fresh);
+            console.log("[useReportResult] Fresh daily fortune received:");
 
             if (!fresh) {
               throw new Error("Received empty response from daily fortune API");

@@ -352,13 +352,15 @@ ${finalPrompt}
 
 // Daily guide API with OpenAI fallback
 app.post("/api/generate-daily", async (req, res) => {
-  const { pillars, lang } = req.body;
+  const { pillars, zodiac, lang } = req.body;
   if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
   const apiKey = getApiKey();
   const todayPillar = getTodayPillar();
   const kstOffset = 9 * 60 * 60 * 1000;
   const kstTodayDate = new Date(new Date().getTime() + kstOffset);
   const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
+
+  const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
 
 const promptTemplate = `
@@ -372,6 +374,7 @@ const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday
   .replace(/{{monthPillar}}/g, pillars.monthPillar)
   .replace(/{{dayPillar}}/g, pillars.dayPillar)
   .replace(/{{timePillar}}/g, pillars.timePillar)
+  .replace(/{{zodiac}}/g, String(correctZodiacIndex))
   .replace(/{{language}}/g, lang);
 
   console.log(finalPrompt, ":::finalPrompt")
@@ -433,6 +436,9 @@ ${finalPrompt}
   }
 
   if (parsed) {
+    if (parsed.zodiac !== undefined) {
+      parsed.zodiac = correctZodiacIndex;
+    }
     return res.json(parsed);
   }
 

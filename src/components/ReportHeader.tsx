@@ -12,6 +12,7 @@ interface ReportHeaderProps {
 }
 
 export default function ReportHeader({ t, report, lang, userData, manseRyeok }: ReportHeaderProps) {
+  console.log(JSON.stringify(manseRyeok), ':???manseRyeok')
   const quotesKo = [
     "쯧. 네 속이 훤히 보이는구나.",
     "어허. 마음이 먼저 달려갔구나.",

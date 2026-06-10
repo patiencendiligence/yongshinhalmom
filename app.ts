@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getManseRyeok } from "./src/lib/manseRyeok.js";
+import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok.js";
 
 dotenv.config();
 
@@ -37,6 +37,20 @@ function getSupabaseAdmin() {
   }
   return _supabaseAdmin;
 }
+
+const HANJA_TO_KOREAN: Record<string, string> = {
+  '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무',
+  '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
+  '子': '자', '丑': '축', '寅': '인', '卯': '묘', '辰': '진',
+  '巳': '사', '午': '오', '未': '미', '申': '신', '酉': '유',
+  '戌': '술', '亥': '해'
+};
+
+function translateHanjaToKorean(pillar: string): string {
+  if (!pillar) return "";
+  return pillar.split("").map(char => HANJA_TO_KOREAN[char] || char).join("");
+}
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -196,13 +210,12 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-const rawInstruction = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "";
+const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "";
 const ohangContent = process.env.VITE_OHANG || process.env.OHANG || "";
-const SYSTEM_INSTRUCTION = rawInstruction
-  .replace(/\$\{env\.VITE_OHANG\}/g, ohangContent)
-  .replace(/\$\{VITE_OHANG\}/g, ohangContent)
-  .replace(/\{\{VITE_OHANG\}\}/g, ohangContent);
-
+const DAILY_PROMPT_PRINT = process.env.DAILY_PROMPT_PRINT || process.env.VITE_DAILY_PROMPT_PRINT || "";
+const DAILY_PROMPT_TEMPLATE = process.env.DAILY_PROMPT_TEMPLATE || process.env.VITE_DAILY_PROMPT_TEMPLATE || "";
+const PROMPT_PRINT = process.env.PROMPT_PRINT || process.env.VITE_PROMPT_PRINT || "";
+const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_TEMPLATE
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
@@ -241,8 +254,8 @@ async function tryOpenAI(prompt: string, systemInstruction: string): Promise<str
 
 // Gemini report API with OpenAI fallback
 app.post("/api/generate-report", async (req, res) => {
-  const { userData, lang, level } = req.body;
-  if (!userData?.birthDate) return res.status(400).json({ error: "birthDate required" });
+  const { pillars, zodiac, targetYear, lang, level } = req.body;
+  if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
 
   const apiKey = getApiKey();
   
@@ -252,90 +265,35 @@ app.post("/api/generate-report", async (req, res) => {
   const kstNow = new Date(now.getTime() + kstOffset);
   const kstToday = kstNow.toISOString().split('T')[0];
   
-  const currentYear = userData.targetYear || kstNow.getFullYear();
-  
-  // Calculate correct zodiac index to assist AI and ensure accuracy (Lipchun-aware via getManseRyeok)
-  const manse = getManseRyeok(userData.birthDate, userData.birthTime || "12:00", userData.isLunar || false);
-  const correctZodiacIndex = (manse && manse.zodiac !== undefined) 
-    ? manse.zodiac 
-    : ((parseInt(userData.birthDate.split('-')[0]) - 1924) % 12);
+  const currentYear = targetYear || kstNow.getFullYear();
+  const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
+
+  console.log(JSON.stringify(pillars));
 
   const prompt = `
-ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
-STRICTLY RETURN ONLY A VALID JSON OBJECT. NO MARKDOWN CODE BLOCKS.
-
-분석 대상 연도: ${currentYear}년
-의뢰인 정보: ${JSON.stringify(userData)}
-분석 수준: ${level === 'detailed' ? "심격 분석 (Detailed)" : "기본 분석 (Standard)"}
-현재 날짜: ${kstToday}
-
-REQUIRED JSON STRUCTURE:
-{
-  "summary": "Full fortune summary (min 400 characters)",
-  "zodiac": ${correctZodiacIndex},
-  "illustrationType": "SUN"|"MOON"|"TREE"|"CANDLE"|"DRAGON"|"WATER"|"MOUNTAIN"|"BELLS",
-  "sections": [
-    // Must contain exactly 8 elements corresponding strictly to the 8 sections in the system instructions (Chapter 1 to Chapter 8):
-    // sections[0] title should be "전체 대운" (or English equivalent)
-    // sections[1] title should be "입력 연도 운세" (or English equivalent)
-    // sections[2] title should be "전체 오행 분석" (or English equivalent) -> MUST contain the full five elements analysis here, do NOT skip or replace this chapter!
-    // sections[3] title should be "전체 건강 관리 습관" (or English equivalent)
-    // sections[4] title should be "전체 관계 및 상호작용 스타일" (or English equivalent)
-    // sections[5] title should be "전체 커리어 및 자원 관리 방향성" (or English equivalent)
-    // sections[6] title should be "전체 생활 개선 가이드" (or English equivalent)
-    // sections[7] title should be "해당 연도 월별 상세 세운" (or English equivalent)
-  ],
-  "luckInfo": {
-    "color": "Today Lucky Color",
-    "item": "Today Lucky Item",
-    "food": "Today Lucky Food"
-  },
-  "todaysFortune": {
-    "title": "오늘의 컨디션 가이드",
-    "content": "분석 내용 (첫 줄에 날짜 포함)"
-  }
-}
-
-NOTE: The zodiac index MUST be ${correctZodiacIndex}.
-The "todaysFortune" content MUST start with the current date: "### ${kstToday}\n\n...".
-In the content of "todaysFortune", you MUST strictly organize the text using the following headers matching the language requested:
-### ${lang === "ko" ? "오늘의 전반적인 흐름" : "Today's Overall Flow"} [Score] / [Evaluation], [Saju Tag]
-[content]
-### ${lang === "ko" ? "오늘 조심할 것" : "What to Watch Out For Today"}
-[content]
-### ${lang === "ko" ? "오늘 좋은 기운" : "Good Energies of Today"}
-[content]
-### ${lang === "ko" ? "오늘의 성공운/재물운" : "Success and Wealth of Today"}
-[content]
-### ${lang === "ko" ? "오늘의 애정운" : "Love Fortune of Today"}
-### ${lang === "ko" ? "오늘의 로또운" : "Lotto Fortune of Today"}
-[content]
-
-NOTE for todaysFortune headers:
-- [Score] must be a calculated score between 0 and 100 based on the hexagram/star.
-- [Evaluation] must be one of: [아주 좋음, 좋음, 비교적 좋음, 보통, 비교적 좋지 않음, 좋지 않음, 주의] (or English equivalents: [Excellent, Good, Fairly Good, Normal, Fairly Bad, Bad, Caution]).
-- [Saju Tag] must be a relevant Saju star/influence "살" (e.g. 천을, 도화, 화개, 역마, 망신, 반안, 귀인, 지살 등) for the day. (e.g. "### 오늘의 전반적인 흐름 60 / 보통, 천을" or "### Today's Overall Flow 90 / Excellent, Dohwa").
-
-STRICT RULE: Do NOT mix or append any [전체적인 오행 균형 설명] (Overall Five Elements Analysis) inside "todaysFortune". Put the five elements analysis ONLY in sections[2] (전체 오행 분석) of the report.
+${SYSTEM_INSTRUCTION}
+${PROMPT_TEMPLATE}
+${PROMPT_PRINT}
 `;
 
   let parsed: any = null;
 
   if (apiKey) {
     const genAI = new GoogleGenerativeAI(apiKey);
+
     for (const modelName of MODELS_TO_TRY) {
       try {
         console.log(`[Gemini Server] Trying ${modelName}...`);
         const model = genAI.getGenerativeModel({ 
           model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION
+          systemInstruction: SYSTEM_INSTRUCTION,
         });
 
         const result = await model.generateContent({
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.8,
+            temperature: 0.1,
           }
         });
 
@@ -351,7 +309,7 @@ STRICT RULE: Do NOT mix or append any [전체적인 오행 균형 설명] (Overa
         parsed = JSON.parse(text);
         break;
       } catch (e: any) {
-        console.error(`[Gemini Server] ${modelName} failed:`, e.message);
+         console.error(`[Gemini Server] ${modelName} failed:`, e.message);
       }
     }
   } else {
@@ -362,6 +320,7 @@ STRICT RULE: Do NOT mix or append any [전체적인 오행 균형 설명] (Overa
   if (!parsed) {
     try {
       console.log("[Gemini Server] Initiating OpenAI fallback...");
+
       const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
       parsed = JSON.parse(text);
     } catch (err: any) {
@@ -380,55 +339,26 @@ STRICT RULE: Do NOT mix or append any [전체적인 오행 균형 설명] (Overa
 
 // Daily guide API with OpenAI fallback
 app.post("/api/generate-daily", async (req, res) => {
-  const { userData, lang } = req.body;
+  const { pillars, lang } = req.body;
+  if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
   const apiKey = getApiKey();
-
+  const todayPillar = getTodayPillar();
   const kstOffset = 9 * 60 * 60 * 1000;
   const kstTodayDate = new Date(new Date().getTime() + kstOffset);
   const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
+
   const prompt = `
 ${SYSTEM_INSTRUCTION}
-ALL responses MUST be written in ${lang === "ko" ? "KOREAN" : "ENGLISH"}.
-STRICTLY RETURN ONLY A VALID JSON OBJECT.
-
-의뢰인 사주 정보: ${JSON.stringify(userData)}
-현재 날짜: ${formattedToday}
-
-이 의뢰인의 사주와 '현재 날짜'의 일진(日辰)을 분석하여 '오늘의 컨디션 가이드'를 작성하세요.
-내용에는 반드시 "${formattedToday}" 날짜를 첫 줄에 명시하고, 다음과 같은 헤더를 사용하여 본문을 정확히 구분하여 작성하세요:
-### ${lang === "ko" ? "오늘의 전반적인 흐름" : "Today's Overall Flow"} [Score] / [Evaluation], [Saju Tag]
-[content]
-### ${lang === "ko" ? "오늘 조심할 것" : "What to Watch Out For Today"}
-[content]
-### ${lang === "ko" ? "오늘 좋은 기운" : "Good Energies of Today"}
-[content]
-### ${lang === "ko" ? "오늘의 성공운/재물운" : "Success and Wealth of Today"}
-[content]
-### ${lang === "ko" ? "오늘의 애정운" : "Love Fortune of Today"}
-[content]
-### ${lang === "ko" ? "오늘의 로또운" : "Lotto Fortune of Today"}
-[content]
-
-NOTE for headers:
-- [Score] must be a calculated score between 0 and 100 based on the hexagram/star.
-- [Evaluation] must be one of: [아주 좋음, 좋음, 비교적 좋음, 보통, 비교적 좋지 않음, 좋지 않음, 주의] (or English equivalents: [Excellent, Good, Fairly Good, Normal, Fairly Bad, Bad, Caution]).
-- [Saju Tag] must be a relevant Saju star/influence "살" (e.g. 천을, 도화, 화개, 역마, 망신, 반안, 귀인, 지살 등) for the day. (e.g. "### 오늘의 전반적인 흐름 60 / 보통, 천을" or "### Today's Overall Flow 90 / Excellent, Dohwa").
-
-
-REQUIRED JSON STRUCTURE:
-{
-  "title": "오늘의 컨디션 가이드",
-  "content": "분석 내용 (첫 줄에 날짜 포함)"
-}
-
-STRICT RULE: Do NOT include any separate [전체적인 오행 균형 설명] (Overall Five Elements Analysis), Saju tables, or other chapters. ONLY output the 6 requested fortune sections under their respective headers. Do NOT append anything after the content of "오늘의 로또운" / "Lotto Fortune of Today".
+${DAILY_PROMPT_TEMPLATE}
+${DAILY_PROMPT_PRINT}
 `;
 
   let parsed: any = null;
 
   if (apiKey) {
     const genAI = new GoogleGenerativeAI(apiKey);
+
     for (const modelName of MODELS_TO_TRY) {
       try {
         console.log(`[Gemini Daily Server] Trying ${modelName}...`);
@@ -441,7 +371,7 @@ STRICT RULE: Do NOT include any separate [전체적인 오행 균형 설명] (Ov
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            temperature: 0.8,
+            temperature: 0.1,
           }
         });
 

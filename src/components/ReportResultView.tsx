@@ -23,6 +23,7 @@ interface ReportResultViewProps {
   triggerPayment: (hash: string) => void;
   userData: any;
   lang: Language;
+  isUpgradingDetail?: boolean;
 }
 
 export default function ReportResultView({
@@ -35,6 +36,7 @@ export default function ReportResultView({
   triggerPayment,
   userData,
   lang,
+  isUpgradingDetail,
 }: ReportResultViewProps) {
   const t = translations[lang] as any;
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -282,6 +284,7 @@ export default function ReportResultView({
               handlePayment={handlePayment}
               onUpgrade={onUpgrade}
               handleManualCheck={handleManualCheck}
+              isUpgradingDetail={isUpgradingDetail}
             />
           )}
         </div>

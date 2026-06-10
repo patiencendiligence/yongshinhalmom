@@ -229,3 +229,43 @@ export function getManseRyeok(
     return null;
   }
 }
+
+export function getTodayPillar(): string {
+  try {
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const kstDate = new Date(Date.now() + kstOffset);
+    const y = kstDate.getUTCFullYear();
+    const m = kstDate.getUTCMonth() + 1;
+    const d = kstDate.getUTCDate();
+    const h = kstDate.getUTCHours();
+    const min = kstDate.getUTCMinutes();
+
+    const correctedDate = normalizeKoreanManseTime(y, m, d, h, min);
+    const cy = correctedDate.getFullYear();
+    const cm = correctedDate.getMonth() + 1;
+    const cd = correctedDate.getDate();
+    const ch = correctedDate.getHours();
+    const cmin = correctedDate.getMinutes();
+
+    const solar = Solar.fromYmdHms(cy, cm, cd, ch, cmin, 0);
+    if (!solar) return "";
+    const lunarData = solar.getLunar();
+    if (!lunarData) return "";
+    const ec = lunarData.getEightChar();
+    if (!ec) return "";
+    const hanjaPillar = ec.getDay();
+
+    const HANJA_TO_KOREAN: Record<string, string> = {
+      '甲': '갑', '乙': '을', '丙': '병', '丁': '정', '戊': '무',
+      '己': '기', '庚': '경', '辛': '신', '壬': '임', '癸': '계',
+      '子': '자', '丑': '축', '寅': '인', '卯': '묘', '辰': '진',
+      '巳': '사', '午': '오', '未': '미', '申': '신', '酉': '유',
+      '戌': '술', '亥': '해'
+    };
+
+    return hanjaPillar.split("").map(char => HANJA_TO_KOREAN[char] || char).join("");
+  } catch (error) {
+    console.error('[getTodayPillar Error]', error);
+    return "";
+  }
+}

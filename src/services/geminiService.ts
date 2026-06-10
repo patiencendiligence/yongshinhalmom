@@ -98,10 +98,14 @@ export async function getTodaysFortune(
     timePillar: translateHanjaToKorean(manse.pillars.time)
   } : null;
 
+  const correctZodiacIndex = (manse && manse.zodiac !== undefined)
+    ? manse.zodiac
+    : ((parseInt(userData.birthDate.split('-')[0]) - 1924) % 12);
+
   const response = await fetch("/api/generate-daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ pillars, lang })
+    body: JSON.stringify({ pillars, zodiac: correctZodiacIndex, lang })
   });
 
   if (!response.ok) {

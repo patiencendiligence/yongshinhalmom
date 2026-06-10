@@ -269,11 +269,21 @@ app.post("/api/generate-report", async (req, res) => {
   const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
   console.log(JSON.stringify(pillars));
-
-  const prompt = `
-${SYSTEM_INSTRUCTION}
+const promptTemplate = `
 ${PROMPT_TEMPLATE}
 ${PROMPT_PRINT}
+`;
+
+const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
+  .replace(/{{today}}/g, kstToday)
+  .replace(/{{yearPillar}}/g, pillars.yearPillar)
+  .replace(/{{monthPillar}}/g, pillars.monthPillar)
+  .replace(/{{dayPillar}}/g, pillars.dayPillar)
+  .replace(/{{timePillar}}/g, pillars.timePillar)
+  .replace(/{{zodiac}}/g, String(correctZodiacIndex));
+  const prompt = `
+${SYSTEM_INSTRUCTION}
+${finalPrompt}
 `;
 
   let parsed: any = null;
@@ -348,11 +358,21 @@ app.post("/api/generate-daily", async (req, res) => {
   const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
 
-  const prompt = `
-${SYSTEM_INSTRUCTION}
+const promptTemplate = `
 ${DAILY_PROMPT_TEMPLATE}
 ${DAILY_PROMPT_PRINT}
 `;
+
+const finalPrompt = promptTemplate.replace(/{{today}}/g, formattedToday)
+  .replace(/{{yearPillar}}/g, pillars.yearPillar)
+  .replace(/{{monthPillar}}/g, pillars.monthPillar)
+  .replace(/{{dayPillar}}/g, todayPillar)
+  .replace(/{{timePillar}}/g, pillars.timePillar);
+  const prompt = `
+${SYSTEM_INSTRUCTION}
+${finalPrompt}
+`;
+
 
   let parsed: any = null;
 

@@ -210,16 +210,41 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
+const DEFAULT_DAILY_PROMPT_TEMPLATE = `
+당신은 사주명리 대가 '용신할멈'입니다.
+귀하의 사주 원국:
+- 년주: {{yearPillar}}
+- 월주: {{monthPillar}}
+- 일주: {{dayPillar}}
+- 시주: {{timePillar}}
+- 띠: {{zodiac}}
+
+오늘의 날짜: {{formattedToday}}
+오늘의 일진: {{todayPillar}}
+
+사주 원국의 일주와 오늘의 일진을 바탕으로 오늘의 정성 어린 운세를 한글로 구어체(~하구먼, ~했네, ~라네 등 따뜻한 할머니 말투)로 작성해주세요.
+`;
+
+const DEFAULT_DAILY_PROMPT_PRINT = `
+반드시 JSON 형식으로 응답해주세요. 마크다운 백틱 등 다른 텍스트는 포함하지 말고 순수 JSON만 반환해야 합니다:
+{
+  "title": "{{formattedToday}} 오늘의 운세",
+  "content": "오늘의 조언과 운세 세부 내용..."
+}
+`;
+
 const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "";
 const ohangContent = process.env.VITE_OHANG || process.env.OHANG || "";
-const DAILY_PROMPT_PRINT = process.env.DAILY_PROMPT_PRINT || process.env.VITE_DAILY_PROMPT_PRINT || "";
-const DAILY_PROMPT_TEMPLATE = process.env.DAILY_PROMPT_TEMPLATE || process.env.VITE_DAILY_PROMPT_TEMPLATE || "";
+const DAILY_PROMPT_PRINT = process.env.DAILY_PROMPT_PRINT || process.env.VITE_DAILY_PROMPT_PRINT || DEFAULT_DAILY_PROMPT_PRINT;
+const DAILY_PROMPT_TEMPLATE = process.env.DAILY_PROMPT_TEMPLATE || process.env.VITE_DAILY_PROMPT_TEMPLATE || DEFAULT_DAILY_PROMPT_TEMPLATE;
 const PROMPT_PRINT = process.env.PROMPT_PRINT || process.env.VITE_PROMPT_PRINT || "";
-const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_TEMPLATE
+const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_TEMPLATE || "";
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
   "gemini-2.5-flash",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
   "gemini-flash-latest"
 ];
 

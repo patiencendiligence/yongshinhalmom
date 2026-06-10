@@ -183,11 +183,11 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
   };
   const elementSlug = elementEngMap[strongest.element] || "fire";
 
+  const titleLower = section.title.toLowerCase();
   const isFiveElementsSection = 
-    section.title === "전체 오행 분석" || 
-    section.title === "Overall Five Elements Analysis" ||
-    section.title.includes("전체 오행 분석") ||
-    section.title.includes("Overall Five Elements Analysis");
+    titleLower.includes("오행 분석") || 
+    titleLower.includes("오행 해석") || 
+    titleLower.includes("five elements");
 
   if (idx === 0) {
     if (!parsedFortune) return null;
@@ -340,22 +340,19 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
           </>
         )}
       </div>
-       {isFiveElementsSection && (
-              <div className="mt-8 pt-6 border-t border-ink-black/5 dark:border-white/5 flex flex-col sm:flex-row items-center justify-start gap-4">
-                <Link
-                  id="strongest-element-link"
-                  to={`./element/${elementSlug}`}
-                  className="button group flex items-center gap-4 px-8 py-4 bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black/60 dark:text-white/60 font-sans font-black text-[11px] uppercase tracking-[0.2em] hover:scale-102 transition-all cursor-pointer rounded-sm"
-                >
-                  <span className="text-base">{strongest.emoji}</span>
-                  <span className="flex items-center">
-                    {lang === "en"
-                      ? `Characteristics of Strong ${strongest.element} (${elementSlug.toUpperCase()}) Energy`
-                      : `${strongest.element} 기운이 강한 사람 특징 보러가기`}
-                  </span>
-                </Link>
-              </div>
-            )}
+        {isFiveElementsSection && (
+          <div className="mt-8 pt-6 border-t border-ink-black/5 dark:border-white/5 flex flex-col sm:flex-row items-center justify-start gap-4">
+            <Link
+              id="strongest-element-link"
+              to={`/element/${elementSlug}`}
+              className="text-[11px] font-sans font-black tracking-[0.2em] text-ink-black/40 dark:text-white/40 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all cursor-pointer flex items-center gap-1"
+            >
+              {lang === "en"
+                ? `Characteristics of Strong ${strongest.element} (${elementSlug.toUpperCase()}) Energy >`
+                : `${strongest.element} 기운이 강한 사람 특징 보러가기 >`}
+            </Link>
+          </div>
+        )}
     </motion.div>
   );
 }

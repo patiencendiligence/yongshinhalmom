@@ -32,6 +32,7 @@ export default function MainApp() {
     userData,
     setUserData,
     report,
+    isUpgradingDetail,
     preFilledData,
     loginAndPersist,
     handleChoice,
@@ -132,6 +133,7 @@ export default function MainApp() {
                    triggerPayment={triggerPayment}
                    userData={userData} 
                    lang={lang} 
+                   isUpgradingDetail={isUpgradingDetail}
                 />
               </motion.div>
             )}

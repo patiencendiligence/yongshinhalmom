@@ -17,6 +17,7 @@ export function useReportFlow(
   const [state, setState] = useState<AppState>("LANDING");
   const [userData, setUserData] = useState<any>(null);
   const [report, setReport] = useState<ReportResult | null>(null);
+  const [isUpgradingDetail, setIsUpgradingDetail] = useState(false);
   const [preFilledData, setPreFilledData] = useState<any>(null);
   const navigate = useNavigate();
 
@@ -97,7 +98,11 @@ export function useReportFlow(
     }
 
     // IMMEDIATELY set loading to provide visual feedback
-    setState("LOADING");
+    if (level === 'detailed' && report && report.level === 'simple') {
+      setIsUpgradingDetail(true);
+    } else {
+      setState("LOADING");
+    }
     console.log(`[Flow] Starting analysis for ${activeData.name} (${level})...`);
 
     // Check payment status for detailed analysis
@@ -183,13 +188,34 @@ export function useReportFlow(
       }
 
       console.log("[Flow] Success. Transitioning to RESULT.");
-      setReport({ ...result, level: actualLevel, pendingPayment });
+      if (level === 'detailed' && report && report.level === 'simple') {
+        // Merging logic to respect User requirement: 
+        // Keep the top areas (simple sections) exactly matching.
+        // Replace subsequent detailed sections.
+        const mergedSections = [
+          ...report.sections.slice(0, 3), // Keep original top 3 sections
+          ...result.sections.slice(3)      // Grab the other sections from detailed run
+        ];
+        
+        setReport({
+          ...report,                        // Keep original metadata/summary/fortune/zodiac
+          sections: mergedSections,
+          level: 'detailed',
+          pendingPayment: false
+        });
+      } else {
+        setReport({ ...result, level: actualLevel, pendingPayment });
+      }
       setState("RESULT");
     } catch (error: any) {
       console.error("[Flow] Report generation error:", error);
       
       // CRITICAL: Ensure we get out of LOADING state even on error
-      setState("INPUT");
+      if (level === 'detailed' && report && report.level === 'simple') {
+        // Stay on result, just reset detailed loader
+      } else {
+        setState("INPUT");
+      }
       
       const isQuota = error?.status === 429 || error?.message?.includes("429");
       const isTimeout = error?.message?.includes("시간") || error?.message?.includes("timeout");
@@ -200,6 +226,8 @@ export function useReportFlow(
 
       // Small delay to ensure state transition is visible before alert blocks
       setTimeout(() => alert(msg), 200);
+    } finally {
+      setIsUpgradingDetail(false);
     }
   };
 
@@ -280,6 +308,8 @@ export function useReportFlow(
     userData,
     setUserData,
     report,
+    isUpgradingDetail,
+    setIsUpgradingDetail,
     preFilledData,
     loginAndPersist,
     handleChoice,

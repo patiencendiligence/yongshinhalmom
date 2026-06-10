@@ -146,7 +146,7 @@ export function useReportResult({
   const displayDetailed = isPremiumUser && report.level === 'detailed';
   const manseRyeok = useMemo(() => {
     if (!userData?.birthDate) return { full: "" };
-    return getManseRyeok(userData.birthDate, userData.birthTime, userData.isLunar);
+    return getManseRyeok(userData.birthDate, userData.birthTime || "12:00", userData.isLunar);
   }, [userData?.birthDate, userData?.birthTime, userData?.isLunar]);
   const safeManseRyeok = manseRyeok || { full: "" };
 

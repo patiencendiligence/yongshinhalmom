@@ -151,17 +151,17 @@ export function getStrongestElement(manseRyeok: any) {
     time.charAt(0), time.charAt(1)
   ].filter(Boolean);
 
-  const woodStems = ["甲", "乙"];
-  const fireStems = ["丙", "丁"];
-  const earthStems = ["戊", "己"];
-  const metalStems = ["庚", "辛"];
-  const waterStems = ["壬", "癸"];
+  const woodStems = ["甲", "乙", "갑", "을"];
+  const fireStems = ["丙", "丁", "병", "정"];
+  const earthStems = ["戊", "己", "무", "기"];
+  const metalStems = ["庚", "辛", "경", "신"];
+  const waterStems = ["壬", "癸", "임", "계"];
 
-  const woodBranches = ["寅", "卯"];
-  const fireBranches = ["巳", "午"];
-  const earthBranches = ["辰", "戌", "丑", "未"];
-  const metalBranches = ["申", "酉"];
-  const waterBranches = ["子", "亥"];
+  const woodBranches = ["寅", "卯", "인", "묘"];
+  const fireBranches = ["巳", "午", "사", "오"];
+  const earthBranches = ["辰", "戌", "丑", "未", "진", "술", "축", "미"];
+  const metalBranches = ["申", "酉", "신", "유"];
+  const waterBranches = ["子", "亥", "자", "해"];
 
   let woodCount = 0;
   let fireCount = 0;

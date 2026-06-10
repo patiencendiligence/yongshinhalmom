@@ -372,7 +372,7 @@ const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday
   .replace(/{{monthPillar}}/g, pillars.monthPillar)
   .replace(/{{dayPillar}}/g, pillars.dayPillar)
   .replace(/{{timePillar}}/g, pillars.timePillar)
-  .replace(/{{language}})/g, lang);
+  .replace(/{{language}}/g, lang);
 
   console.log(JSON.stringify(pillars), ":::finalPrompt")
   const prompt = `

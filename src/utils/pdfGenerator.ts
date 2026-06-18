@@ -367,7 +367,7 @@ export async function generateReportPdf({
       }
       pages.push(page5);
 
-      // PAGE 6: Remedies & Oracle Advice + Medical warnings
+      // PAGE 6: Remedies & Oracle Advice + Medical warnings + Extra custom premium sections
       const page6 = createPdfPage(6);
       if (filteredCards[7]) {
         const clonedCard7 = filteredCards[7].cloneNode(true) as HTMLElement;
@@ -378,6 +378,18 @@ export async function generateReportPdf({
         }
         page6.insertBefore(clonedCard7, page6.lastChild);
       }
+      
+      // Dynamically append any extra card(s) from detailed premium prompt additions
+      for (let i = 8; i < filteredCards.length; i++) {
+        const clonedExtra = filteredCards[i].cloneNode(true) as HTMLElement;
+        clonedExtra.className = "pdf-card flex-1";
+        const label = clonedExtra.querySelector('.chapter-label');
+        if (label) {
+          label.innerHTML = lang === "ko" ? `추가장 ${String(i - 7).padStart(2, '0')}` : `EXTRA ${String(i - 7).padStart(2, '0')}`;
+        }
+        page6.insertBefore(clonedExtra, page6.lastChild);
+      }
+
       if (liveWarning) {
         const clonedWarning = liveWarning.cloneNode(true) as HTMLElement;
         clonedWarning.className = "pdf-warning";

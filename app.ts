@@ -384,6 +384,7 @@ app.post("/api/generate-report", async (req, res) => {
   const promptTemplate = `
   ${PROMPT_TEMPLATE}
   ${PROMPT_PRINT}
+  ${level === "detailed" ? "아래의 내용은 앞선 내용의 응답인 JSON 형식 8개의 섹션 뒤에 추가로 'title'과 'content'를 덧붙여서 응답한다.": ""}
   ${level === "detailed" ? PROMPT_PAID_DETAIL_TEMPLATE : ""}
   ${level === "detailed" ? PROMPT_PAID_DETAIL_PRINT : ""}
   `;

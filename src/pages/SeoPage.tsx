@@ -200,19 +200,15 @@ export default function SeoPage({
 
               ul: ({ children }) => (
                 <ul className="list-none pl-1 space-y-3 mb-6">
-                  {/* Map descendants to custom list elements for clean themed bullet points */}
-                  {Array.isArray(children) ? (
-                    children.map((child, idx) => (
-                      <li key={idx} className="flex gap-2.5 items-start text-ink-black/80 dark:text-white/80 text-sm sm:text-base">
-                        <span className="leading-relaxed">{child}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="flex gap-2.5 items-start text-ink-black/80 dark:text-white/80">
-                      <span className="leading-relaxed">{children}</span>
-                    </li>
-                  )}
+                  {children}
                 </ul>
+              ),
+
+              li: ({ children }) => (
+                <li className="flex gap-2.5 items-start text-ink-black/80 dark:text-white/80 text-sm sm:text-base">
+                  <span className={`w-1.5 h-1.5 ${theme.accentBg} rounded-full inline-block shrink-0 mt-2`} />
+                  <span className="leading-relaxed text-left">{children}</span>
+                </li>
               ),
 
               blockquote: ({ children }) => (

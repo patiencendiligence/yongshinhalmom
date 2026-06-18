@@ -1,8 +1,11 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
+
 import express from "express";
 import path from "path";
 import axios from "axios";
 import dotenv from "dotenv";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok.js";
@@ -49,6 +52,112 @@ const HANJA_TO_KOREAN: Record<string, string> = {
 function translateHanjaToKorean(pillar: string): string {
   if (!pillar) return "";
   return pillar.split("").map(char => HANJA_TO_KOREAN[char] || char).join("");
+}
+
+function cleanAndParseJSON(rawText: string): any {
+  if (!rawText) {
+    throw new Error("Empty text received");
+  }
+  let text = rawText.trim();
+  
+  // 1. Try parsing directly
+  try {
+    return JSON.parse(text);
+  } catch (e) {}
+
+  // 2. Strip any markdown block wrappers if present (e.g. ```json ... ```)
+  text = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+  try {
+    return JSON.parse(text);
+  } catch (e) {}
+
+  // 3. Find first '{' and use brace tracking to grab exact matching object
+  const start = text.indexOf('{');
+  if (start !== -1) {
+    let depth = 0;
+    let inString = false;
+    let escape = false;
+    let matchEnd = -1;
+
+    for (let i = start; i < text.length; i++) {
+      const char = text[i];
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (char === '\\') {
+        escape = true;
+        continue;
+      }
+      if (char === '"') {
+        inString = !inString;
+        continue;
+      }
+      if (!inString) {
+        if (char === '{') {
+          depth++;
+        } else if (char === '}') {
+          depth--;
+          if (depth === 0) {
+            matchEnd = i;
+            break;
+          }
+        }
+      }
+    }
+
+    if (matchEnd !== -1) {
+      const extracted = text.substring(start, matchEnd + 1);
+      try {
+        return JSON.parse(extracted);
+      } catch (e) {
+        // Try sanitization
+        try {
+          const sanitized = sanitizeJSON(extracted);
+          return JSON.parse(sanitized);
+        } catch (innerE) {}
+      }
+    }
+  }
+
+  // 4. Fallback to simple substring and sanitize
+  const firstCurly = text.indexOf('{');
+  const lastCurly = text.lastIndexOf('}');
+  if (firstCurly !== -1 && lastCurly !== -1) {
+    const fallbackText = text.substring(firstCurly, lastCurly + 1);
+    try {
+      return JSON.parse(fallbackText);
+    } catch (e) {
+      const sanitized = sanitizeJSON(fallbackText);
+      return JSON.parse(sanitized);
+    }
+  }
+
+  throw new Error("Could not parse valid JSON from the generated response");
+}
+
+function sanitizeJSON(jsonStr: string): string {
+  let cleaned = jsonStr.trim();
+  
+  // Remove multi-line comments
+  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, "");
+  
+  // Strip lines starting with //
+  cleaned = cleaned.split("\n")
+    .map(line => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("//")) {
+        return "";
+      }
+      return line;
+    })
+    .join("\n");
+
+  // Remove trailing commas before } or ]
+  cleaned = cleaned.replace(/,\s*}/g, "}");
+  cleaned = cleaned.replace(/,\s*\]/g, "]");
+  
+  return cleaned;
 }
 
 
@@ -210,63 +319,19 @@ app.get("/api/check-payment", async (req, res) => {
   }
 });
 
-const DEFAULT_DAILY_PROMPT_TEMPLATE = `
-당신은 사주명리 대가 '용신할멈'입니다.
-귀하의 사주 원국:
-- 년주: {{yearPillar}}
-- 월주: {{monthPillar}}
-- 일주: {{dayPillar}}
-- 시주: {{timePillar}}
-- 띠: {{zodiac}}
-
-오늘의 날짜: {{formattedToday}}
-오늘의 일진: {{todayPillar}}
-
-사주 원국의 일주와 오늘의 일진을 바탕으로 오늘의 정성 어린 운세를 한글로 구어체(~하구먼, ~했네, ~라네 등 따뜻한 할머니 말투)로 작성해주세요.
-`;
-
-const DEFAULT_DAILY_PROMPT_PRINT = `
-반드시 JSON 형식으로 응답해주세요. 마크다운 백틱 등 다른 텍스트는 포함하지 말고 순수 JSON만 반환해야 합니다.
-"content" 필드 안에는 반드시 다음의 마크다운 소제목들을 포함하여 작성해 주세요:
-
-### 전반적인 흐름 (오늘의 점수/총평, 신살 혹은 길신/흉신 예: [85 / 비교적 좋음, 도화])
-이곳에 오늘 하루의 전반적인 사주 흐름과 할범의 조언을 친근한 구어체(~하구먼, ~했네, ~라네 등 귀엽고 친밀한 할할머니 말투)로 작성해주세요.
-
-### 조심할 것
-이곳에 오늘 특히 경계하고 주의해야 할 점이나 마음가짐을 설명해 주게.
-
-### 좋은 기운
-이곳에 오늘 도움이 될 좋은 방향, 조치나 일상 속 작은 수확들에 대해 설명해 주게.
-
-### 성공운/재물운
-이곳에 오늘의 일진과 사주 원국에 따른 성공 및 재물 흐름을 적어주게.
-
-### 애정운
-이곳에 오늘의 대인관계나 연인/가족들과의 교감 및 마음 나눔에 대해 조언해 주게.
-
-### 로또운
-이곳에 뜻밖의 행운이나 로또, 횡재수에 관련해서 담백하고 현명한 일침을 놓아주게.
-
-JSON 응답 형식 예시:
-{
-  "title": "{{formattedToday}} 오늘의 운세",
-  "content": "### 전반적인 흐름 [85/비교적 좋음, 귀인]\\n오늘 하루는 아주 따스한 햇살이 자네 길을 비추는구나. 전반적으로 좋은 일진이니 걱정 붙들어 매시게.\\n\\n### 조심할 것\\n남과의 쓸데없는 시비를 피하고, 말에 신중하면 만사가 형통할 걸세.\\n\\n### 좋은 기운\\n동쪽으로 걸어가면 조그마한 기쁨이 기다리고 있을 테니, 아침 산책이라도 다녀오게.\\n\\n### 성공운/재물운\\n지갑을 너무 쉽게 열지만 않는다면 정직한 땀방울이 자네의 재물을 지탱해줄 테지.\\n\\n### 애정운\\n가까운 이에게 먼저 따뜻한 말 한마디 건네보게나. 사랑이 꽃피는 소리가 들릴 걸세.\\n\\n### 로또운\\n횡재수를 너무 탐하면 득보다 실이 많으니 일상의 소소한 복에 만족하게."
-}
-`;
-
 const SYSTEM_INSTRUCTION = process.env.SYSTEM_INSTRUCTION || process.env.VITE_SYSTEM_INSTRUCTION || "";
 const ohangContent = process.env.VITE_OHANG || process.env.OHANG || "";
-const DAILY_PROMPT_PRINT = process.env.DAILY_PROMPT_PRINT || process.env.VITE_DAILY_PROMPT_PRINT || DEFAULT_DAILY_PROMPT_PRINT;
-const DAILY_PROMPT_TEMPLATE = process.env.DAILY_PROMPT_TEMPLATE || process.env.VITE_DAILY_PROMPT_TEMPLATE || DEFAULT_DAILY_PROMPT_TEMPLATE;
+const DAILY_PROMPT_PRINT = process.env.DAILY_PROMPT_PRINT || process.env.VITE_DAILY_PROMPT_PRINT || "";
+const DAILY_PROMPT_TEMPLATE = process.env.DAILY_PROMPT_TEMPLATE || process.env.VITE_DAILY_PROMPT_TEMPLATE || "";
 const PROMPT_PRINT = process.env.PROMPT_PRINT || process.env.VITE_PROMPT_PRINT || "";
 const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_TEMPLATE || "";
+const PROMPT_PAID_DETAIL_TEMPLATE = process.env.PROMPT_PAID_DETAIL_TEMPLATE || process.env.VITE_PROMPT_PAID_DETAIL_TEMPLATE || "";
+const PROMPT_PAID_DETAIL_PRINT = process.env.PROMPT_PAID_DETAIL_PRINT || process.env.VITE_PROMPT_PAID_DETAIL_PRINT || "";
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
   "gemini-2.5-flash",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-flash-latest"
+  "gemini-3.1-pro-preview"
 ];
 
 function getApiKey() {
@@ -300,195 +365,199 @@ async function tryOpenAI(prompt: string, systemInstruction: string): Promise<str
 
 // Gemini report API with OpenAI fallback
 app.post("/api/generate-report", async (req, res) => {
-  const { pillars, zodiac, targetYear, lang, level } = req.body;
-  if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
+  try {
+    const { pillars, zodiac, targetYear, lang, level } = req.body;
+    if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
 
-  const apiKey = getApiKey();
-  
-  // Use KST (UTC+9) for current date to match user expectations
-  const now = new Date();
-  const kstOffset = 9 * 60 * 60 * 1000;
-  const kstNow = new Date(now.getTime() + kstOffset);
-  const kstToday = kstNow.toISOString().split('T')[0];
-  
-  const currentYear = targetYear || kstNow.getFullYear();
-  const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
+    const apiKey = getApiKey();
+    
+    // Use KST (UTC+9) for current date to match user expectations
+    const now = new Date();
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const kstNow = new Date(now.getTime() + kstOffset);
+    const kstToday = kstNow.toISOString().split('T')[0];
+    
+    const currentYear = targetYear || kstNow.getFullYear();
+    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
 
-const promptTemplate = `
-${PROMPT_TEMPLATE}
-${PROMPT_PRINT}
-`;
+  const promptTemplate = `
+  ${PROMPT_TEMPLATE}
+  ${PROMPT_PRINT}
+  ${level === "detailed" ? PROMPT_PAID_DETAIL_TEMPLATE : ""}
+  ${level === "detailed" ? PROMPT_PAID_DETAIL_PRINT : ""}
+  `;
 
-const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
-  .replace(/{{today}}/g, kstToday)
-  .replace(/{{yearPillar}}/g, pillars.yearPillar)
-  .replace(/{{monthPillar}}/g, pillars.monthPillar)
-  .replace(/{{dayPillar}}/g, pillars.dayPillar)
-  .replace(/{{timePillar}}/g, pillars.timePillar)
-  .replace(/{{zodiac}}/g, String(correctZodiacIndex))
-  .replace(/{{analysisLevel}}/g, level).replace(/{{language}}/g, lang);
+  const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
+    .replace(/{{today}}/g, kstToday)
+    .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
+    .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
+    .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
+    .replace(/{{timePillar}}/g, pillars.timePillar || "")
+    .replace(/{{zodiac}}/g, String(correctZodiacIndex))
+    .replace(/{{analysisLevel}}/g, level || "simple").replace(/{{language}}/g, lang || "ko");
 
-console.log(JSON.stringify(pillars), ":::finalPrompt")
-  const prompt = `
-${SYSTEM_INSTRUCTION}
-${finalPrompt}
-`;
+  console.log(JSON.stringify(pillars), ":::finalPrompt")
+    const prompt = `
+  ${SYSTEM_INSTRUCTION}
+  ${finalPrompt}
+  `;
 
-  let parsed: any = null;
+    let parsed: any = null;
 
-  if (apiKey) {
-    const genAI = new GoogleGenerativeAI(apiKey);
-
-    for (const modelName of MODELS_TO_TRY) {
-      try {
-        console.log(`[Gemini Server] Trying ${modelName}...`);
-        const model = genAI.getGenerativeModel({ 
-          model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION,
-        });
-
-        const result = await model.generateContent({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.1,
+    if (apiKey) {
+      const ai = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
           }
-        });
-
-        const response = await result.response;
-        let text = response.text();
-        
-        const firstCurly = text.indexOf('{');
-        const lastCurly = text.lastIndexOf('}');
-        if (firstCurly !== -1 && lastCurly !== -1) {
-          text = text.substring(firstCurly, lastCurly + 1);
         }
-        
-        parsed = JSON.parse(text);
-        break;
-      } catch (e: any) {
-         console.error(`[Gemini Server] ${modelName} failed:`, e.message);
+      });
+
+      for (const modelName of MODELS_TO_TRY) {
+        try {
+          console.log(`[Gemini Server] Trying ${modelName}...`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              systemInstruction: SYSTEM_INSTRUCTION,
+              responseMimeType: "application/json",
+              temperature: 0.1,
+            }
+          });
+
+          let text = response.text || "";
+          parsed = cleanAndParseJSON(text);
+          break;
+        } catch (e: any) {
+           console.error(`[Gemini Server] ${modelName} failed:`, e.message);
+        }
+      }
+    } else {
+      console.warn("[Gemini Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
+    }
+
+    // Fallback to OpenAI
+    if (!parsed) {
+      try {
+        console.log("[Gemini Server] Initiating OpenAI fallback...");
+
+        const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+        parsed = cleanAndParseJSON(text);
+      } catch (err: any) {
+        console.error("[Gemini Server] OpenAI fallback failed:", err.message);
       }
     }
-  } else {
-    console.warn("[Gemini Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
-  }
 
-  // Fallback to OpenAI
-  if (!parsed) {
-    try {
-      console.log("[Gemini Server] Initiating OpenAI fallback...");
-
-      const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
-      parsed = JSON.parse(text);
-    } catch (err: any) {
-      console.error("[Gemini Server] OpenAI fallback failed:", err.message);
+    if (parsed) {
+      // Ensure zodiac is ALWAYS the correct one from calculation
+      parsed.zodiac = correctZodiacIndex;
+      return res.json(parsed);
     }
-  }
 
-  if (parsed) {
-    // Ensure zodiac is ALWAYS the correct one from calculation
-    parsed.zodiac = correctZodiacIndex;
-    return res.json(parsed);
+    res.status(500).json({ error: "All AI model generation attempts failed (Gemini and OpenAI)" });
+  } catch (globalErr: any) {
+    console.error("[Gemini Server] Global route handler caught error:", globalErr);
+    res.status(500).json({ error: globalErr.message || "An unexpected error occurred during report generation." });
   }
-
-  res.status(500).json({ error: "All AI model generation attempts failed (Gemini and OpenAI)" });
 });
 
 // Daily guide API with OpenAI fallback
 app.post("/api/generate-daily", async (req, res) => {
-  const { pillars, zodiac, lang } = req.body;
-  if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
-  const apiKey = getApiKey();
-  const todayPillar = getTodayPillar();
-  const kstOffset = 9 * 60 * 60 * 1000;
-  const kstTodayDate = new Date(new Date().getTime() + kstOffset);
-  const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
+  try {
+    const { pillars, zodiac, lang } = req.body;
+    if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
+    const apiKey = getApiKey();
+    const todayPillar = getTodayPillar();
+    const kstOffset = 9 * 60 * 60 * 1000;
+    const kstTodayDate = new Date(new Date().getTime() + kstOffset);
+    const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
-  const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
-
-
-const promptTemplate = `
-${DAILY_PROMPT_TEMPLATE}
-${DAILY_PROMPT_PRINT}
-`;
-
-const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday)
-  .replace(/{{todayPillar}}/g, todayPillar)
-  .replace(/{{yearPillar}}/g, pillars.yearPillar)
-  .replace(/{{monthPillar}}/g, pillars.monthPillar)
-  .replace(/{{dayPillar}}/g, pillars.dayPillar)
-  .replace(/{{timePillar}}/g, pillars.timePillar)
-  .replace(/{{zodiac}}/g, String(correctZodiacIndex))
-  .replace(/{{language}}/g, lang);
-
-  console.log(finalPrompt, ":::finalPrompt")
-  const prompt = `
-${SYSTEM_INSTRUCTION}
-${finalPrompt}
-`;
+    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
 
-  let parsed: any = null;
+  const promptTemplate = `
+  ${DAILY_PROMPT_TEMPLATE}
+  ${DAILY_PROMPT_PRINT}
+  `;
 
-  if (apiKey) {
-    const genAI = new GoogleGenerativeAI(apiKey);
+  const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday)
+    .replace(/{{todayPillar}}/g, todayPillar || "")
+    .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
+    .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
+    .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
+    .replace(/{{timePillar}}/g, pillars.timePillar || "")
+    .replace(/{{zodiac}}/g, String(correctZodiacIndex))
+    .replace(/{{language}}/g, lang || "ko");
 
-    for (const modelName of MODELS_TO_TRY) {
-      try {
-        console.log(`[Gemini Daily Server] Trying ${modelName}...`);
-        const model = genAI.getGenerativeModel({ 
-          model: modelName,
-          systemInstruction: SYSTEM_INSTRUCTION
-        });
+    console.log(finalPrompt, ":::finalPrompt")
+    const prompt = `
+  ${SYSTEM_INSTRUCTION}
+  ${finalPrompt}
+  `;
 
-        const result = await model.generateContent({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.1,
+
+    let parsed: any = null;
+
+    if (apiKey) {
+      const ai = new GoogleGenAI({
+        apiKey: apiKey,
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
           }
-        });
-
-        const response = await result.response;
-        let text = response.text();
-        
-        const firstCurly = text.indexOf('{');
-        const lastCurly = text.lastIndexOf('}');
-        if (firstCurly !== -1 && lastCurly !== -1) {
-          text = text.substring(firstCurly, lastCurly + 1);
         }
-        
-        parsed = JSON.parse(text);
-        break;
-      } catch (e: any) {
-        console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
+      });
+
+      for (const modelName of MODELS_TO_TRY) {
+        try {
+          console.log(`[Gemini Daily Server] Trying ${modelName}...`);
+          const response = await ai.models.generateContent({
+            model: modelName,
+            contents: prompt,
+            config: {
+              systemInstruction: SYSTEM_INSTRUCTION,
+              responseMimeType: "application/json",
+              temperature: 0.1,
+            }
+          });
+
+          let text = response.text || "";
+          parsed = cleanAndParseJSON(text);
+          break;
+        } catch (e: any) {
+          console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
+        }
+      }
+    } else {
+      console.warn("[Gemini Daily Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
+    }
+
+    // Fallback to OpenAI
+    if (!parsed) {
+      try {
+        console.log("[Gemini Daily Server] Initiating OpenAI fallback...");
+        const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+        parsed = cleanAndParseJSON(text);
+      } catch (err: any) {
+        console.error("[Gemini Daily Server] OpenAI fallback failed:", err.message);
       }
     }
-  } else {
-    console.warn("[Gemini Daily Server] Gemini API key is missing. Skipping directly to OpenAI fallback.");
-  }
 
-  // Fallback to OpenAI
-  if (!parsed) {
-    try {
-      console.log("[Gemini Daily Server] Initiating OpenAI fallback...");
-      const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
-      parsed = JSON.parse(text);
-    } catch (err: any) {
-      console.error("[Gemini Daily Server] OpenAI fallback failed:", err.message);
+    if (parsed) {
+      if (parsed.zodiac !== undefined) {
+        parsed.zodiac = correctZodiacIndex;
+      }
+      return res.json(parsed);
     }
-  }
 
-  if (parsed) {
-    if (parsed.zodiac !== undefined) {
-      parsed.zodiac = correctZodiacIndex;
-    }
-    return res.json(parsed);
+    res.status(500).json({ error: "All AI model daily generation attempts failed (Gemini and OpenAI)" });
+  } catch (globalErr: any) {
+    console.error("[Gemini Daily Server] Global route handler caught error:", globalErr);
+    res.status(500).json({ error: globalErr.message || "An unexpected error occurred during daily generation." });
   }
-
-  res.status(500).json({ error: "All AI model daily generation attempts failed (Gemini and OpenAI)" });
 });
 
 app.get("/api/health", (req, res) => {

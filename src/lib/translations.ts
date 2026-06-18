@@ -22,6 +22,7 @@ export const translations = {
     luckyColor: "행운 색상",
     luckyItem: "행운 아이템",
     luckyFood: "행운 음식",
+    luckyLocation: "행운 장소",
     since: `Since ${currentYear}`,
     traditionalWisdom: "Data Insights",
     landingQuote: "자네의 고유한 자취와 환경을 살펴주마.\n더 나은 하루를 위한 길잡이가 되어 줄 테니 잘 확인해보게.",
@@ -36,7 +37,7 @@ export const translations = {
     registryTitle: "기초 정보 입력",
     registrySubtitle: "분석을 위해 정보를 남겨보게",
     clientName: "성명",
-    namePlaceholder: "이름을 적어보거라",
+    namePlaceholder: "내 너를 무어라 부를까",
     birthPlace: "지역 정보",
     placePlaceholder: "예: 서울, 부산",
     birthDate: "생년월일",
@@ -49,7 +50,7 @@ export const translations = {
     missingFields: "빈틈없이 적어주어야 내 명확히 살펴줄 수 있느니라.",
     loadingSummary: "사주 분석 중...",
     loadingDetail: "자취를 훑어내려가고 있으니, 잠시 마음을 가다듬고 기다려보게.",
-    yourLifestyleReport: "용신할멈의 감정서(鑑定書)",
+    yourLifestyleReport: "용신할멈의 조언",
     authorizedRecipient: "Authorized Recipient",
     section: "Section",
     askSpirit: "AI 질문하기",
@@ -62,7 +63,7 @@ export const translations = {
     quotaExceeded: "찾아오는 이가 너무 많아 잠시 숨을 고르는 중이니 조금 뒤에 다시 오게.",
     halmeomSpirit: "AI Assistant",
     infoTitle: "분석 기술 및 기준",
-    appIntro: "용신할멈은 사용자의 고유 데이터와 환경적 패턴을 분석하여 현대적인 라이프스타일 인사이트를 제공합니다.",
+    appIntro: "수많은 사람들의 고민을 들어주던 GPT 무당 ‘용신할멈’에서 시작해, 이제는 더 깊은 사주 풀이와 인생 리포트를 전합니다. 타고난 기질과 삶의 흐름을 바탕으로 인간관계, 직업, 재물, 그리고 오늘의 운세까지 찬찬히 살펴봅니다.",
     calcStandards: "데이터 처리 기준",
     standard1: "1. 환경 보정: 지정된 지역의 지리적 특성과 시간대를 정밀하게 보정하여 계산합니다.",
     standard2: "2. 시간 보정: 시행된 모든 표준시 변경 사항을 자동으로 감지하여 보정합니다.",
@@ -156,7 +157,7 @@ export const translations = {
   luckyColor: "Lucky Color",
   luckyItem: "Lucky Item",
   luckyFood: "Lucky Food",
-
+  luckyLocation: "Lucky Location",
   grandmother: "old oracle",
   ancientOracle: "Saju Reading",
 
@@ -190,7 +191,7 @@ export const translations = {
   clientName: "Name",
 
   namePlaceholder:
-    "Write the name here",
+    "What shall I call you?",
 
   birthPlace: "Birth Place",
 
@@ -253,7 +254,7 @@ export const translations = {
   infoTitle: "Reading Principles",
 
   appIntro:
-    "Yongshin Halmeom examines the flow carried within one's birth time and environment, interpreting the hidden tendencies tied to life, relationships, work, and fortune.",
+    "Born from thousands of conversations as a popular GPT fortune teller, Yongshin Halmeom now offers deeper Saju-based life readings. Through your birth data and life patterns, she explores personality, relationships, career, and the flow of everyday fortune.",
 
   calcStandards: "Reading Standards",
 

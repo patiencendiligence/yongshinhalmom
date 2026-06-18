@@ -1,6 +1,6 @@
 export interface UserProfile {
   id: string;
-  name: string;
+  name?: string;
   birthDate: string;
   birthTime: string;
   isLunar: boolean;
@@ -31,9 +31,10 @@ export const storageService = {
   saveProfile: (profile: Omit<UserProfile, "id" | "createdAt">) => {
     const profiles = storageService.getProfiles();
     const isDuplicate = profiles.find(p => 
-      p.name === profile.name && 
       p.birthDate === profile.birthDate && 
-      p.birthTime === profile.birthTime
+      p.birthTime === profile.birthTime &&
+      p.gender === profile.gender &&
+      p.birthPlace === profile.birthPlace
     );
 
     if (isDuplicate) return;
@@ -85,7 +86,6 @@ export const storageService = {
 
   findCachedReport: (data: any, year: number, level: 'simple' | 'detailed'): any | null => {
     const hash = JSON.stringify({
-      name: data.name,
       birthDate: data.birthDate,
       birthTime: data.birthTime,
       isLunar: data.isLunar,

@@ -80,6 +80,15 @@ export async function getReport(userData: {
   return { ...data, level };
 }
 
+function arePillarsEqual(p1: any, p2: any): boolean {
+  if (!p1 && !p2) return true;
+  if (!p1 || !p2) return false;
+  return p1.yearPillar === p2.yearPillar &&
+         p1.monthPillar === p2.monthPillar &&
+         p1.dayPillar === p2.dayPillar &&
+         p1.timePillar === p2.timePillar;
+}
+
 export async function getTodaysFortune(
   userData: {
     birthDate: string;
@@ -102,6 +111,45 @@ export async function getTodaysFortune(
     ? manse.zodiac
     : ((parseInt(userData.birthDate.split('-')[0]) - 1924) % 12);
 
+  const CACHE_KEY = "saju_daily_fortune_cache";
+  
+  // Calculate current KST date
+  const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+  const todayDateStr = kstNow.toISOString().split('T')[0];
+
+  // Try parsing cached data from localStorage
+  let cachedData: any = null;
+  try {
+    const rawCache = localStorage.getItem(CACHE_KEY);
+    if (rawCache) {
+      cachedData = JSON.parse(rawCache);
+    }
+  } catch (err) {
+    console.warn("Failed to retrieve daily fortune cache:", err);
+  }
+
+  if (cachedData && cachedData.payload && cachedData.response) {
+    const cachedPayload = cachedData.payload;
+    const cachedResponse = cachedData.response;
+
+    const pillarsMatch = arePillarsEqual(cachedPayload.pillars, pillars);
+    const zodiacMatch = cachedPayload.zodiac === correctZodiacIndex;
+    const langMatch = cachedPayload.lang === lang;
+
+    // Check if response contains today's KST date (YYYY-MM-DD format)
+    const dateRegex = /\d{4}-\d{2}-\d{2}/;
+    const contentMatch = cachedResponse.content ? cachedResponse.content.match(dateRegex) : null;
+    const titleMatch = cachedResponse.title ? cachedResponse.title.match(dateRegex) : null;
+    const dateInResponse = (contentMatch ? contentMatch[0] : null) || (titleMatch ? titleMatch[0] : null);
+
+    const dateMatch = dateInResponse === todayDateStr || (cachedResponse.content && cachedResponse.content.includes(todayDateStr));
+
+    if (pillarsMatch && zodiacMatch && langMatch && dateMatch) {
+      console.log("[getTodaysFortune] Active daily fortune found in cache. Avoiding API call.", todayDateStr);
+      return cachedResponse;
+    }
+  }
+
   const response = await fetch("/api/generate-daily", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -113,7 +161,26 @@ export async function getTodaysFortune(
     throw new Error(err.error || "Generation error");
   }
 
-  return await response.json();
+  const result = await response.json();
+
+  // Store in cache
+  try {
+    const cacheToStore = {
+      payload: {
+        pillars,
+        zodiac: correctZodiacIndex,
+        lang
+      },
+      response: result,
+      cachedAt: new Date().toISOString()
+    };
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheToStore));
+    console.log("[getTodaysFortune] Cached new daily fortune successfully.");
+  } catch (err) {
+    console.warn("Failed to write daily fortune cache:", err);
+  }
+
+  return result;
 }
 
 /**

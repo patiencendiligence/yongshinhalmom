@@ -16,7 +16,6 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
   const nextYear = currentYear + 1;
 
   const [formData, setFormData] = useState({
-    name: initialData?.name || "",
     birthDate: initialData?.birthDate || "",
     birthTime: initialData?.birthTime || "",
     isLunar: initialData?.isLunar ?? false,
@@ -32,7 +31,6 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
         ...prev,
         ...initialData,
         // Only update if the value is actually different and provided
-        name: initialData.name ?? prev.name,
         birthDate: initialData.birthDate ?? prev.birthDate,
         birthTime: initialData.birthTime ?? prev.birthTime,
         isLunar: initialData.isLunar ?? prev.isLunar,
@@ -45,7 +43,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.birthDate || !formData.birthPlace) {
+    if (!formData.birthDate || !formData.birthPlace) {
       alert(t.missingFields);
       return;
     }
@@ -66,29 +64,7 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
       </header>
 
       <form onSubmit={handleSubmit} className="space-y-16 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
-          <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.clientName}</label>
-            <input
-              type="text"
-              placeholder={t.namePlaceholder}
-              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/12 dark:placeholder:text-white/12"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-6">
-            <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.birthPlace}</label>
-            <input
-              type="text"
-              placeholder={t.placePlaceholder}
-              className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/12 dark:placeholder:text-white/12"
-              value={formData.birthPlace}
-              onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
-            />
-          </div>
-        </div>
+        
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
           <div className="space-y-6">
@@ -110,7 +86,16 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
             />
           </div>
         </div>
-
+        <div className="space-y-6">
+          <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.birthPlace}</label>
+          <input
+            type="text"
+            placeholder={t.placePlaceholder}
+            className="w-full bg-transparent border-b border-ink-black/15 dark:border-white/10 px-0 py-4 outline-none focus:border-ink-black dark:focus:border-white transition-all font-serif text-3xl text-ink-black dark:text-white placeholder:text-ink-black/12 dark:placeholder:text-white/12"
+            value={formData.birthPlace}
+            onChange={(e) => setFormData({ ...formData, birthPlace: e.target.value })}
+          />
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-16 pt-4">
           <div className="space-y-8">
             <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.calendarType}</label>

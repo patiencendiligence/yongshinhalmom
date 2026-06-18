@@ -4,30 +4,51 @@
  */
 
 export function parseDailyFortune(content: string) {
+  if (!content) {
+    return {
+      flow: "",
+      watchOut: "",
+      goodEnergy: "",
+      wealth: "",
+      love: "",
+      lotto: "",
+      score: 70,
+      evaluation: "보통",
+      sajuTag: ""
+    };
+  }
+
+  // Normalize line endings to avoid \r issues
+  const normalized = content.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalized.split('\n');
+
   const getBlock = (titleKeywords: string[]) => {
-    const lines = content.split('\n');
     let capture = false;
     let blockLines: string[] = [];
-    for (const line of lines) {
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       const trimmed = line.trim();
-      if (
-        trimmed.startsWith('###') || 
-        trimmed.startsWith('##') || 
-        trimmed.startsWith('*') || 
-        trimmed.startsWith('**') || 
-        trimmed.startsWith('- **') || 
-        trimmed.startsWith('- ###')
-      ) {
+
+      // Check if this line is likely a header
+      const isHeader = 
+        trimmed.startsWith('#') || 
+        /^\d+[\.\s\:\)]/.test(trimmed) ||
+        /^\[\d+\]/.test(trimmed);
+
+      if (isHeader) {
         const isMatch = titleKeywords.some(keyword => trimmed.includes(keyword));
         if (isMatch) {
           capture = true;
-          continue;
+          continue; // Skip the header line itself from body content
         } else if (capture) {
+          // If we hit any other header while capturing, stop capturing this block
           break;
         }
       }
+
       if (capture) {
-        // Stop capture if we see Five elements block appended
+        // Prevent accidental bleed into other utility blocks or element distributions
         if (
           trimmed.includes('전체적인 오행') || 
           trimmed.includes('오행 분포') || 
@@ -41,7 +62,9 @@ export function parseDailyFortune(content: string) {
         blockLines.push(line);
       }
     }
+
     let cleaned = blockLines.join('\n').trim();
+    // Strip bullet markers or markdown stars from the cleaned output
     if (cleaned.startsWith('-') || cleaned.startsWith('*')) {
       cleaned = cleaned.replace(/^[\s-*]+/, '').trim();
     }
@@ -66,21 +89,21 @@ export function parseDailyFortune(content: string) {
   let evaluation = "보통";
   let sajuTag = "";
 
-  const lines = content.split('\n');
   const flowHeaderLine = lines.find(line => {
     const l = line.trim();
-    return l.startsWith('###') && (l.includes('전반적인 흐름') || l.includes('Overall Flow') || l.includes('전반 적인 흐름') || l.includes('오늘의 흐름'));
+    return l.includes('전반적인 흐름') || l.includes('Overall Flow') || l.includes('오늘의 흐름');
   });
 
   if (flowHeaderLine) {
-    const strippedHeader = flowHeaderLine.replace(/^###\s*/, '').replace(/오늘의\s*전반적인\s*흐름|전반적인\s*흐름|Today's\s*Overall\s*Flow/i, '').trim();
-    const match = strippedHeader.match(/(\d+)\s*[\/|:]\s*([^,\n]+)(?:,\s*([^,\n]+))?/);
-    if (match) {
-      score = parseInt(match[1]) || 70;
-      evaluation = match[2]?.trim() || "보통";
-      sajuTag = match[3]?.trim() || "";
+    const strippedHeader = flowHeaderLine.replace(/^#+\s*/, '').replace(/오늘의\s*전반적인\s*흐름|전반적인\s*흐름|Today's\s*Overall\s*Flow/i, '').trim();
+    const bracketMatch = strippedHeader.match(/\[?\s*(\d+)\s*[\/|:]\s*([^,\n\])]+)(?:,\s*([^,\n\])]+))?\s*\]?/);
+    
+    if (bracketMatch) {
+      score = parseInt(bracketMatch[1]) || 70;
+      evaluation = bracketMatch[2]?.trim() || "보통";
+      sajuTag = bracketMatch[3]?.trim() || "";
     } else {
-      const parts = strippedHeader.split('/');
+      const parts = strippedHeader.replace(/[\[\]()]/g, '').split('/');
       if (parts.length >= 2) {
         const parsedScore = parseInt(parts[0].replace(/[^0-9]/g, ''));
         if (!isNaN(parsedScore)) score = parsedScore;
@@ -101,7 +124,6 @@ export function parseDailyFortune(content: string) {
         else if (strippedHeader.includes('좋지 않음')) evaluation = "좋지 않음";
         else if (strippedHeader.includes('주의')) evaluation = "주의";
         
-        // Find general Korean chars representing "살" or "귀인" as sajuTag
         const sajuTags = ['천을', '도화', '화개', '역마', '망신', '귀인', '연살', '겁살', '재살', '천살', '지살', '월살', '반안', '육해'];
         for (const tag of sajuTags) {
           if (strippedHeader.includes(tag)) {
@@ -113,30 +135,13 @@ export function parseDailyFortune(content: string) {
     }
   }
 
-  // Fallbacks if some sections are missing are now cleaned completely of static placeholder content.
-  if (!watchOut) {
-    watchOut = "";
-  }
-  if (!goodEnergy) {
-    goodEnergy = "";
-  }
-  if (!wealth) {
-    wealth = "";
-  }
-  if (!love) {
-    love = "";
-  }
-  if (!lotto) {
-    lotto = "";
-  }
-
   return {
     flow: flow || "",
-    watchOut,
-    goodEnergy,
-    wealth,
-    love,
-    lotto,
+    watchOut: watchOut || "",
+    goodEnergy: goodEnergy || "",
+    wealth: wealth || "",
+    love: love || "",
+    lotto: lotto || "",
     score,
     evaluation,
     sajuTag

@@ -165,20 +165,21 @@ export function useReportResult({
   const safeManseRyeok = manseRyeok || { full: "" };
 
   const swappedReport = useMemo(() => {
-    return report;
+    return report || ({ sections: [], todaysFortune: undefined } as any);
   }, [report]);
 
   // Generate sections list with swapped / re-formatted chapters
   const displaySections = useMemo(() => {
-    if (swappedReport.todaysFortune) {
-      const list = [...swappedReport.sections];
+    const sections = (swappedReport && Array.isArray(swappedReport.sections)) ? swappedReport.sections : [];
+    if (swappedReport && swappedReport.todaysFortune) {
+      const list = [...sections];
       const dailySec: ReportSection = dailySection || swappedReport.todaysFortune || {
         title: lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide",
         content: ""
       };
       return [dailySec, ...list];
     } else {
-      const list = [...swappedReport.sections];
+      const list = [...sections];
       if (dailySection && list.length > 2) {
         list[2] = dailySection;
       }
@@ -192,7 +193,7 @@ export function useReportResult({
       }
       return list;
     }
-  }, [swappedReport.sections, swappedReport.todaysFortune, dailySection, lang]);
+  }, [swappedReport, dailySection, lang]);
 
   const handlePayment = () => {
     if (!user) {
@@ -245,6 +246,7 @@ export function useReportResult({
     reportHash,
     handlePayment,
     handleManualCheck,
-    swappedReport
+    swappedReport,
+    dailySection
   };
 }

@@ -17,8 +17,8 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
       <Helmet>
-        <title>{lang === "en" ? "Yongshin Halmeom - AI Saju Report & Today's Fortune" : "용신할멈 - AI 사주명리 보고서 & 오늘의 운세"}</title>
-        <meta name="description" content={lang === "en" ? "Explore traditional Saju wisdom. Discover your fate, useful elements, daily fortune guidance, and authentic insights." : "용신할멈과 함께 알아보는 전통 사주명리 지혜. 일간, 대운, 용신과 오늘 하루의 길흉화복을 완벽히 분석해드립니다."} />
+        <title>{lang === "en" ? "Yongshin Halmeom - Korean Saju Report & Today's Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"}</title>
+        <meta name="description" content={lang === "en" ? "Tsk. Looking for answers? Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." : "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/" />
       </Helmet>
       

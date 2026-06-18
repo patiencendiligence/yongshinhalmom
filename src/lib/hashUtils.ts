@@ -1,8 +1,8 @@
 
 export function getReportHash(userData: any): string {
   if (!userData) return "";
-  const { name, birthDate, birthTime, isLunar, gender, targetYear } = userData;
-  const hashBase = `${name}|${birthDate}|${birthTime}|${isLunar}|${gender}|${targetYear}`;
+  const { birthDate, birthTime, isLunar, gender, targetYear } = userData;
+  const hashBase = `${birthDate}|${birthTime}|${isLunar}|${gender}|${targetYear}`;
   
   // Simple hash function
   let hash = 0;

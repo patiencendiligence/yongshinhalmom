@@ -30,13 +30,13 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
   ];
 
   const hashInt = React.useMemo(() => {
-    const name = userData?.name || "";
+    const baseStr = userData?.birthDate || "";
     let val = 0;
-    for (let i = 0; i < name.length; i++) {
-      val += name.charCodeAt(i);
+    for (let i = 0; i < baseStr.length; i++) {
+      val += baseStr.charCodeAt(i);
     }
     return val;
-  }, [userData?.name]);
+  }, [userData?.birthDate]);
 
   const quote = React.useMemo(() => {
     const list = lang === "ko" ? quotesKo : quotesEn;
@@ -71,14 +71,14 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
           {quote}
         </p>
         <p className="text-lg md:text-3xl font-serif text-ink-black/55 dark:text-white/40 italic leading-relaxed md:leading-snug max-w-2xl text-left">
-          "{report.summary}"
+          "{report?.summary}"
         </p>
 
         <div className="mt-12 md:mt-16 flex flex-wrap gap-x-8 gap-y-4">
           {[
-            { label: lang === "ko" ? "COLOR" : "COLOR", value: report.luckInfo.color },
-            { label: lang === "ko" ? "ITEM" : "ITEM", value: report.luckInfo.item },
-            { label: lang === "ko" ? "FOOD" : "FOOD", value: report.luckInfo.food },
+            { label: lang === "ko" ? "COLOR" : "COLOR", value: report?.luckInfo?.color || "" },
+            { label: lang === "ko" ? "ITEM" : "ITEM", value: report?.luckInfo?.item || "" },
+            { label: lang === "ko" ? "FOOD" : "FOOD", value: report?.luckInfo?.food || "" },
           ].map((luck, i) => (
             <div key={i} className="flex flex-col gap-1 sm:gap-2">
               <span className="text-[9px] sm:text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30">
@@ -94,16 +94,16 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
       
       <div className="text-center md:text-right flex flex-col justify-end items-center md:items-end w-full md:w-auto">
         <div className="mb-6 md:mb-8 p-1.5 border border-ink-black/5 dark:border-white/5 rounded-2xl bg-ink-black/[0.02] dark:bg-white/[0.02] zodiac-container">
-          <Illustration zodiac={manseRyeok?.zodiac !== undefined ? manseRyeok.zodiac : report.zodiac} />
+          <Illustration zodiac={manseRyeok?.zodiac !== undefined ? manseRyeok.zodiac : report?.zodiac} />
         </div>
         <div className="text-[9px] sm:text-[10px] font-sans font-bold tracking-[0.5em] text-ink-black/20 dark:text-white/20 uppercase mb-3 md:mb-4">
-          {t.authorizedRecipient}
+          {lang === "ko" ? "사주 대상자" : "Saju Subject"}
         </div>
-        <div className="text-4xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic">
-          {userData.name}
+        <div className="text-2xl md:text-xl font-serif font-black text-ink-black dark:text-white italic">
+          {userData?.birthDate || ""} {userData?.isLunar ? '🌙 ': '🌞'}
         </div>
         <p className="text-base sm:text-xl text-ink-black/30 dark:text-white/20 italic mt-3 md:mt-4">
-          {userData.birthDate} ({userData.isLunar ? t.lunar : t.solar})
+          {userData?.gender === "male" ? (lang === "ko" ? "남성" : "Male") : (lang === "ko" ? "여성" : "Female")}
         </p>
       </div>
     </header>

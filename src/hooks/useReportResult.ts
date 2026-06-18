@@ -183,6 +183,33 @@ export function useReportResult({
         });
       }
     }
+
+    // Append and format Deep Saju Analysis premium sectors
+    const deepData = swappedReport['analysis'];
+    if (deepData && typeof deepData === 'object') {
+      Object.entries(deepData).forEach(([key, val]) => {
+        let formattedContent = "";
+        if (typeof val === 'string') {
+          formattedContent = val;
+        } else if (Array.isArray(val)) {
+          formattedContent = val.map(item => `- ${item}`).join('\n');
+        } else if (val && typeof val === 'object') {
+          formattedContent = Object.entries(val)
+            .map(([subKey, subVal]) => `- **${subKey}**: ${subVal}`)
+            .join('\n');
+        } else {
+          formattedContent = String(val);
+        }
+        
+        const alreadyExists = sections.some(s => s.title === key);
+        if (!alreadyExists) {
+          sections.push({
+            title: key,
+            content: formattedContent
+          });
+        }
+      });
+    }
     
     // Create the Daily Section (Today's Fortune)
     const dailySec: ReportSection = dailySection || swappedReport.todaysFortune || {
@@ -193,7 +220,7 @@ export function useReportResult({
     const combined = [dailySec, ...sections];
 
     // Under simple mode, show lock box and only first 3 components (Today's Fortune + overall fate and yearly forecast)
-    return displayDetailed ? combined : combined.slice(0, 3);
+    return displayDetailed ? combined : combined.slice(0, 7);
   }, [swappedReport, dailySection, lang, displayDetailed]);
 
   const handlePayment = () => {

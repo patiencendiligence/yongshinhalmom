@@ -367,7 +367,7 @@ export async function generateReportPdf({
       }
       pages.push(page5);
 
-      // PAGE 6: Remedies & Oracle Advice + Medical warnings + Extra custom premium sections
+      // PAGE 6: Remedies & Oracle Advice
       const page6 = createPdfPage(6);
       if (filteredCards[7]) {
         const clonedCard7 = filteredCards[7].cloneNode(true) as HTMLElement;
@@ -378,28 +378,45 @@ export async function generateReportPdf({
         }
         page6.insertBefore(clonedCard7, page6.lastChild);
       }
+      pages.push(page6);
       
-      // Dynamically append any extra card(s) from detailed premium prompt additions
+      // Starting from card index 8, group every 2 extra cards into a new dynamic page
+      let currentExtraPageNum = 7;
+      let currentExtraPage = createPdfPage(currentExtraPageNum);
+      let cardsOnCurrentPage = 0;
+
       for (let i = 8; i < filteredCards.length; i++) {
+        if (cardsOnCurrentPage === 2) {
+          pages.push(currentExtraPage);
+          currentExtraPageNum++;
+          currentExtraPage = createPdfPage(currentExtraPageNum);
+          cardsOnCurrentPage = 0;
+        }
+
         const clonedExtra = filteredCards[i].cloneNode(true) as HTMLElement;
-        clonedExtra.className = "pdf-card flex-1";
+        clonedExtra.className = "pdf-card";
         const label = clonedExtra.querySelector('.chapter-label');
         if (label) {
           label.innerHTML = lang === "ko" ? `추가장 ${String(i - 7).padStart(2, '0')}` : `EXTRA ${String(i - 7).padStart(2, '0')}`;
         }
-        page6.insertBefore(clonedExtra, page6.lastChild);
+        currentExtraPage.insertBefore(clonedExtra, currentExtraPage.lastChild);
+        cardsOnCurrentPage++;
       }
 
-      if (liveWarning) {
+      if (cardsOnCurrentPage > 0) {
+        pages.push(currentExtraPage);
+      }
+
+      if (liveWarning && pages.length > 0) {
+        const lastPage = pages[pages.length - 1];
         const clonedWarning = liveWarning.cloneNode(true) as HTMLElement;
         clonedWarning.className = "pdf-warning";
         const alertLabel = clonedWarning.querySelector('.uppercase');
         if (alertLabel) {
           alertLabel.className = "text-mythic-red uppercase";
         }
-        page6.insertBefore(clonedWarning, page6.lastChild);
+        lastPage.insertBefore(clonedWarning, lastPage.lastChild);
       }
-      pages.push(page6);
     } else {
       // Simple/Basic structures (3 Pages total)
       const page3 = createPdfPage(3);
@@ -432,6 +449,19 @@ export async function generateReportPdf({
       }
       pages.push(page3);
     }
+
+    // Calculate final actual total pages and update the footers
+    const finalTotalPages = pages.length;
+    pages.forEach((p, idx) => {
+      const pageNum = idx + 1;
+      const footer = p.querySelector(".pdf-footer") as HTMLElement;
+      if (footer) {
+        footer.innerHTML = `
+          <div>© 2026 Yongshinhalmom. LIFESTYLE ANALYSIS REPORT.</div>
+          <div>${lang === "ko" ? `페이지 ${pageNum} / 전체 ${finalTotalPages}` : `PAGE ${pageNum} OF ${finalTotalPages}`}</div>
+        `;
+      }
+    });
 
     // Append standard children to temp DOM
     pages.forEach(p => tempContainer.appendChild(p));

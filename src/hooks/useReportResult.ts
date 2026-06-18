@@ -185,9 +185,23 @@ export function useReportResult({
     }
 
     // Append and format Deep Saju Analysis premium sectors
-    const deepData = swappedReport['analysis'];
+    let deepData = swappedReport['analysis'] || swappedReport['심층 사주 분석'] || swappedReport['Deep Saju Analysis'];
+    
+    // If no explicit wrapper key is found, fall back to checking top-level keys
+    if (!deepData && swappedReport && typeof swappedReport === 'object') {
+      const knownKeys = ['summary', 'sections', 'luckInfo', 'todaysFortune', 'zodiac', 'title', 'content', 'id', 'level', 'language', 'createdAt', 'userId', 'paymentStatus'];
+      const hasPremiumKeys = Object.keys(swappedReport).some(k => !knownKeys.includes(k) && typeof swappedReport[k] === 'object');
+      if (hasPremiumKeys) {
+        deepData = swappedReport;
+      }
+    }
+
     if (deepData && typeof deepData === 'object') {
+      const knownKeys = ['summary', 'sections', 'luckInfo', 'todaysFortune', 'zodiac', 'title', 'content', 'id', 'level', 'language', 'createdAt', 'userId', 'paymentStatus'];
       Object.entries(deepData).forEach(([key, val]) => {
+        if (deepData === swappedReport && knownKeys.includes(key)) {
+          return; // Skip standard root keys
+        }
         let formattedContent = "";
         if (typeof val === 'string') {
           formattedContent = val;

@@ -532,7 +532,8 @@ export async function generateReportPdf({
       });
     }
 
-    pdf.save(`yongshin_report_${userData.name}.pdf`);
+    const cleanDate = (userData?.birthDate || "").replace(/[^0-9]/g, "");
+    pdf.save(`yongshin_report_${cleanDate || "anon"}.pdf`);
 
     // Cleanup
     document.body.removeChild(tempContainer);

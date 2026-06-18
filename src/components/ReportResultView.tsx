@@ -65,8 +65,8 @@ export default function ReportResultView({
   const handleShareSaju = () => {
     const strongest = getStrongestElement(safeManseRyeok);
     const shareUrl = window.location.origin;
-    const copyText = lang === 'ko' ? `자네 아직 자기 팔자를 모르고 사는군.\n${userData.name} 는 ${strongest.element} ${strongest.emoji} 기운이 강하다네.\n생년월일만 넣어보게.이 할멈이 자네 길도 봐줌세.\n${shareUrl}` :
-    `Hmm, you still don't know your own fate, do you?\n${userData.name} carries strong ${strongest.element} ${strongest.emoji} energy. Enter your birth date.\nThis old grandma shall read the path that awaits you.\n${shareUrl}`
+    const copyText = lang === 'ko' ? `자네 아직 자기 팔자를 모르고 사는군.\n자네 사주에는 ${strongest.element} ${strongest.emoji} 기운이 강하다네.\n생년월일만 넣어보게. 이 할멈이 자네 길도 봐줌세.\n${shareUrl}` :
+    `Hmm, you still don't know your own fate, do you?\nYour chart carries strong ${strongest.element} ${strongest.emoji} energy. Enter your birth date.\nThis old grandma shall read the path that awaits you.\n${shareUrl}`
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(copyText)
@@ -127,10 +127,12 @@ export default function ReportResultView({
 
   const parsedFortune = React.useMemo(() => {
     if (viewMode !== "today") return null;
-    const dailySection = displaySections[0] || activeReport.todaysFortune || activeReport.sections.find(s => s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘")) || activeReport.sections[2];
+    if (!activeReport) return null;
+    const activeSections = Array.isArray(activeReport.sections) ? activeReport.sections : [];
+    const dailySection = displaySections[0] || activeReport.todaysFortune || activeSections.find(s => s && s.title && (s.title.includes("컨디션") || s.title.includes("Condition") || s.title.includes("오늘"))) || activeSections[2];
     const dailyContent = dailySection ? dailySection.content : "";
     return parseDailyFortune(dailyContent);
-  }, [viewMode, activeReport.sections, activeReport.todaysFortune, displaySections]);
+  }, [viewMode, activeReport, displaySections]);
 
   if (viewMode === "today" && parsedFortune) {
     return (
@@ -141,62 +143,79 @@ export default function ReportResultView({
             {t.todayFortuneTitle}
           </div>
           <h1 className="text-4xl md:text-7xl font-serif font-black italic tracking-tight text-ink-black dark:text-white leading-tight">
-            {userData.name}{lang === "ko" ? "님의 오늘의 운세" : "'s Today's Fortune"}
+            {lang === "ko" ? "오늘의 운세" : "Today's Fortune"}
           </h1>
           <p className="text-sm text-ink-black/40 dark:text-white/30 italic mt-3 font-sans">
-            {userData.birthDate} ({userData.isLunar ? t.lunar : t.solar}) • {safeManseRyeok.full}
+            {userData?.birthDate || ""} ({userData?.isLunar ? t.lunar : t.solar}) • {safeManseRyeok.full}
           </p>
         </div>
 
-        {/* 6 Main Fortune Cards */}
-        <div className="space-y-6 mb-12 relative z-10">
-          {[
-            { 
-              title: t.todayFlow || "오늘의 전반적인 흐름", 
-              content: parsedFortune.flow, 
-              colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30",
-              badges: (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-ink-black/5 dark:bg-white/5 text-ink-black/80 dark:text-white/80 border border-ink-black/10 dark:border-white/10 uppercase tracking-widest rounded-sm">
-                    {parsedFortune.score}점 • {parsedFortune.evaluation}
-                  </span>
-                  {parsedFortune.sajuTag && (
-                    <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-mythic-gold/15 text-mythic-gold dark:text-mythic-gold border border-mythic-gold/30 uppercase tracking-widest rounded-sm">
-                      {parsedFortune.sajuTag}
-                    </span>
-                  )}
+        {/* 6 Main Fortune Cards / Loading Skeleton */}
+        {isRefreshingDaily ? (
+          <div className="space-y-6 mb-12 relative z-10">
+            {[1, 2, 3].map((_, i) => (
+              <div key={i} className="p-6 md:p-8 bg-white/20 dark:bg-black/10 border border-ink-black/5 dark:border-white/5 animate-pulse flex flex-col md:flex-row gap-6 items-start rounded-lg shadow-sm">
+                <div className="md:w-1/4 shrink-0 space-y-3">
+                  <div className="h-6 bg-ink-black/10 dark:bg-white/10 rounded w-1/2" />
+                  <div className="h-4 bg-ink-black/10 dark:bg-white/10 rounded w-3/4" />
                 </div>
-              )
-            },
-            { title: t.todayPrecautions || "오늘 조심할 것", content: parsedFortune.watchOut, colorClass: "border-mythic-red/20 hover:border-mythic-red/40 dark:border-mythic-red/20 dark:hover:border-mythic-red/40", titleStyle: "text-mythic-red dark:text-mythic-red" },
-            { title: t.todayEnergies || "오늘 좋은 기운", content: parsedFortune.goodEnergy, colorClass: "border-mythic-gold/20 hover:border-mythic-gold/40 dark:border-mythic-gold/20 dark:hover:border-mythic-gold/40", titleStyle: "text-mythic-gold dark:text-mythic-gold" },
-            { title: t.todaySuccessWealth || "오늘의 성공운/재물운", content: parsedFortune.wealth, colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30" },
-            { title: t.todayLove || "오늘의 애정운", content: parsedFortune.love, colorClass: "border-pink-500/10 hover:border-pink-500/30 dark:border-pink-500/15 dark:hover:border-pink-500/35", titleStyle: "text-pink-600 dark:text-pink-400" },
-            { title: t.todayLotto || "오늘의 로또운", content: parsedFortune.lotto, colorClass: "border-emerald-500/10 hover:border-emerald-500/30 dark:border-emerald-500/15 dark:hover:border-emerald-500/35", titleStyle: "text-emerald-600 dark:text-emerald-400" },
-          ].filter(item => item.content && item.content.trim() !== "").map((item, i) => (
-            <div 
-              key={i} 
-              className={`p-4 md:p-6 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}
-            >
-              <div className="md:w-1/4 shrink-0 flex flex-col items-start gap-1">
-                <span className={`text-xl font-serif font-black italic ${item.titleStyle || "text-ink-black dark:text-white"}`}>
-                  {item.title}
-                </span>
-                {"badges" in item ? item.badges : null}
+                <div className="flex-1 space-y-3 w-full">
+                  <div className="h-4 bg-ink-black/10 dark:bg-white/10 rounded w-full" />
+                  <div className="h-4 bg-ink-black/10 dark:bg-white/10 rounded w-5/6" />
+                </div>
               </div>
-              <div className="flex-1 text-base md:text-lg text-ink-black/75 dark:text-white/80 leading-relaxed font-sans whitespace-pre-line">
-                {item.content}
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-6 mb-12 relative z-10">
+            {[
+              { 
+                title: t.todayFlow || "오늘의 전반적인 흐름", 
+                content: parsedFortune.flow, 
+                colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30",
+                badges: (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-ink-black/5 dark:bg-white/5 text-ink-black/80 dark:text-white/80 border border-ink-black/10 dark:border-white/10 uppercase tracking-widest rounded-sm">
+                      {parsedFortune.score}점 • {parsedFortune.evaluation}
+                    </span>
+                    {parsedFortune.sajuTag && (
+                      <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-mythic-gold/15 text-mythic-gold dark:text-mythic-gold border border-mythic-gold/30 uppercase tracking-widest rounded-sm">
+                        {parsedFortune.sajuTag}
+                      </span>
+                    )}
+                  </div>
+                )
+              },
+              { title: t.todayPrecautions || "오늘 조심할 것", content: parsedFortune.watchOut, colorClass: "border-mythic-red/20 hover:border-mythic-red/40 dark:border-mythic-red/20 dark:hover:border-mythic-red/40", titleStyle: "text-mythic-red dark:text-mythic-red" },
+              { title: t.todayEnergies || "오늘 좋은 기운", content: parsedFortune.goodEnergy, colorClass: "border-mythic-gold/20 hover:border-mythic-gold/40 dark:border-mythic-gold/20 dark:hover:border-mythic-gold/40", titleStyle: "text-mythic-gold dark:text-mythic-gold" },
+              { title: t.todaySuccessWealth || "오늘의 성공운/재물운", content: parsedFortune.wealth, colorClass: "border-ink-black/10 hover:border-ink-black/30 dark:border-white/10 dark:hover:border-white/30" },
+              { title: t.todayLove || "오늘의 애정운", content: parsedFortune.love, colorClass: "border-pink-500/10 hover:border-pink-500/30 dark:border-pink-500/15 dark:hover:border-pink-500/35", titleStyle: "text-pink-600 dark:text-pink-400" },
+              { title: t.todayLotto || "오늘의 로또운", content: parsedFortune.lotto, colorClass: "border-emerald-500/10 hover:border-emerald-500/30 dark:border-emerald-500/15 dark:hover:border-emerald-500/35", titleStyle: "text-emerald-600 dark:text-emerald-400" },
+            ].filter(item => item.content && item.content.trim() !== "").map((item, i) => (
+              <div 
+                key={i} 
+                className={`p-4 md:p-6 bg-white/40 dark:bg-black/30 border ${item.colorClass} backdrop-blur-sm transition-all duration-300 flex flex-col md:flex-row gap-6 items-start`}
+              >
+                <div className="md:w-1/4 shrink-0 flex flex-col items-start gap-1">
+                  <span className={`text-xl font-serif font-black italic ${item.titleStyle || "text-ink-black dark:text-white"}`}>
+                    {item.title}
+                  </span>
+                  {"badges" in item ? item.badges : null}
+                </div>
+                <div className="flex-1 text-base md:text-lg text-ink-black/75 dark:text-white/80 leading-relaxed font-sans whitespace-pre-line">
+                  {item.content}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* Lucky info row */}
         <div className="grid grid-cols-3 gap-4 md:gap-6 mb-16 relative z-10">
           {[
-            { label: t.luckyColor || "행운 색상", value: activeReport.luckInfo.color },
-            { label: t.luckyItem || "행운 아이템", value: activeReport.luckInfo.item },
-            { label: t.luckyFood || "행운 음식", value: activeReport.luckInfo.food }
+            { label: t.luckyColor || "행운 색상", value: activeReport?.luckInfo?.color || "-" },
+            { label: t.luckyItem || "행운 아이템", value: activeReport?.luckInfo?.item || "-" },
+            { label: t.luckyFood || "행운 음식", value: activeReport?.luckInfo?.food || "-" }
           ].map((item, idx) => (
             <div key={idx} className="p-6 md:p-8 bg-white/40 dark:bg-black/20 border border-ink-black/10 dark:border-white/5 backdrop-blur-sm flex flex-col gap-2 text-center text-ink-black dark:text-white">
               <span className="text-[9px] font-sans font-black uppercase tracking-[0.3em] text-ink-black/40 dark:text-white/30">
@@ -264,7 +283,6 @@ export default function ReportResultView({
         {/* Structural Bento Grid Layout */}
         <div id="report-grid" className="grid grid-cols-12 gap-px bg-ink-black/10 dark:bg-white/10 mb-32 relative z-10 border border-ink-black/10 dark:border-white/10 rounded-2xl overflow-hidden shadow-xl dark:shadow-2xl">
           {displaySections
-            .slice(0, displayDetailed ? undefined : 3)
             .map((section, idx) => (
               <ReportItemCard
                 key={idx}
@@ -291,7 +309,7 @@ export default function ReportResultView({
         </div>
 
         {/* Medical / Disclaimer Warning Box */}
-        {activeReport.medicalAdvice && (
+        {activeReport?.medicalAdvice && (
           <div className="mb-16 p-6 bg-white/10 dark:bg-white/5 flex flex-col md:flex-row items-center gap-12 relative z-10 border border-ink-black/10 dark:border-white/20">
             <div className="w-24 h-24 bg-ink-black dark:bg-black/40 flex-shrink-0 flex items-center justify-center text-white border border-ink-black/20 dark:border-white/20">
               <AlertTriangle className="w-10 h-10 text-mythic-red" />
@@ -301,7 +319,7 @@ export default function ReportResultView({
                 {t.disclaimer}
               </div>
               <p className="text-ink-black/80 dark:text-white/80 font-sans leading-relaxed text-xl max-w-4xl italic font-bold">
-                {activeReport.medicalAdvice}
+                {activeReport?.medicalAdvice}
               </p>
             </div>
           </div>

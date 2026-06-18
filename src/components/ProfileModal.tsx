@@ -51,26 +51,27 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                   >
                     {/* Left: Info Details */}
                     <div className="flex-1 min-w-0">
-                      <div className="text-3xl font-serif font-black italic text-ink-black dark:text-white tracking-wide">
-                        {profile.name}
+                      <div className="text-3xl font-serif font-black italic text-ink-black dark:text-white tracking-wide flex items-center gap-2.5 flex-wrap">
+                        <span className="text-sm font-sans font-normal text-ink-black/40 dark:text-white/40 not-italic">
+                          <Calendar className="w-4 h-4 text-ink-black/40 dark:text-white/40 shrink-0" /> 
+                          {profile.birthDate} ({profile.isLunar ? t.lunar : t.solar}) 생
+                        </span>
                       </div>
                       
                       <div className="flex flex-col gap-1.5 mt-3 text-xs text-ink-black/60 dark:text-white/50 tracking-wide font-sans font-medium">
-                        <span className="flex items-center gap-2">
-                          <Calendar className="w-4 h-4 text-ink-black/40 dark:text-white/40 shrink-0" /> 
-                          {profile.birthDate} ({profile.isLunar ? t.lunar : t.solar})
+                        <span>
+                          {profile.gender === "male" 
+                            ? (lang === "ko" ? "남성" : "Male") 
+                            : (lang === "ko" ? "여성" : "Female")}
+                          ({profile.birthPlace})
                         </span>
-                        
                         <span className="inline-block w-fit text-[11px] text-ink-black/45 dark:text-white/45 font-serif font-black italic tracking-widest uppercase hover:text-ink-black dark:hover:text-white transition-colors select-none">
                           <span className="underline underline-offset-4 decoration-[1px] decoration-ink-black/30 dark:decoration-white/30">
-                            {profile.targetYear} LIFE ANALYSIS
+                            {profile.targetYear} {lang === "ko" ? "년 운세" : "'s fortune"}
                           </span>
                         </span>
 
-                        <span className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-ink-black/40 dark:text-white/40 shrink-0" /> 
-                          {profile.birthPlace}
-                        </span>
+
                       </div>
                     </div>
 

@@ -103,7 +103,7 @@ export function useReportFlow(
     } else {
       setState("LOADING");
     }
-    console.log(`[Flow] Starting analysis for ${activeData.name} (${level})...`);
+    console.log(`[Flow] Starting analysis (${level})...`);
 
     // Check payment status for detailed analysis
     let actualLevel = level;
@@ -171,7 +171,6 @@ export function useReportFlow(
         try {
           storageService.setReportCache({
             inputHash: JSON.stringify({
-              name: activeData.name,
               birthDate: activeData.birthDate,
               birthTime: activeData.birthTime,
               isLunar: activeData.isLunar,
@@ -190,11 +189,12 @@ export function useReportFlow(
       console.log("[Flow] Success. Transitioning to RESULT.");
       if (level === 'detailed' && report && report.level === 'simple') {
         // Merging logic to respect User requirement: 
-        // Keep the top areas (simple sections) exactly matching.
-        // Replace subsequent detailed sections.
+        // Keep all original simple sections.
+        // Append the newly generated paid/detailed sections at the end.
+        const simpleCount = report.sections.length;
         const mergedSections = [
-          ...report.sections.slice(0, 3), // Keep original top 3 sections
-          ...result.sections.slice(3)      // Grab the other sections from detailed run
+          ...report.sections,
+          ...result.sections.slice(simpleCount)
         ];
         
         setReport({

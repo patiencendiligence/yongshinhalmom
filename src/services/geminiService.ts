@@ -29,6 +29,7 @@ export interface ReportResult {
     food: string;
     location: string;
   };
+  analysis: Record<string, string | number>;
   level: 'simple' | 'detailed';
   medicalAdvice?: string;
   isAbuse?: boolean;

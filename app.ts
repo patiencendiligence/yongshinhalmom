@@ -386,8 +386,8 @@ app.post("/api/generate-report", async (req, res) => {
   const promptTemplate = `
   ${PROMPT_TEMPLATE}
   ${PROMPT_PRINT}
-  ${(level === "detailed") ? PROMPT_PAID_DETAIL_TEMPLATE : ""}
-  ${(level === "detailed") ? PROMPT_PAID_DETAIL_PRINT : ""}
+  ${level === "detailed" ? PROMPT_PAID_DETAIL_TEMPLATE : ""}
+  ${level === "detailed" ? PROMPT_PAID_DETAIL_PRINT : ""}
   `;
 
   const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))

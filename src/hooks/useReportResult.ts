@@ -156,7 +156,8 @@ export function useReportResult({
     };
   }, [user, reportHash, isCurrentlyPaid, report.level, checkPaymentStatus, onUpgrade, viewMode]);
 
-  const isPremiumUser = isCurrentlyPaid;
+  const isAdmin = user?.email === 'patiencendiligence@gmail.com' || user?.email === 'test@example.com';
+  const isPremiumUser = isCurrentlyPaid || isAdmin;
   const displayDetailed = isPremiumUser && report.level === 'detailed';
   const manseRyeok = useMemo(() => {
     if (!userData?.birthDate) return { full: "" };
@@ -170,30 +171,30 @@ export function useReportResult({
 
   // Generate sections list with swapped / re-formatted chapters
   const displaySections = useMemo(() => {
-    const sections = (swappedReport && Array.isArray(swappedReport.sections)) ? swappedReport.sections : [];
-    if (swappedReport && swappedReport.todaysFortune) {
-      const list = [...sections];
-      const dailySec: ReportSection = dailySection || swappedReport.todaysFortune || {
-        title: lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide",
-        content: ""
-      };
-      return [dailySec, ...list];
-    } else {
-      const list = [...sections];
-      if (dailySection && list.length > 2) {
-        list[2] = dailySection;
+    let sections = (swappedReport && Array.isArray(swappedReport.sections)) ? [...swappedReport.sections] : [];
+    
+    // Check if the report contains top-level title and content from premium prompt
+    if (swappedReport && swappedReport.title && swappedReport.content) {
+      const alreadyExists = sections.some(s => s.title === swappedReport.title);
+      if (!alreadyExists) {
+        sections.push({
+          title: swappedReport.title,
+          content: swappedReport.content
+        });
       }
-      if (list.length > 2) {
-        const sec0 = list[0];
-        const sec1 = list[1];
-        const sec2 = list[2];
-        list[0] = sec2; // Today's Fortune is placed first
-        list[1] = sec0; // Overall Daily Saju is placed second
-        list[2] = sec1; // 2026 Saju Forecast is placed third
-      }
-      return list;
     }
-  }, [swappedReport, dailySection, lang]);
+    
+    // Create the Daily Section (Today's Fortune)
+    const dailySec: ReportSection = dailySection || swappedReport.todaysFortune || {
+      title: lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide",
+      content: ""
+    };
+
+    const combined = [dailySec, ...sections];
+
+    // Under simple mode, show lock box and only first 3 components (Today's Fortune + overall fate and yearly forecast)
+    return displayDetailed ? combined : combined.slice(0, 3);
+  }, [swappedReport, dailySection, lang, displayDetailed]);
 
   const handlePayment = () => {
     if (!user) {

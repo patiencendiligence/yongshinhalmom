@@ -308,7 +308,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
       <div className="mb-12">
         <div className="flex items-center gap-4 mb-8">
           <div className="text-[10px] uppercase tracking-[0.6em] font-sans font-black text-ink-black/40 dark:text-white/30 italic chapter-label">
-            {idx === 0 ? "FREE" : `CHAPTER ${String(idx + 1).padStart(2, "0")}`}
+            {idx === 0 ? "FREE" : `CHAPTER ${String(idx).padStart(2, "0")}`}
           </div>
           {isRefreshing && (
             <span className="text-[10px] text-mythic-gold animate-pulse font-sans font-bold tracking-widest">

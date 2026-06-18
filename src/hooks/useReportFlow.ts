@@ -188,18 +188,9 @@ export function useReportFlow(
 
       console.log("[Flow] Success. Transitioning to RESULT.");
       if (level === 'detailed' && report && report.level === 'simple') {
-        // Merging logic to respect User requirement: 
-        // Keep all original simple sections.
-        // Append the newly generated paid/detailed sections at the end.
-        const simpleCount = report.sections.length;
-        const mergedSections = [
-          ...report.sections,
-          ...result.sections.slice(simpleCount)
-        ];
-        
+        // Respect User requirement: Show the complete detailed results generated under the premium prompt
         setReport({
-          ...report,                        // Keep original metadata/summary/fortune/zodiac
-          sections: mergedSections,
+          ...result,
           level: 'detailed',
           pendingPayment: false
         });

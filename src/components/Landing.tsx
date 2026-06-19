@@ -51,7 +51,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <h1 className="flex flex-col items-center mb-12">
           <span className="text-[11px] font-sans font-black tracking-[0.8em] uppercase text-ink-black dark:text-white mb-6 opacity-80">{t.ancientOracle}</span>
           <div className="flex flex-col items-center">
-            <span className="text-6xl md:text-[10rem] font-serif font-black italic tracking-tighter leading-[1.15] py-6 px-4 block overflow-visible gradient-title">
+            <span className="text-6xl md:text-8xl lg:text-[7rem] font-serif font-black italic tracking-tighter leading-[1.15] py-6 px-4 block overflow-visible gradient-title">
               {t.title}
             </span>
             <span className="text-2xl md:text-3xl font-serif text-ink-black/40 dark:text-white/20 italic tracking-[0.4em] mt-4 uppercase">

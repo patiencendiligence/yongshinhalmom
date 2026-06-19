@@ -12,6 +12,7 @@ interface ReportItemCardProps {
   isRefreshingDaily: boolean;
   lang?: Language;
   manseRyeok?: any;
+  isLast?: boolean;
 }
 
 function parseDailyFortune(content: string) {
@@ -140,7 +141,22 @@ function parseDailyFortune(content: string) {
   };
 }
 
-const getSlotClass = (idx: number, title?: string) => {
+const getSlotClass = (idx: number, title?: string, isLast?: boolean) => {
+  if (isLast) {
+    const baseSpan = "col-span-12 p-8 md:p-12";
+    if (title) {
+      const t = title.toLowerCase();
+      if (t.includes("월별") || t.includes("monthly") || t.includes("세운")) {
+        return `${baseSpan} bg-white/60 dark:bg-black border-t border-ink-black/10 dark:border-white/10`;
+      }
+    }
+    switch (idx) {
+      case 5: return `${baseSpan} bg-mythic-red/90 text-white`;
+      case 7: return `${baseSpan} bg-mythic-gold/5 border-mythic-gold/20`;
+      default: return `${baseSpan}`;
+    }
+  }
+
   if (title) {
     const t = title.toLowerCase();
     if (t.includes("월별") || t.includes("monthly") || t.includes("세운")) {
@@ -161,7 +177,7 @@ const getSlotClass = (idx: number, title?: string) => {
   }
 };
 
-export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko", manseRyeok }: ReportItemCardProps) {
+export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko", manseRyeok, isLast }: ReportItemCardProps) {
   const isRed = idx === 5;
   const isRefreshing = idx === 0 && isRefreshingDaily;
 
@@ -303,7 +319,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
         isRed 
           ? "bg-mythic-red/90 text-white" 
           : "bg-white/60 dark:bg-black text-ink-black dark:text-white"
-      } ${getSlotClass(idx, section.title)}`}
+      } ${getSlotClass(idx, section.title, isLast)}`}
     >
       <div className="mb-12">
         <div className="flex items-center gap-4 mb-8">

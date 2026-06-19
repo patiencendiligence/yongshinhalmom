@@ -38,7 +38,38 @@ export const fileTreeData: CategoryInfo[] = [
       { slug: "water", filename: "water.md", titleKo: "수(水) - 물", titleEn: "Water" },
       { slug: "wood", filename: "wood.md", titleKo: "목(木) - 나무", titleEn: "Wood (Tree)" }
     ]
-  }
+  },
+  {
+    key: "ilgan",
+    name: "ilgan",
+    items: [
+      {slug: "byeonghwa", filename: "byeonghwa.md", titleKo: "병화", titleEn: "Byeong-Hwa(Fire)"},
+      {slug: "junghwa", filename: "junghwa.md", titleKo: "정화", titleEn: "Jung-Hwa(Fire)"},
+      {slug: "gapmock", filename: "gapmock.md", titleKo: "갑목", titleEn: "Gap-Mock(Wood)"},
+      {slug: "eulmock", filename: "eulmock.md", titleKo: "을목", titleEn: "Eul-Mock(Wood)"},
+      {slug: "gito", filename: "gito.md", titleKo: "기토", titleEn: "Gi-To(Earth)"},
+      {slug: "muto", filename: "muto.md", titleKo: "무토", titleEn: "Mu-To(Earth)"},
+      {slug: "gyeonggeum", filename: "gyeonggeum.md", titleKo: "경금", titleEn: "Gyeong-Guem(Metal)"},
+      {slug: "singeum", filename: "singeum.md", titleKo: "신금", titleEn: "Sin-Guem(Metal)"},
+      {slug: "imsu", filename: "imsu.md", titleKo: "임수", titleEn: "Im-Su(Water)"},
+      {slug: "gyesu", filename: "gyesu.md", titleKo: "계수", titleEn: "Gye-Su(Water)"},
+    ]
+  },
+  {key: "ilju",
+  name:"ilju",
+  items: [
+  { slug: "jeonghae", filename: "jeonghae.md", titleKo: "정해일주", titleEn: "Jeong-Hae Day Pillar" },
+  { slug: "jeongmyo", filename: "jeongmyo.md", titleKo: "정묘일주", titleEn: "Jeong-Myo Day Pillar" },
+  { slug: "gapja", filename: "gapja.md", titleKo: "갑자일주", titleEn: "Gap-Ja Day Pillar" },
+  { slug: "eulchuk", filename: "eulchuk.md", titleKo: "을축일주", titleEn: "Eul-Chuk Day Pillar" },
+  { slug: "gapsul", filename: "gapsul.md", titleKo: "갑술일주", titleEn: "Gap-Sul Day Pillar" },
+  { slug: "eulhae", filename: "eulhae.md", titleKo: "을해일주", titleEn: "Eul-Hae Day Pillar" },
+  { slug: "byeongin", filename: "byeongin.md", titleKo: "병인일주", titleEn: "Byeong-In Day Pillar" },
+  { slug: "mujin", filename: "mujin.md", titleKo: "무진일주", titleEn: "Mu-Jin Day Pillar" },
+  { slug: "gyeongo", filename: "gyeongo.md", titleKo: "경오일주", titleEn: "Gyeong-O Day Pillar" },
+  { slug: "gyeyu", filename: "gyeyu.md", titleKo: "계유일주", titleEn: "Gye-Yu Day Pillar" },
+  { slug: "gisa", filename: "gisa.md", titleKo: "기사일주", titleEn: "Gi-Sa Day Pillar" }
+  ]}
 ];
 
 export interface ThemeColors {

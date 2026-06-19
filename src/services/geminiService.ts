@@ -29,7 +29,7 @@ export interface ReportResult {
     food: string;
     location: string;
   };
-  analysis: Record<string, string | number>;
+  analysis?: Record<string, any>;
   level: 'simple' | 'detailed';
   medicalAdvice?: string;
   isAbuse?: boolean;
@@ -68,7 +68,7 @@ export async function getReport(userData: {
       zodiac: correctZodiacIndex, 
       targetYear: userData.targetYear, 
       lang, 
-      level 
+      level
     })
   });
 

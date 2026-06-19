@@ -148,16 +148,16 @@ const getSlotClass = (idx: number, title?: string) => {
     }
   }
   switch (idx) {
-    case 0: return "col-span-12 row-span-auto md:row-span-3 pb-20"; // Detailed Saju
-    case 1: return "col-span-12 md:col-span-6 row-span-2 border-mythic-gold/20"; // Today's Report
-    case 2: return "col-span-12 md:col-span-6 row-span-2 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Overview
-    case 3: return "col-span-12 md:col-span-12 row-span-auto"; // Monthly (Solar Detail)
-    case 4: return "col-span-12 md:col-span-4 row-span-2 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Health
-    case 5: return "col-span-12 md:col-span-4 row-span-2 bg-mythic-red/90 text-white"; // Love
-    case 6: return "col-span-12 md:col-span-4 row-span-2 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Career
-    case 7: return "col-span-12 row-span-2 bg-mythic-gold/5 border-mythic-gold/20"; // Remedy
+    case 0: return "col-span-12 pb-20"; // Detailed Saju
+    case 1: return "col-span-12 md:col-span-6 border-mythic-gold/20"; // Today's Report
+    case 2: return "col-span-12 md:col-span-6 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Overview
+    case 3: return "col-span-12 md:col-span-12"; // Monthly (Solar Detail)
+    case 4: return "col-span-12 md:col-span-4 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Health
+    case 5: return "col-span-12 md:col-span-4 bg-mythic-red/90 text-white"; // Love
+    case 6: return "col-span-12 md:col-span-4 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Career
+    case 7: return "col-span-12 bg-mythic-gold/5 border-mythic-gold/20"; // Remedy
     case 8: return "col-span-12 bg-white/60 dark:bg-black border-t border-ink-black/10 dark:border-white/10 p-8 md:p-12";
-    default: return "col-span-12 md:col-span-6 row-span-2";
+    default: return "col-span-12 md:col-span-6";
   }
 };
 
@@ -316,7 +316,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             </span>
           )}
         </div>
-        <h3 className={`text-3xl md:text-4xl font-serif font-black italic leading-[0.9] ${
+        <h3 className={`text-2xl md:text-2xl font-serif font-black italic leading-[0.9] ${
           isRed ? "text-white" : "text-ink-black dark:text-white"
         } ${isRefreshing ? "opacity-30" : ""}`}>
           {section.title}

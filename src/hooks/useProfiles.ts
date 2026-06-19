@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { storageService, UserProfile } from "../services/storageService";
 
 export function useProfiles() {
-  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [profiles, setProfiles] = useState<UserProfile[]>(() => {
+    return storageService.getProfiles();
+  });
 
   const refreshProfiles = () => {
     setProfiles(storageService.getProfiles());

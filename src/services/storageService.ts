@@ -95,6 +95,24 @@ export const storageService = {
     const today = kstNow.toISOString().split('T')[0];
     const cache = storageService.getReportCache();
     const entry = cache.find(e => e.inputHash === hash && e.year === year && e.date === today && (e.level === level || e.level === 'detailed'));
-    return entry ? entry.result : null;
+    
+    if (entry) {
+      if (level === 'detailed' || entry.level === 'detailed') {
+        const hasAnalysis = entry.result && (
+          entry.result.analysis || 
+          entry.result['심층 사주 분석'] || 
+          entry.result['Deep Saju Analysis'] ||
+          (entry.result && typeof entry.result === 'object' && Object.keys(entry.result).some(key => !['summary', 'sections', 'luckInfo', 'todaysFortune', 'zodiac', 'title', 'content', 'id', 'level', 'language', 'createdAt', 'userId', 'paymentStatus'].includes(key) && typeof entry.result[key] === 'object'))
+        );
+        if (!hasAnalysis) {
+          console.log("[StorageService] Cached report is marked 'detailed' but lacks 'analysis' data. Busting cache to fetch new one from server.");
+          const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year || e.level !== entry.level);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
+          return null;
+        }
+      }
+      return entry.result;
+    }
+    return null;
   }
 };

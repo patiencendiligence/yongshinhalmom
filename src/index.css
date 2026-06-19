@@ -13,8 +13,8 @@
   --color-holo-pink: #ff00ff;
   --color-holo-purple: #9d00ff;
   
-  --font-serif: "Noto Serif KR", serif;
-  --font-sans: "Noto Sans KR", sans-serif;
+  --font-serif: "Noto Serif KR", Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   
   /* Retained/Adjusted Mythic Colors */
   --color-mythic-red: #ff3b30;
@@ -52,7 +52,7 @@
   -webkit-background-clip: text;
   color: transparent;
   animation: najeon-shimmer 15s ease infinite;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
 }
 
 .dark .gradient-title {
@@ -67,7 +67,7 @@
     #fae8ff 90%, 
     #ffffff 100%
   );
-  filter: drop-shadow(0 2px 10px rgba(255, 255, 255, 0.1)) drop-shadow(0 4px 24px rgba(0, 242, 255, 0.08));
+  filter: drop-shadow(0 2px 8px rgba(0, 242, 255, 0.04));
 }
 /* Subtle Najeonchilgi-inspired Pattern */
 .bg-paper-pattern {

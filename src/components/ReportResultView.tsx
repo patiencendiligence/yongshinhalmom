@@ -291,6 +291,7 @@ export default function ReportResultView({
                 isRefreshingDaily={isRefreshingDaily}
                 lang={lang}
                 manseRyeok={safeManseRyeok}
+                isLast={idx === displaySections.length - 1}
               />
             ))}
 

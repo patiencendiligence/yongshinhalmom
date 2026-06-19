@@ -14,9 +14,11 @@
     <meta property="og:image" content="/assets/yongshin.png" />
     <meta property="og:type" content="website" />
     
-    <!-- Preconnect to Font domains -->
+    <!-- Preconnect & DNS prefetch to Font domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     
     <!-- Preload critical assets for LCP -->
     <link rel="preload" href="/assets/zodiac_guardians.png" as="image" fetchpriority="high">
@@ -29,7 +31,29 @@
   </head>
   
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- High-performance Static LCP skeleton that matches Landing page metrics -->
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; background-color: #f9f7f0; color: #1a1a1a; font-family: 'Noto Sans KR', sans-serif; padding: 0 16px; box-sizing: border-box; transition: opacity 0.3s ease;">
+        <div style="margin-bottom: 32px; border: 1px solid rgba(26,26,26,0.1); padding: 4px 16px; text-transform: uppercase; font-size: 9px; font-weight: 900; letter-spacing: 0.5em; opacity: 0.6;">
+          DATA INSIGHTS
+        </div>
+        <h1 style="display: flex; flex-direction: column; align-items: center; margin-bottom: 48px; margin-top: 0;">
+          <span style="font-size: 11px; font-weight: 900; letter-spacing: 0.8em; text-transform: uppercase; margin-bottom: 24px; opacity: 0.8;">사주 분석</span>
+          <span style="font-size: 3.5rem; font-weight: 900; font-family: 'Noto Serif KR', serif; font-style: italic; letter-spacing: -0.05em; line-height: 1.15; color: #1a1a1a;">
+            용신할멈
+          </span>
+          <span style="font-size: 1.5rem; font-family: 'Noto Serif KR', serif; color: rgba(26,26,26,0.4); font-style: italic; letter-spacing: 0.4em; text-transform: uppercase; margin-top: 16px;">
+            SCARY GRANDMA
+          </span>
+        </h1>
+        <p style="max-width: 320px; font-size: 14px; line-height: 1.6; color: rgba(26,26,26,0.7); margin: 0 auto 64px auto; word-break: keep-all;">
+          자네의 고유한 자취와 환경을 살펴주마.<br>더 나은 하루를 위한 길잡이가 되어 줄 테니 잘 확인해보게.
+        </p>
+        <div style="min-width: 280px; height: 56px; background-color: #1a1a1a; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 11px; letter-spacing: 0.5em; text-transform: uppercase;">
+          보러 가기
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

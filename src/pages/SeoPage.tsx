@@ -20,8 +20,8 @@ export default function SeoPage({
   const { category, slug } = useParams();
 
   const [content, setContent] = useState("");
-  const [seoTitle, setSeoTitle] = useState("");
-  const [seoDesc, setSeoDesc] = useState("");
+  const [seoTitle, setSeoTitle] = useState("용신할멈 | YongshinHalmom");
+  const [seoDesc, setSeoDesc] = useState("용신할멈의 사주명리 분석, 일주 해석, 오행 분석, 용신 풀이");
   const [isMobileExplorerOpen, setIsMobileExplorerOpen] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   

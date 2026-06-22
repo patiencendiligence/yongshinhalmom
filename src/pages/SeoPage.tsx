@@ -1,13 +1,142 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Helmet } from "react-helmet-async";
 import { markdownModules } from "../lib/markdownLoader";
 import { ArrowLeft, Menu, X, ArrowUp } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Language } from "../lib/translations";
-import FileExplorer, { getThemeColors } from "../components/FileExplorer";
+import FileExplorer, { getThemeColors, fileTreeData } from "../components/FileExplorer";
 import { filterContentByLanguage } from "../utils/sajuUtils";
+
+
+function getRelatedPosts(currentCategory: string, currentSlug: string) {
+  const allItems: Array<{ category: string, slug: string, titleKo: string, titleEn: string }> = [];
+  
+  fileTreeData.forEach(cat => {
+    cat.items.forEach(item => {
+      allItems.push({
+        category: cat.key,
+        slug: item.slug,
+        titleKo: item.titleKo,
+        titleEn: item.titleEn
+      });
+    });
+  });
+
+  // Filter out current post
+  const candidates = allItems.filter(item => !(item.category === currentCategory && item.slug === currentSlug));
+
+  // Match a steady hash from current directory keys
+  let hash = 0;
+  const combinedStr = (currentCategory || "") + (currentSlug || "");
+  for (let i = 0; i < combinedStr.length; i++) {
+    hash = combinedStr.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  hash = Math.abs(hash);
+
+  const selected: typeof candidates = [];
+  
+  // 1. Pick one from same category is highly relevant
+  const sameCat = candidates.filter(item => item.category === currentCategory);
+  if (sameCat.length > 0) {
+    const idx = hash % sameCat.length;
+    selected.push(sameCat[idx]);
+  }
+
+  // 2. Pick from other categories
+  const otherCat = candidates.filter(item => item.category !== currentCategory);
+  const categoriesGrouped: Record<string, typeof candidates> = {};
+  otherCat.forEach(item => {
+    if (!categoriesGrouped[item.category]) {
+      categoriesGrouped[item.category] = [];
+    }
+    categoriesGrouped[item.category].push(item);
+  });
+
+  const catKeys = Object.keys(categoriesGrouped).sort();
+  
+  let attemptIdx = 0;
+  while (selected.length < 4 && otherCat.length > 0) {
+    const nextCatKey = catKeys[(hash + attemptIdx) % catKeys.length];
+    const catGroup = categoriesGrouped[nextCatKey];
+    if (catGroup && catGroup.length > 0) {
+      const itemIdx = (hash + attemptIdx) % catGroup.length;
+      const chosen = catGroup[itemIdx];
+      if (!selected.some(s => s.category === chosen.category && s.slug === chosen.slug)) {
+        selected.push(chosen);
+      }
+    }
+    attemptIdx++;
+    if (attemptIdx > 40) {
+      for (const item of otherCat) {
+        if (selected.length >= 4) break;
+        if (!selected.some(s => s.category === item.category && s.slug === item.slug)) {
+          selected.push(item);
+        }
+      }
+      break;
+    }
+  }
+
+  while (selected.length < 4 && candidates.length > selected.length) {
+    const fallbackItem = candidates.find(item => !selected.some(s => s.category === item.category && s.slug === item.slug));
+    if (fallbackItem) {
+      selected.push(fallbackItem);
+    } else {
+      break;
+    }
+  }
+
+  return selected.slice(0, 4);
+}
+
+function getSeoDisplayTitle(item: { category: string, slug: string, titleKo: string, titleEn: string }, isKo: boolean) {
+  if (!isKo) {
+    return item.titleEn;
+  }
+  
+  const title = item.titleKo;
+  if (item.category === "basic") {
+    if (title.endsWith("?")) {
+      return `${title.slice(0, -1)} 보는 법과 해석 가이드`;
+    }
+    return `${title} 깊게 이해하기`;
+  }
+  if (item.category === "element") {
+    const parsed = title.split(" - ");
+    if (parsed.length > 1) {
+      return `${parsed[0]} 오행 특징 (${parsed[1]}의 기운)`;
+    }
+    return `${title} 오행의 성격과 활용`;
+  }
+  if (item.category === "ilgan") {
+    const hanjaMap: Record<string, string> = {
+      "갑목": "갑목(甲木)", "을목": "을목(乙木)",
+      "병화": "병화(丙火)", "정화": "정화(丁火)",
+      "무토": "무토(戊土)", "기토": "기토(己土)",
+      "경금": "경금(庚金)", "신금": "신금(辛金)",
+      "임수": "임수(壬水)", "계수": "계수(癸水)"
+    };
+    const styled = hanjaMap[title] || title;
+    return `${styled} 일간의 성격과 특징 풀이`;
+  }
+  if (item.category === "ilju") {
+    return `${title} 특징과 사주명리 해석`;
+  }
+  if (item.category === "sipseong") {
+    const hanjaMap: Record<string, string> = {
+      "비견": "비견(比肩)", "겁재": "겁재(劫財)",
+      "식신": "식신(食神)", "상관": "상관(傷官)",
+      "편재": "편재(偏財)", "정재": "정재(正財)",
+      "편관": "편관(偏官)", "정관": "정관(正官)",
+      "편인": "편인(偏印)", "정인": "정인(正인)"
+    };
+    const styled = hanjaMap[title] || title;
+    return `${styled}의 뜻과 사주 성향 정리`;
+  }
+  return title;
+}
 
 
 export default function SeoPage({
@@ -253,6 +382,50 @@ export default function SeoPage({
           >
             {content}
           </ReactMarkdown>
+
+          {/* Related Posts Section for Internal Link Strength (SEO) */}
+          <div className={`mt-16 pt-12 border-t ${theme.borderMuted}`}>
+            <h4 className="text-base font-serif font-black tracking-wider text-ink-black/80 dark:text-white/85 mb-8 flex items-center gap-3">
+              <span className={`w-1.5 h-6 ${theme.accentBg} rounded-full inline-block`} />
+              <span>{lang === "ko" ? "같이 읽어보면 좋은 사주 이야기" : "Related Posts"}</span>
+            </h4>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {getRelatedPosts(category || "", slug || "").map((related) => {
+                const isKo = lang === "ko";
+                const displayTitle = getSeoDisplayTitle(related, isKo);
+                const relatedTheme = getThemeColors(related.category, related.slug);
+                const pathUrl = `/${related.category}/${related.slug}`;
+                const categoryNamesKo: Record<string, string> = {
+                  basic: "사주 기초",
+                  element: "오행 분석",
+                  ilgan: "일간 분석",
+                  ilju: "일주론",
+                  sipseong: "십성 풀이"
+                };
+                
+                return (
+                  <Link
+                    key={`${related.category}-${related.slug}`}
+                    to={pathUrl}
+                    className={`block p-5 rounded-xl border border-ink-black/10 dark:border-white/10 hover:border-ink-black/20 dark:hover:border-white/20 hover:scale-[1.01] transition-all bg-white/45 dark:bg-zinc-900/40 hover:bg-white/85 dark:hover:bg-zinc-900/60 shadow-sm group`}
+                  >
+                    <div className="flex items-center justify-between gap-1 mb-2">
+                      <span className={`text-[10px] font-sans font-black tracking-widest uppercase ${relatedTheme.text}`}>
+                        {lang === "ko" ? categoryNamesKo[related.category] || related.category : related.category}
+                      </span>
+                      <span className="text-xs opacity-50 font-sans group-hover:translate-x-1 transition-transform">
+                        →
+                      </span>
+                    </div>
+                    <span className="text-sm font-sans font-bold text-ink-black/85 dark:text-white/90 group-hover:text-ink-black dark:group-hover:text-white transition-colors">
+                      {displayTitle}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </article>
       </div>
 

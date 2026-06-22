@@ -115,8 +115,34 @@ export default function SeoPage({
           <meta name="description" content={seoDesc} />
           <meta property="og:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />
           <meta property="og:description" content={seoDesc} />
-          <meta property="og:image" content="/assets/yongshin.png" />
-          <link rel="canonical" href={`https://yongshinhalmom.vercel.app/${category}/${slug}`} />
+          <meta property="og:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
+          <link
+            rel="canonical"
+            href={`https://yongshinhalmom.vercel.app/${category}/${slug}`}
+          />
+
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Article",
+              "headline": seoTitle,
+              "description": seoDesc,
+              "url": `https://yongshinhalmom.vercel.app/${category}/${slug}`,
+              "author": {
+                "@type": "Organization",
+                "name": "용신할멈"
+              },
+              "publisher": {
+                "@type": "Organization",
+                "name": "용신할멈"
+              },
+              "inLanguage": lang,
+              "mainEntityOfPage": {
+                "@type": "WebPage",
+                "@id": `https://yongshinhalmom.vercel.app/${category}/${slug}`
+              }
+            })}
+          </script>
         </Helmet>
       )}
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}

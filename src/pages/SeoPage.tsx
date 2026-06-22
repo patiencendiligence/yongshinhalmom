@@ -109,7 +109,6 @@ export default function SeoPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
-      {seoTitle && (
         <Helmet>
           <title>{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
           <meta name="description" content={seoDesc} />
@@ -121,6 +120,7 @@ export default function SeoPage({
             href={`https://yongshinhalmom.vercel.app/${category}/${slug}`}
           />
 
+      {seoTitle && (
           <script type="application/ld+json">
             {JSON.stringify({
               "@context": "https://schema.org",
@@ -143,8 +143,8 @@ export default function SeoPage({
               }
             })}
           </script>
-        </Helmet>
       )}
+        </Helmet>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
       <div className="flex items-start justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
         <motion.button

@@ -69,6 +69,20 @@ export const fileTreeData: CategoryInfo[] = [
   { slug: "gyeongo", filename: "gyeongo.md", titleKo: "경오일주", titleEn: "Gyeong-O Day Pillar" },
   { slug: "gyeyu", filename: "gyeyu.md", titleKo: "계유일주", titleEn: "Gye-Yu Day Pillar" },
   { slug: "gisa", filename: "gisa.md", titleKo: "기사일주", titleEn: "Gi-Sa Day Pillar" }
+  ]},
+  {key: "sipseong",
+  name: "sipseong",
+  items: [
+  { slug: "bigyeon", filename: "bigyeon.md", titleKo: "비견", titleEn: "Bi-Gyeon (Companion Star)" },
+  { slug: "geopjae", filename: "geopjae.md", titleKo: "겁재", titleEn: "Geop-Jae (Rob Wealth Star)" },
+  { slug: "siksin", filename: "siksin.md", titleKo: "식신", titleEn: "Sik-Sin (Eating God)" },
+  { slug: "sanggwan", filename: "sanggwan.md", titleKo: "상관", titleEn: "Sang-Gwan (Hurting Officer)" },
+  { slug: "pyeonjae", filename: "pyeonjae.md", titleKo: "편재", titleEn: "Pyeon-Jae (Indirect Wealth)" },
+  { slug: "jeongjae", filename: "jeongjae.md", titleKo: "정재", titleEn: "Jeong-Jae (Direct Wealth)" },
+  { slug: "pyeongwan", filename: "pyeongwan.md", titleKo: "편관", titleEn: "Pyeon-Gwan (Seven Killings)" },
+  { slug: "jeonggwan", filename: "jeonggwan.md", titleKo: "정관", titleEn: "Jeong-Gwan (Direct Officer)" },
+  { slug: "pyeonin", filename: "pyeonin.md", titleKo: "편인", titleEn: "Pyeon-In (Indirect Resource)" },
+  { slug: "jeongin", filename: "jeongin.md", titleKo: "정인", titleEn: "Jeong-In (Direct Resource)" }
   ]}
 ];
 

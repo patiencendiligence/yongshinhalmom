@@ -332,7 +332,8 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             </span>
           )}
         </div>
-        <h3 className={`text-2xl md:text-2xl font-serif font-black italic leading-[0.9] ${
+        <h3 style={{whiteSpace:  'keep-all'}}
+        className={`text-xl md:text-xl font-serif font-black italic leading-[0.9]${
           isRed ? "text-white" : "text-ink-black dark:text-white"
         } ${isRefreshing ? "opacity-30" : ""}`}>
           {section.title}

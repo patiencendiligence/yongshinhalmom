@@ -6,6 +6,56 @@ import { getTodaysFortune, ReportResult, ReportSection } from "../services/gemin
 import { getManseRyeok } from "../lib/manseRyeok";
 import { Language } from "../lib/translations";
 
+function parseLuckInfo(luckInfo: any): { color: string; item: string; food: string; location?: string } | null {
+  if (!luckInfo) return null;
+  if (typeof luckInfo === "object") {
+    return {
+      color: luckInfo.color || luckInfo.색상 || "",
+      item: luckInfo.item || luckInfo.아이템 || "",
+      food: luckInfo.food || luckInfo.음식 || "",
+      location: luckInfo.location || luckInfo.장소 || "",
+    };
+  }
+  
+  if (typeof luckInfo === "string") {
+    const result: any = { color: "", item: "", food: "", location: "" };
+    const parts = luckInfo.split(/[,，]/);
+    parts.forEach(part => {
+      const match = part.match(/(색상|color|색)\s*[:：]\s*(.*)/i);
+      if (match) result.color = match[2].trim();
+      
+      const itemMatch = part.match(/(아이템|item|물건)\s*[:：]\s*(.*)/i);
+      if (itemMatch) result.item = itemMatch[2].trim();
+      
+      const foodMatch = part.match(/(음식|food|식사)\s*[:：]\s*(.*)/i);
+      if (foodMatch) result.food = foodMatch[2].trim();
+      
+      const locMatch = part.match(/(장소|location|위치)\s*[:：]\s*(.*)/i);
+      if (locMatch) result.location = locMatch[2].trim();
+    });
+
+    if (!result.color && !result.item && !result.food) {
+      const subParts = luckInfo.split(/[,，·\n]/);
+      subParts.forEach(sp => {
+        const cleaned = sp.trim();
+        if (cleaned.includes("색상") || cleaned.includes("색") || cleaned.toLowerCase().includes("color")) {
+          result.color = cleaned.replace(/^(색상|색|color|[:：\s])+/i, "").trim();
+        } else if (cleaned.includes("아이템") || cleaned.toLowerCase().includes("item")) {
+          result.item = cleaned.replace(/^(아이템|item|[:：\s])+/i, "").trim();
+        } else if (cleaned.includes("음식") || cleaned.toLowerCase().includes("food")) {
+          result.food = cleaned.replace(/^(음식|food|[:：\s])+/i, "").trim();
+        } else if (cleaned.includes("장소") || cleaned.toLowerCase().includes("location")) {
+          result.location = cleaned.replace(/^(장소|location|[:：\s])+/i, "").trim();
+        }
+      });
+    }
+
+    return result;
+  }
+  
+  return null;
+}
+
 interface UseReportResultProps {
   report: ReportResult;
   userData: any;
@@ -30,8 +80,90 @@ export function useReportResult({
   const reportHash = useMemo(() => getReportHash(userData), [userData]);
   const [isCurrentlyPaid, setIsCurrentlyPaid] = useState(() => storageService.isLocalPaid(reportHash));
   const [isCheckingPayment, setIsCheckingPayment] = useState(false);
-  const [dailySection, setDailySection] = useState<ReportSection | null>(null);
   const [isRefreshingDaily, setIsRefreshingDaily] = useState(false);
+
+  const [dailySection, setDailySection] = useState<ReportSection | null>(() => {
+    try {
+      const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+      const today = kstNow.toISOString().split('T')[0];
+      const rawCache = localStorage.getItem("saju_daily_fortune_cache");
+      if (rawCache) {
+        const cached = JSON.parse(rawCache);
+        if (cached && cached.response) {
+          const cachedResponse = cached.response;
+          const dateRegex = /\d{4}-\d{2}-\d{2}/;
+          const contentMatch = cachedResponse.content ? cachedResponse.content.match(dateRegex) : null;
+          const titleMatch = cachedResponse.title ? cachedResponse.title.match(dateRegex) : null;
+          const dateInResponse = (contentMatch ? contentMatch[0] : null) || (titleMatch ? titleMatch[0] : null);
+          const dateMatch = dateInResponse === today || (cachedResponse.content && cachedResponse.content.includes(today));
+
+          if (dateMatch) {
+            let contentStr = "";
+            if (typeof cachedResponse.content === "string") {
+              contentStr = cachedResponse.content;
+            } else if (typeof cachedResponse.content === "object" && cachedResponse.content !== null) {
+              contentStr = JSON.stringify(cachedResponse.content);
+            } else if (typeof cachedResponse === "string") {
+              contentStr = cachedResponse;
+            } else if (typeof cachedResponse.todaysFortune?.content === "string") {
+              contentStr = cachedResponse.todaysFortune.content;
+            } else if (typeof cachedResponse.todaysFortune === "string") {
+              contentStr = cachedResponse.todaysFortune;
+            } else {
+              const keys = Object.keys(cachedResponse);
+              const contentKey = keys.find(k => k.toLowerCase().includes("content") || k.toLowerCase().includes("fortune") || k.toLowerCase().includes("text"));
+              if (contentKey && typeof cachedResponse[contentKey] === "string") {
+                contentStr = cachedResponse[contentKey];
+              } else {
+                contentStr = JSON.stringify(cachedResponse);
+              }
+            }
+
+            const todayFormatted = `### ${today}`;
+            if (contentStr && !contentStr.includes(today)) {
+              contentStr = `${todayFormatted}\n\n${contentStr}`;
+            }
+
+            const titleStr = typeof cachedResponse.title === "string" ? cachedResponse.title : (lang === "ko" ? "오늘의 컨디션 가이드" : "Today's Condition Guide");
+
+            return {
+              title: titleStr,
+              content: contentStr
+            };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to pre-load daily section from cache:", e);
+    }
+    return null;
+  });
+
+  const [dailyLuckInfo, setDailyLuckInfo] = useState<{ color: string; item: string; food: string; location?: string } | null>(() => {
+    try {
+      const kstNow = new Date(new Date().getTime() + 9 * 60 * 60 * 1000);
+      const today = kstNow.toISOString().split('T')[0];
+      const rawCache = localStorage.getItem("saju_daily_fortune_cache");
+      if (rawCache) {
+        const cached = JSON.parse(rawCache);
+        if (cached && cached.response && cached.response.luckInfo) {
+          const cachedResponse = cached.response;
+          const dateRegex = /\d{4}-\d{2}-\d{2}/;
+          const contentMatch = cachedResponse.content ? cachedResponse.content.match(dateRegex) : null;
+          const titleMatch = cachedResponse.title ? cachedResponse.title.match(dateRegex) : null;
+          const dateInResponse = (contentMatch ? contentMatch[0] : null) || (titleMatch ? titleMatch[0] : null);
+          const dateMatch = dateInResponse === today || (cachedResponse.content && cachedResponse.content.includes(today));
+
+          if (dateMatch) {
+            return parseLuckInfo(cachedResponse.luckInfo);
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to pre-load daily luckInfo from cache:", e);
+    }
+    return null;
+  });
 
   // Daily Refresh Effect if date is different in KST or when explicitly requested in "today" mode
   useEffect(() => {
@@ -98,6 +230,10 @@ export function useReportResult({
             title: titleStr,
             content: contentStr
           });
+
+          if (fresh.luckInfo) {
+            setDailyLuckInfo(parseLuckInfo(fresh.luckInfo));
+          }
         } catch (error) {
           console.error("[useReportResult] Failed to refresh daily fortune section:", error);
         } finally {
@@ -289,6 +425,7 @@ export function useReportResult({
     handlePayment,
     handleManualCheck,
     swappedReport,
-    dailySection
+    dailySection,
+    dailyLuckInfo
   };
 }

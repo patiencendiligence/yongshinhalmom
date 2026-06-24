@@ -400,3 +400,26 @@ export function filterContentByLanguage(rawText: string, lang: "ko" | "en"): str
   return result;
 }
 
+
+export const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "사주는 무료인가요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "이 용신할멈은 기본 사주풀이는 무료일세."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "용신은 어떻게 찾나요?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "사주의 오행 균형과 일간의 상태를 분석해 용신을 판단하지."
+      }
+    }
+  ]
+};

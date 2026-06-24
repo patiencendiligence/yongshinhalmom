@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Language } from "../lib/translations";
 import FileExplorer, { getThemeColors, fileTreeData } from "../components/FileExplorer";
 import { filterContentByLanguage } from "../utils/sajuUtils";
-
+import { faqSchema }from "../utils/sajuUtils.ts";
 
 function getRelatedPosts(currentCategory: string, currentSlug: string) {
   const allItems: Array<{ category: string, slug: string, titleKo: string, titleEn: string }> = [];
@@ -248,7 +248,8 @@ export default function SeoPage({
             rel="canonical"
             href={`https://yongshinhalmom.vercel.app/${category}/${slug}`}
           />
-
+          
+          
       {seoTitle && (
           <script type="application/ld+json">
             {JSON.stringify({
@@ -272,7 +273,9 @@ export default function SeoPage({
               }
             })}
           </script>
+          
       )}
+      
         </Helmet>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
       <div className="flex items-start justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">

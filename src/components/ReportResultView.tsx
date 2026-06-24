@@ -95,6 +95,7 @@ export default function ReportResultView({
     handlePayment,
     handleManualCheck,
     swappedReport,
+    dailyLuckInfo,
   } = useReportResult({
     report,
     userData,
@@ -106,6 +107,7 @@ export default function ReportResultView({
   });
 
   const activeReport = swappedReport || report;
+  const activeLuckInfo = (viewMode === "today" && dailyLuckInfo) ? dailyLuckInfo : (activeReport?.luckInfo || {});
 
   const handleSavePdf = async () => {
     if (isGeneratingPdf) return;
@@ -213,9 +215,9 @@ export default function ReportResultView({
         {/* Lucky info row */}
         <div className="grid grid-cols-3 gap-4 md:gap-6 mb-16 relative z-10">
           {[
-            { label: t.luckyColor || "행운 색상", value: activeReport?.luckInfo?.color || "-" },
-            { label: t.luckyItem || "행운 아이템", value: activeReport?.luckInfo?.item || "-" },
-            { label: t.luckyFood || "행운 음식", value: activeReport?.luckInfo?.food || "-" }
+            { label: t.luckyColor || "행운 색상", value: activeLuckInfo?.color || "-" },
+            { label: t.luckyItem || "행운 아이템", value: activeLuckInfo?.item || "-" },
+            { label: t.luckyFood || "행운 음식", value: activeLuckInfo?.food || "-" }
           ].map((item, idx) => (
             <div key={idx} className="p-6 md:p-8 bg-white/40 dark:bg-black/20 border border-ink-black/10 dark:border-white/5 backdrop-blur-sm flex flex-col gap-2 text-center text-ink-black dark:text-white">
               <span className="text-[9px] font-sans font-black uppercase tracking-[0.3em] text-ink-black/40 dark:text-white/30">

@@ -23,24 +23,6 @@ async function main() {
       console.error("DAILY ERROR (Message):", err.message);
     }
   }
-
-  try {
-    console.log("Testing /api/generate-report...");
-    const reportRes = await axios.post("http://localhost:3000/api/generate-report", {
-      pillars: mockPillars,
-      zodiac: 4,
-      targetYear: 2026,
-      lang: "ko",
-      level: "simple"
-    });
-    console.log("REPORT SUCCESS:", JSON.stringify(reportRes.data, null, 2));
-  } catch (err: any) {
-    if (err.response) {
-      console.error("REPORT ERROR (Response):", err.response.status, err.response.data);
-    } else {
-      console.error("REPORT ERROR (Message):", err.message);
-    }
-  }
 }
 
 main();

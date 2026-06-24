@@ -99,7 +99,7 @@ export async function getTodaysFortune(
     birthPlace: string;
   },
   lang: Language = "ko"
-): Promise<{ title: string; content: string }> {
+): Promise<{ title: string; content: string; luckInfo?: any }> {
   const manse = getManseRyeok(userData.birthDate, userData.birthTime || "12:00", userData.isLunar || false);
   const pillars = manse ? {
     yearPillar: translateHanjaToKorean(manse.pillars.year),

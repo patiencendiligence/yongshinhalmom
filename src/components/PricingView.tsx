@@ -17,6 +17,7 @@ export default function PricingView({ onBack, onPurchase, lang }: PricingViewPro
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
       <Helmet>
+        <html lang={lang} />
         <title>{lang === "en" ? "Pricing & Offerings - Yongshin Halmeom" : "복채 복덕방 복채 안내 - 용신할멈"}</title>
         <meta name="description" content={lang === "en" ? "Discover Pricing and Unlock Detailed Saju Analysis with Yongshin Halmeom." : "신묘한 힘으로 보는 사주명리 종합감명 보고서의 복채안내와 결제 정보입니다."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/pricing" />

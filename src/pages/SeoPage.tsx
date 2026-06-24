@@ -239,6 +239,7 @@ export default function SeoPage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
         <Helmet>
+          <html lang={lang} />
           <title>{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
           <meta name="description" content={seoDesc} />
           <meta property="og:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />

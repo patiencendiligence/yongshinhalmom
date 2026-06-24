@@ -14,6 +14,21 @@ interface LandingProps {
 export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: LandingProps) {
   const t = translations[lang];
   
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": lang === "en" ? "Yongshin Halmeom" : "용신할멈",
+    "alternateName": ["YongshinHalmeom", "용신할멈 사주"],
+    "url": "https://yongshinhalmom.vercel.app/"
+  };
+
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": lang === "en" ? "Yongshin Halmeom" : "용신할멈",
+    "url": "https://yongshinhalmom.vercel.app/",
+    "logo": "https://yongshinhalmom.vercel.app/assets/yongshin.png"
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
@@ -21,6 +36,32 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <title>{lang === "en" ? "Yongshin Halmeom - Korean Saju Report & Today's Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"}</title>
         <meta name="description" content={lang === "en" ? "Tsk. Looking for answers? Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." : "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/" />
+        
+        {/* OpenGraph Core Metadata */}
+        <meta property="og:title" content={lang === "en" ? "Yongshin Halmeom - Saju & Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"} />
+        <meta property="og:description" content={lang === "en" ? "Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." : "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
+        <meta property="og:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
+        <meta property="og:url" content="https://yongshinhalmom.vercel.app/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content={lang === "en" ? "Yongshin Halmeom" : "용신할멈"} />
+        <meta property="og:locale" content={lang === "en" ? "en_US" : "ko_KR"} />
+
+        {/* Twitter Card Metadata */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={lang === "en" ? "Yongshin Halmeom - Saju & Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"} />
+        <meta name="twitter:description" content={lang === "en" ? "Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." : "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
+        <meta name="twitter:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
+
+        {/* JSON-LD Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(websiteSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(orgSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
       </Helmet>
       
       {/* Decorative Accents */}
@@ -105,12 +146,6 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
 
           {t.moreInfo}
         </button>
-        <script
-  type="application/ld+json"
-  dangerouslySetInnerHTML={{
-    __html: JSON.stringify(faqSchema),
-  }}
-/>
       </div>
     </div>
   );

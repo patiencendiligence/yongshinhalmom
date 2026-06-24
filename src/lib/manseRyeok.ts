@@ -48,7 +48,7 @@ function normalizeKoreanManseTime(
   day: number,
   hour: number,
   minute: number
-): Date {
+): { year: number; month: number; day: number; hour: number; minute: number } {
   const date = new Date(
     `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:00+09:00`
   );
@@ -64,7 +64,18 @@ function normalizeKoreanManseTime(
     date.setHours(date.getHours() - 1);
   }
 
-  return date;
+  // To extract the corrected components timezone-safely (KST = UTC + 9 hours),
+  // we shift the timestamp by 9 hours and use UTC getters.
+  const kstOffset = 9 * 60 * 60 * 1000;
+  const kstDate = new Date(date.getTime() + kstOffset);
+
+  return {
+    year: kstDate.getUTCFullYear(),
+    month: kstDate.getUTCMonth() + 1,
+    day: kstDate.getUTCDate(),
+    hour: kstDate.getUTCHours(),
+    minute: kstDate.getUTCMinutes()
+  };
 }
 
 /**
@@ -120,7 +131,7 @@ export function getManseRyeok(
     /**
      * 실무 만세력 기준 시간 보정
      */
-    const correctedDate =
+    const corrected =
       normalizeKoreanManseTime(
         year,
         month,
@@ -129,11 +140,11 @@ export function getManseRyeok(
         minute
       );
 
-    const y = correctedDate.getFullYear();
-    const m = correctedDate.getMonth() + 1;
-    const d = correctedDate.getDate();
-    const h = correctedDate.getHours();
-    const min = correctedDate.getMinutes();
+    const y = corrected.year;
+    const m = corrected.month;
+    const d = corrected.day;
+    const h = corrected.hour;
+    const min = corrected.minute;
 
     if (isBoundaryTime(h, min)) {
       console.warn(
@@ -240,12 +251,12 @@ export function getTodayPillar(): string {
     const h = kstDate.getUTCHours();
     const min = kstDate.getUTCMinutes();
 
-    const correctedDate = normalizeKoreanManseTime(y, m, d, h, min);
-    const cy = correctedDate.getFullYear();
-    const cm = correctedDate.getMonth() + 1;
-    const cd = correctedDate.getDate();
-    const ch = correctedDate.getHours();
-    const cmin = correctedDate.getMinutes();
+    const corrected = normalizeKoreanManseTime(y, m, d, h, min);
+    const cy = corrected.year;
+    const cm = corrected.month;
+    const cd = corrected.day;
+    const ch = corrected.hour;
+    const cmin = corrected.minute;
 
     const solar = Solar.fromYmdHms(cy, cm, cd, ch, cmin, 0);
     if (!solar) return "";

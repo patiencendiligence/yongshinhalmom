@@ -139,9 +139,11 @@ export const translations = {
       ],
       oneTime: "단회성 결제 (구독 없음)",
       disclaimer: "결제 즉시 분석이 시작되며 디지털 콘텐츠 특성상 환불이 불가능합니다."
-    }
+    },
+    moreInfo: "더 알아보기"
   },
  en: {
+  moreInfo: "More info",
   title: "Yongshin Halmeom",
   subtitle: "Fortune & Fate Reading",
   viewTodayFortune: "View Today's Fortune",

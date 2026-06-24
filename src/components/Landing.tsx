@@ -76,7 +76,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
-        className="flex flex-col items-center gap-10 relative z-20"
+        className="flex flex-col items-center gap-10 relative z-20 mb-10"
       >
         <div className="flex flex-col md:flex-row gap-6">
           <button
@@ -96,6 +96,15 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           )}
         </div>
       </motion.div>
+       <div className="flex items-center gap-8 mt-10">
+        <button
+          onClick={ () => location.href ='/basic/what-is-saju'}
+          className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-ink-black/70 dark:text-white/60 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all flex items-center gap-4 group"
+        >
+
+          {t.moreInfo}
+        </button>
+      </div>
     </div>
   );
 }

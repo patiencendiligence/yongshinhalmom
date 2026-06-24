@@ -214,17 +214,30 @@ export function getStrongestElementFromReport(report: any, manseRyeok: any): { e
   const fallback = getStrongestElement(manseRyeok);
   if (!report) return fallback;
 
-  // Combine summary and all section contents for scanning
+  // 1. Try to find the specific Five Elements (오행 분석) section first to isolate the analysis
   let textToScan = "";
-  if (report.summary) textToScan += report.summary + "\n";
-  if (Array.isArray(report.sections)) {
-    report.sections.forEach((sec: any) => {
+  const sections = Array.isArray(report.sections) ? report.sections : [];
+  const fiveElementsSec = sections.find((s: any) => {
+    const titleLower = (s.title || "").toLowerCase();
+    return (
+      titleLower.includes("오행 분석") || 
+      titleLower.includes("오행 해석") || 
+      titleLower.includes("five elements") ||
+      titleLower.includes("오행 분포") ||
+      titleLower.includes("오행 균형")
+    );
+  });
+
+  if (fiveElementsSec) {
+    textToScan = (fiveElementsSec.title || "") + "\n" + (fiveElementsSec.content || "");
+  } else {
+    // Fallback: Combine summary and all section contents if specific section not found
+    if (report.summary) textToScan += report.summary + "\n";
+    sections.forEach((sec: any) => {
       textToScan += (sec.title || "") + "\n" + (sec.content || "") + "\n";
     });
+    if (report.content) textToScan += report.content + "\n";
   }
-
-  // Also scan any other available text fields
-  if (report.content) textToScan += report.content + "\n";
 
   const lowerText = textToScan.toLowerCase();
 
@@ -233,66 +246,71 @@ export function getStrongestElementFromReport(report: any, manseRyeok: any): { e
   const elementKeywords = {
     "목": {
       patterns: [
-        /목\s*기운이\s*(가장\s*)?강/,
-        /나무\s*기운이\s*(가장\s*)?강/,
+        /목\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
+        /나무\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
         /목\(나무\)\s*기운/,
         /나무\s*기운이\s*태산/,
-        /wood\s*energy\s*is\s*strong/,
-        /strong\s*wood\s*energy/,
-        /dominant\s*element\s*is\s*wood/,
-        /strongest\s*element\s*is\s*wood/
+        /가장\s*(강한|왕성한|많은|발달한)\s*(기운|오행은|오행은 바로)\s*(바로\s*)?목/,
+        /지배적인\s*(기운은|오행은)\s*목/,
+        /wood\s*energy\s*is\s*(the\s*)?strongest/,
+        /strongest\s*element\s*is\s*wood/,
+        /dominant\s*element\s*is\s*wood/
       ],
       simple: ["목 기운", "나무 기운", "wood energy", "strong wood"]
     },
     "화": {
       patterns: [
-        /화\s*기운이\s*(가장\s*)?강/,
-        /불\s*기운이\s*(가장\s*)?강/,
+        /화\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
+        /불\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
         /화\(불\)\s*기운/,
         /불\s*기운이\s*태산/,
-        /fire\s*energy\s*is\s*strong/,
-        /strong\s*fire\s*energy/,
-        /dominant\s*element\s*is\s*fire/,
-        /strongest\s*element\s*is\s*fire/
+        /가장\s*(강한|왕성한|많은|발달한)\s*(기운|오행은|오행은 바로)\s*(바로\s*)?화/,
+        /지배적인\s*(기운은|오행은)\s*화/,
+        /fire\s*energy\s*is\s*(the\s*)?strongest/,
+        /strongest\s*element\s*is\s*fire/,
+        /dominant\s*element\s*is\s*fire/
       ],
       simple: ["화 기운", "불 기운", "fire energy", "strong fire"]
     },
     "토": {
       patterns: [
-        /토\s*기운이\s*(가장\s*)?강/,
-        /흙\s*기운이\s*(가장\s*)?강/,
+        /토\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
+        /흙\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
         /토\(흙\)\s*기운/,
         /흙\s*기운이\s*태산/,
-        /earth\s*energy\s*is\s*strong/,
-        /strong\s*earth\s*energy/,
-        /dominant\s*element\s*is\s*earth/,
-        /strongest\s*element\s*is\s*earth/
+        /가장\s*(강한|왕성한|많은|발달한)\s*(기운|오행은|오행은 바로)\s*(바로\s*)?토/,
+        /지배적인\s*(기운은|오행은)\s*토/,
+        /earth\s*energy\s*is\s*(the\s*)?strongest/,
+        /strongest\s*element\s*is\s*earth/,
+        /dominant\s*element\s*is\s*earth/
       ],
       simple: ["토 기운", "흙 기운", "earth energy", "strong earth"]
     },
     "금": {
       patterns: [
-        /금\s*기운이\s*(가장\s*)?강/,
-        /쇠\s*기운이\s*(가장\s*)?강/,
+        /금\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
+        /쇠\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
         /금\(쇠\)\s*기운/,
         /쇠\s*기운이\s*태산/,
-        /metal\s*energy\s*is\s*strong/,
-        /strong\s*metal\s*energy/,
-        /dominant\s*element\s*is\s*metal/,
-        /strongest\s*element\s*is\s*metal/
+        /가장\s*(강한|왕성한|많은|발달한)\s*(기운|오행은|오행은 바로)\s*(바로\s*)?금/,
+        /지배적인\s*(기운은|오행은)\s*금/,
+        /metal\s*energy\s*is\s*(the\s*)?strongest/,
+        /strongest\s*element\s*is\s*metal/,
+        /dominant\s*element\s*is\s*metal/
       ],
       simple: ["금 기운", "쇠 기운", "metal energy", "strong metal"]
     },
     "수": {
       patterns: [
-        /수\s*기운이\s*(가장\s*)?강/,
-        /물\s*기운이\s*(가장\s*)?강/,
+        /수\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
+        /물\s*기운이\s*(가장\s*)?(강|왕성|우세|많|발달|지배|주도)/,
         /수\(물\)\s*기운/,
         /물\s*기운이\s*태산/,
-        /water\s*energy\s*is\s*strong/,
-        /strong\s*water\s*energy/,
-        /dominant\s*element\s*is\s*water/,
-        /strongest\s*element\s*is\s*water/
+        /가장\s*(강한|왕성한|많은|발달한)\s*(기운|오행은|오행은 바로)\s*(바로\s*)?수/,
+        /지배적인\s*(기운은|오행은)\s*수/,
+        /water\s*energy\s*is\s*(the\s*)?strongest/,
+        /strongest\s*element\s*is\s*water/,
+        /dominant\s*element\s*is\s*water/
       ],
       simple: ["수 기운", "물 기운", "water energy", "strong water"]
     }

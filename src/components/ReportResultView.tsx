@@ -6,7 +6,7 @@ import { useReportResult } from "../hooks/useReportResult";
 import { generateReportPdf } from "../utils/pdfGenerator";
 import { ReportResult } from "../services/geminiService";
 import { Language, translations } from "../lib/translations";
-import { parseDailyFortune, getStrongestElement } from "../utils/sajuUtils";
+import { parseDailyFortune, getStrongestElement, getStrongestElementFromReport } from "../utils/sajuUtils";
 import ReportHeader from "./ReportHeader";
 import ReportItemCard from "./ReportItemCard";
 import PremiumLockBox from "./PremiumLockBox";
@@ -63,7 +63,7 @@ export default function ReportResultView({
   };
 
   const handleShareSaju = () => {
-    const strongest = getStrongestElement(safeManseRyeok);
+    const strongest = getStrongestElementFromReport(activeReport, safeManseRyeok);
     const shareUrl = window.location.origin;
     const copyText = lang === 'ko' ? `자네 아직 자기 팔자를 모르고 사는군.\n자네 사주에는 ${strongest.element} ${strongest.emoji} 기운이 강하다네.\n생년월일만 넣어보게. 이 할멈이 자네 길도 봐줌세.\n${shareUrl}` :
     `Hmm, you still don't know your own fate, do you?\nYour chart carries strong ${strongest.element} ${strongest.emoji} energy. Enter your birth date.\nThis old grandma shall read the path that awaits you.\n${shareUrl}`
@@ -294,6 +294,7 @@ export default function ReportResultView({
                 lang={lang}
                 manseRyeok={safeManseRyeok}
                 isLast={idx === displaySections.length - 1}
+                report={activeReport}
               />
             ))}
 

@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import ReactMarkdown from "react-markdown";
 import { ReportSection } from "../services/geminiService";
 import { Language } from "../lib/translations";
-import { getStrongestElement } from "../utils/sajuUtils";
+import { getStrongestElement, getStrongestElementFromReport } from "../utils/sajuUtils";
 import {  ArrowRight } from "lucide-react";
 interface ReportItemCardProps {
   idx: number;
@@ -13,6 +13,7 @@ interface ReportItemCardProps {
   lang?: Language;
   manseRyeok?: any;
   isLast?: boolean;
+  report?: any;
 }
 
 function parseDailyFortune(content: string) {
@@ -177,7 +178,7 @@ const getSlotClass = (idx: number, title?: string, isLast?: boolean) => {
   }
 };
 
-export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko", manseRyeok, isLast }: ReportItemCardProps) {
+export default function ReportItemCard({ idx, section, isRefreshingDaily, lang = "ko", manseRyeok, isLast, report }: ReportItemCardProps) {
   const isRed = idx === 5;
   const isRefreshing = idx === 0 && isRefreshingDaily;
 
@@ -187,8 +188,8 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
   }, [idx, section.content]);
 
   const strongest = React.useMemo(() => {
-    return manseRyeok ? getStrongestElement(manseRyeok) : { element: "화", emoji: "🔥" };
-  }, [manseRyeok]);
+    return manseRyeok ? getStrongestElementFromReport(report, manseRyeok) : { element: "화", emoji: "🔥" };
+  }, [report, manseRyeok]);
 
   const elementEngMap: Record<string, string> = {
     "목": "wood",
@@ -342,7 +343,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
 
       <div className={`text-md md:text-md font-sans tracking-tight leading-relaxed markdown-container ${
         isRed ? "text-white/95" : "text-ink-black/80 dark:text-white/70"
-      } ${isRefreshing ? "opacity-30" : ""}`}>
+      } ${isRefreshing ? "opacity-30" : ""}`} style={{whiteSpace:  'keep-all'}}>
         {isRefreshing ? (
           <div className="space-y-4">
             <div className="h-4 bg-ink-black/10 dark:bg-white/10 rounded w-full animate-pulse" />

@@ -17,6 +17,7 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl text-white/80 font-sans leading-relaxed">
       <Helmet>
+        <html lang={lang} />
         <title>{lang === "en" ? "Privacy Policy & Terms of Service - Yongshin Halmeom" : "개인정보 처리방침 및 이용약관 - 용신할멈"}</title>
         <meta name="description" content={lang === "en" ? "Review the privacy practices and user terms of service for Yongshin Halmeom AI Saju." : "용신할멈 홈페이지의 개인정보처리방침 및 서비스 이용약관을 공지합니다."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/policies" />

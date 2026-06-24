@@ -47,7 +47,7 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
     if (lang === "ko") {
       return (
         <>
-          할멈의 <span className="mythic-gradient-text">감정서(鑑定書)</span>
+          할멈의 <span className="mythic-gradient-text">조언</span>
         </>
       );
     } else {
@@ -64,7 +64,7 @@ export default function ReportHeader({ t, report, lang, userData, manseRyeok }: 
   return (
     <header className="pt-20 pb-16 md:pt-32 md:pb-24 flex flex-col items-center md:items-start md:flex-row justify-between border-b border-ink-black/10 dark:border-white/10 mb-16 relative z-10">
       <div className="max-w-3xl mb-12 md:mb-0 w-full">
-        <h1 className="text-5xl sm:text-7xl md:text-11xl font-serif font-black italic tracking-tighter text-ink-black dark:text-white leading-[0.9] md:leading-[0.8] mb-4 text-left">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif font-black italic tracking-tighter text-ink-black dark:text-white leading-[0.9] md:leading-[0.8] mb-4 text-left">
           {titleContent}
         </h1>
         <p className="mt-5 text-sm font-sans font-medium text-ink-black/45 dark:text-white/35 mb-8 text-left tracking-wide block">

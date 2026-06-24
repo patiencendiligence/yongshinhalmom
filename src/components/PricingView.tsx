@@ -2,6 +2,7 @@ import { ArrowLeft, CreditCard, ChevronRight } from "lucide-react";
 import { motion } from "motion/react";
 import { Helmet } from "react-helmet-async";
 import { Language, translations } from "../lib/translations";
+import { faqSchema } from "../utils/sajuUtils";
 
 interface PricingViewProps {
   onBack: () => void;
@@ -19,6 +20,9 @@ export default function PricingView({ onBack, onPurchase, lang }: PricingViewPro
         <title>{lang === "en" ? "Pricing & Offerings - Yongshin Halmeom" : "복채 복덕방 복채 안내 - 용신할멈"}</title>
         <meta name="description" content={lang === "en" ? "Discover Pricing and Unlock Detailed Saju Analysis with Yongshin Halmeom." : "신묘한 힘으로 보는 사주명리 종합감명 보고서의 복채안내와 결제 정보입니다."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/pricing" />
+        <script type="application/ld+json">
+    {JSON.stringify(faqSchema)}
+  </script>
       </Helmet>
       <motion.button
         initial={{ opacity: 0, x: -10 }}

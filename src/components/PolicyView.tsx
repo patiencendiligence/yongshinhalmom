@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { Language, translations } from "../lib/translations";
+import { faqSchema } from "../utils/sajuUtils";
 
 interface PolicyViewProps {
   onBack: () => void;
@@ -19,6 +20,9 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
         <title>{lang === "en" ? "Privacy Policy & Terms of Service - Yongshin Halmeom" : "개인정보 처리방침 및 이용약관 - 용신할멈"}</title>
         <meta name="description" content={lang === "en" ? "Review the privacy practices and user terms of service for Yongshin Halmeom AI Saju." : "용신할멈 홈페이지의 개인정보처리방침 및 서비스 이용약관을 공지합니다."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/policies" />
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
       </Helmet>
       <div className="flex justify-between items-center mb-16">
         <motion.button

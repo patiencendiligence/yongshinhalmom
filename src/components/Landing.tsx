@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Sparkles } from "lucide-react";
 import { Helmet } from "react-helmet-async";
-
+import { faqSchema }from "../utils/sajuUtils.ts";
 import { Language, translations } from "../lib/translations";
 
 interface LandingProps {
@@ -14,6 +14,7 @@ interface LandingProps {
 export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: LandingProps) {
   const t = translations[lang];
   
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
       <Helmet>
@@ -104,6 +105,12 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
 
           {t.moreInfo}
         </button>
+        <script
+  type="application/ld+json"
+  dangerouslySetInnerHTML={{
+    __html: JSON.stringify(faqSchema),
+  }}
+/>
       </div>
     </div>
   );

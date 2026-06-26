@@ -13,6 +13,8 @@ export default function Illustration({ zodiac, className = "" }: IllustrationPro
   
   return (
     <div 
+      role="img"
+      aria-label="용신할멈 AI 사주 분석 - 12지신 수호신 캐릭터 일러스트"
       className={`w-32 h-44 border border-white/10 rounded-lg zodiac-illustration shadow-2xl ${className}`}
       data-col={col}
       data-row={row}

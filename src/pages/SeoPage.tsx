@@ -148,7 +148,7 @@ export default function SeoPage({
 }) {
   const { category, slug } = useParams();
 
-  const [content, setContent] = useState("");
+  const [content, setContent] = useState("용신할멈 무료 사주 및 오늘의 운세 서비스\n👵 용신할멈이 알려주는 나만의 사주팔자와 오늘의 정교한 기운 가이드. 무료 오늘의 운세 및 명리학 보고서를 상세하게 분석해 드립니다.\n사주 기초, 음양오행, 천간지지, 일주론, 십성 풀이까지 사주 명리학의 모든 지혜를 알기 쉽게 해설하고, 나에게 꼭 맞는 수호용신(用神)을 찾아내 삶의 균형을 잡아줍니다.\n오늘의 바이오리듬과 기운 변화에 맞는 행운의 색상, 추천 음식, 추천 처방 아이템을 매일 실시간으로 점검해 드립니다.");
   const [seoTitle, setSeoTitle] = useState("용신할멈 | YongshinHalmom");
   const [seoDesc, setSeoDesc] = useState("용신할멈의 사주명리 분석, 일주 해석, 오행 분석, 용신 풀이");
   const [isMobileExplorerOpen, setIsMobileExplorerOpen] = useState(false);
@@ -322,6 +322,8 @@ export default function SeoPage({
                       className="w-full max-w-[465px] aspect-[465/384] mb-8 overflow-hidden rounded-xl border border-ink-black/10 dark:border-white/10 relative shadow-sm hover:shadow-md transition-shadow duration-300 bg-cream/30 dark:bg-zinc-900/30"
                     >
                       <div 
+                        role="img"
+                        aria-label={`용신할멈 AI 사주명리 오행 분석 - ${slug} (${theme.themeName}) 상징 일러스트`}
                         className="absolute inset-0 select-none pointer-events-none"
                         style={{
                           backgroundImage: "url('/assets/o-hang.png')",

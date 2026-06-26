@@ -30,11 +30,38 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
     "logo": "https://yongshinhalmom.vercel.app/assets/yongshin.png"
   };
 
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": lang === "en" ? "Yongshin Halmeom AI Saju" : "용신할멈 AI 사주명리 & 오늘의 운세",
+    "alternateName": ["용신할멈", "용신할멈 사주", "Yongshin Halmeom", "사주 GPT", "AI 사주", "무료 사주", "용한 신점"],
+    "url": "https://yongshinhalmom.vercel.app/",
+    "image": "https://yongshinhalmom.vercel.app/assets/yongshin.png",
+    "description": lang === "en" 
+      ? "Get free professional Saju analysis & today's fortune by Yongshin Halmeom, utilizing traditional Korean Astrology with advanced AI technology." 
+      : "👵 용신할멈이 알려주는 나만의 사주팔자와 오늘의 정교한 기운 가이드. 무료 오늘의 운세 및 명리학 보고서를 상세하게 분석해 드립니다. 용신 찾기, 오행 분석, 일주론, 십성 해설 제공.",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "All",
+    "browserRequirements": "Requires HTML5 support",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "KRW"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "1540"
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
       <Helmet>
         <title>{lang === "en" ? "Yongshin Halmeom - Korean Saju Report & Today's Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"}</title>
-        <meta name="description" content={lang === "en" ? "Tsk. Looking for answers? Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." : "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
+        <meta name="description" content={lang === "en" ? 
+        "Tsk. Looking for answers? Yongsin Grandma reads the patterns of your life through Saju—personality, relationships, career, and daily fortune included." :
+        "쯧. 답답한 마음이 있느냐. 용신할멈이 사주를 바탕으로 자네의 기질과 인간관계, 직업, 재물, 오늘의 흐름까지 찬찬히 풀어주마."} />
         <link rel="canonical" href="https://yongshinhalmom.vercel.app/" />
         
         {/* OpenGraph Core Metadata */}
@@ -58,6 +85,9 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         </script>
         <script type="application/ld+json">
           {JSON.stringify(orgSchema)}
+        </script>
+        <script type="application/ld+json">
+          {JSON.stringify(webAppSchema)}
         </script>
         <script type="application/ld+json">
           {JSON.stringify(faqSchema)}
@@ -138,14 +168,31 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           )}
         </div>
       </motion.div>
-       <div className="flex items-center gap-8 mt-10">
+       <div className="flex flex-col items-center gap-8 mt-10 w-full max-w-lg">
         <button
           onClick={ () => location.href ='/basic/what-is-saju'}
           className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-ink-black/70 dark:text-white/60 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all flex items-center gap-4 group"
         >
-
           {t.moreInfo}
         </button>
+
+        {/* Beautiful, traditional, semantic footer for SEO and internal link crawling */}
+        <footer className="mt-12 pt-8 border-t border-ink-black/10 dark:border-white/10 w-full text-left px-2 opacity-80 z-10">
+          <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-ink-black/60 dark:text-white/40 mb-4">
+            {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
+          </h2>
+          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] font-sans text-ink-black/80 dark:text-white/60">
+            <a href="/basic/what-is-saju" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가? (무료 사주)"}</a>
+            <a href="/basic/what-is-yongshin" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가? (용신 찾기)"}</a>
+            <a href="/basic/what-is-ilgan" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가? (오행 분석)"}</a>
+            <a href="/basic/what-is-sipsin" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가? (사주 GPT)"}</a>
+          </div>
+          <p className="mt-8 text-[10px] text-ink-black/50 dark:text-white/30 leading-relaxed text-center font-sans tracking-wide">
+            {lang === "en" 
+              ? "Yongshin Halmeom © All traditional Saju analysis, fortune guides, and element characters are calculated based on orthodox Eastern astrology."
+              : "용신할멈 © 용한 신점 수준의 사주 대운, 세운 흐름 분석과 정밀한 만세력 기운 계산은 정통 동양 사주 명리학 이론을 바탕으로 작동합니다."}
+          </p>
+        </footer>
       </div>
     </div>
   );

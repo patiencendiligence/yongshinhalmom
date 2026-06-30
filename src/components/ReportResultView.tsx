@@ -355,16 +355,27 @@ export default function ReportResultView({
      
 
       {/* Feedback & Inquiries Footer Label */}
-      <div className="mt-8 text-center opacity-30 relative z-10 hide-in-pdf">
-        <p className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase mb-2">
+      <div className="mt-8 text-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10 hide-in-pdf flex flex-col items-center gap-2">
+        <p className="text-[10px] font-sans font-bold tracking-[0.2em] uppercase">
           {lang === "ko" ? "오류 제보 및 문의" : "Bug Reports & Inquiries"}
         </p>
-        <a
-          href="mailto:patiencendiligence@gmail.com"
-          className="text-xs font-serif italic hover:text-mythic-gold transition-all"
-        >
-          patiencendiligence@gmail.com
-        </a>
+        <div className="flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs">
+          <a
+            href="mailto:yongshinhalmom@gmail.com"
+            className="font-serif italic hover:text-mythic-gold transition-all underline"
+          >
+            yongshinhalmom@gmail.com
+          </a>
+          <span className="opacity-40">|</span>
+          <a
+            href="https://www.instagram.com/yongshinhalmom.saju"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-serif italic hover:text-mythic-gold transition-all underline"
+          >
+            Instagram: @yongshinhalmom.saju
+          </a>
+        </div>
       </div>
 
       {/* Lazy Loaded Interactive Payment Confirmation Overlay */}

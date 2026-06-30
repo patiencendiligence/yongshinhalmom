@@ -187,6 +187,18 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
             <a href="/basic/what-is-ilgan" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가? (오행 분석)"}</a>
             <a href="/basic/what-is-sipsin" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가? (사주 GPT)"}</a>
           </div>
+          
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink-black/5 dark:border-white/5 pt-4 text-[10px] font-sans tracking-wider text-ink-black/60 dark:text-white/40">
+            <div>
+              <span>✉️ {lang === "en" ? "Contact: " : "제보 및 문의: "}</span>
+              <a href="mailto:yongshinhalmom@gmail.com" className="underline hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">yongshinhalmom@gmail.com</a>
+            </div>
+            <div>
+              <span>📸 Instagram: </span>
+              <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="underline hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">@yongshinhalmom.saju</a>
+            </div>
+          </div>
+
           <p className="mt-8 text-[10px] text-ink-black/50 dark:text-white/30 leading-relaxed text-center font-sans tracking-wide">
             {lang === "en" 
               ? "Yongshin Halmeom © All traditional Saju analysis, fortune guides, and element characters are calculated based on orthodox Eastern astrology."

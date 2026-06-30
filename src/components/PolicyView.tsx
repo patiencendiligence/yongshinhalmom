@@ -81,7 +81,15 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
             <h2 className="text-xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.support}</h2>
             <div className="space-y-2 text-sm font-sans tracking-tight">
                <p className="text-white/40 uppercase text-[10px] tracking-widest">Inquiry Line</p>
-               <p className="text-white text-lg font-serif italic">patiencendiligence@gmail.com</p>
+               <p className="text-white text-lg font-serif italic">
+                 <a href="mailto:yongshinhalmom@gmail.com" className="hover:text-mythic-gold transition-colors underline">yongshinhalmom@gmail.com</a>
+               </p>
+               
+               <p className="text-white/40 uppercase text-[10px] tracking-widest mt-4">Instagram</p>
+               <p className="text-white text-lg font-serif italic">
+                 <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="hover:text-mythic-gold transition-colors underline">@yongshinhalmom.saju</a>
+               </p>
+               
                <p className="text-white/40 mt-2">{t.responseTime}</p>
             </div>
           </section>

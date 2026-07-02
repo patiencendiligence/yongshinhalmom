@@ -5,13 +5,11 @@ import { Language, translations } from "../lib/translations";
 interface InfoModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onOpenReport: () => void;
   lang: Language;
 }
 
-export default function InfoModal({ isOpen, onClose, onOpenReport, lang }: InfoModalProps) {
+export default function InfoModal({ isOpen, onClose, lang }: InfoModalProps) {
   const t = translations[lang];
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -75,12 +73,12 @@ export default function InfoModal({ isOpen, onClose, onOpenReport, lang }: InfoM
                       {t.diffInfo}
                     </p>
                   </div>
-                  <button
-                    onClick={onOpenReport}
-                    className="w-full md:w-auto px-10 py-5 bg-white text-black font-sans font-black text-[11px] uppercase tracking-[0.4em] transition-all hover:scale-105 active:scale-95"
+                  <a
+                    href="mailto:yongshinhalmom@gmail.com"
+                    className="w-full md:w-auto px-10 py-5 bg-white text-black font-sans font-black text-[11px] uppercase tracking-[0.4em] transition-all hover:scale-105 active:scale-95 text-center flex items-center justify-center"
                   >
                     {t.reportBtn}
-                  </button>
+                  </a>
                 </div>
               </div>
             </div>

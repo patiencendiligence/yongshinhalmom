@@ -154,7 +154,6 @@ export default function MainApp() {
       <InfoModal 
         isOpen={isInfoModalOpen} 
         onClose={() => setIsInfoModalOpen(false)} 
-        onOpenReport={() => { window.location.href = "mailto:yongshinhalmom@gmail.com"; }} 
         lang={lang} 
       />
       

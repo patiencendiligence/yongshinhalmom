@@ -36,18 +36,7 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
           {t.back}
         </motion.button>
 
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-        >
-          <Link
-            to="/"
-            className="flex items-center gap-3 text-mythic-gold/60 hover:text-mythic-gold transition-all uppercase tracking-[0.5em] text-[10px] font-black group"
-          >
-            <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            {mainT.backToHome}
-          </Link>
-        </motion.div>
+        
       </div>
 
       <div className="space-y-16 bg-black border border-white/20 p-8 md:p-20 relative overflow-hidden shadow-2xl dragon-pattern">
@@ -82,12 +71,12 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
             <div className="space-y-2 text-sm font-sans tracking-tight">
                <p className="text-white/40 uppercase text-[10px] tracking-widest">Inquiry Line</p>
                <p className="text-white text-lg font-serif italic">
-                 <a href="mailto:yongshinhalmom@gmail.com" className="hover:text-mythic-gold transition-colors underline">yongshinhalmom@gmail.com</a>
+                 <a href="mailto:yongshinhalmom@gmail.com" className="hover:text-white/85 transition-colors underline text-white/70">yongshinhalmom@gmail.com</a>
                </p>
                
                <p className="text-white/40 uppercase text-[10px] tracking-widest mt-4">Instagram</p>
                <p className="text-white text-lg font-serif italic">
-                 <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="hover:text-mythic-gold transition-colors underline">@yongshinhalmom.saju</a>
+                 <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="hover:text-white/85 transition-colors underline text-white/70">@yongshinhalmom.saju</a>
                </p>
                
                <p className="text-white/40 mt-2">{t.responseTime}</p>
@@ -116,17 +105,17 @@ export default function PolicyView({ onBack, lang }: PolicyViewProps) {
           </section>
         </div>
 
-        <section className="pt-16 border-t border-white/10 relative z-10">
+        <div className="pt-16 border-t border-white/10 relative z-10">
           <h2 className="text-2xl font-serif font-black italic mb-6 text-white uppercase tracking-widest">{t.termsTitle}</h2>
           <p className="text-sm text-white/50 leading-relaxed max-w-3xl">
             {t.termsText}
           </p>
-        </section>
+        </div>
 
         <section className="pt-16 border-t border-white/10 relative z-10 flex flex-col items-center gap-4">
           <Link
             to="/"
-            className="flex items-center gap-3 text-mythic-gold/60 hover:text-mythic-gold transition-all uppercase tracking-[0.5em] text-[10px] font-black group px-8 py-4 border border-white/10 hover:border-mythic-gold/30 rounded bg-white/[0.02]"
+            className="flex items-center gap-3 text-white/70 hover:text-white/95 transition-all uppercase tracking-[0.5em] text-[10px] font-black group px-8 py-4 border border-white/10 hover:border-white/30 rounded-none bg-white/[0.02]"
           >
             <Home className="w-4 h-4 group-hover:scale-110 transition-transform" />
             {mainT.backToHome}

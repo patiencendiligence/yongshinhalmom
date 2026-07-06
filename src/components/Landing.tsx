@@ -170,7 +170,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           {/* Button 1: See For Yourself */}
           <button
             onClick={onStart}
-            className="w-full max-w-[328px] h-[56px] rounded-lg font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-pink-200/40 bg-gradient-to-r from-pink-100/40 via-purple-50/30 to-cyan-100/40 text-ink-black/90 hover:opacity-95 shadow-[0_4px_20px_rgba(244,114,182,0.06)] dark:border-white/10 dark:from-[rgba(0,242,255,0.12)] dark:via-[rgba(157,0,255,0.12)] dark:to-[rgba(255,0,255,0.12)] dark:text-white dark:shadow-[0_0_20px_rgba(157,0,255,0.1)] dark:hover:shadow-[0_0_25px_rgba(157,0,255,0.18)]"
+            className="w-full max-w-[328px] h-[56px] rounded-none font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-pink-200/40 bg-gradient-to-r from-pink-100/40 via-purple-50/30 to-cyan-100/40 text-ink-black/90 hover:opacity-95 shadow-[0_4px_20px_rgba(244,114,182,0.06)] dark:border-white/10 dark:from-[rgba(0,242,255,0.12)] dark:via-[rgba(157,0,255,0.12)] dark:to-[rgba(255,0,255,0.12)] dark:text-white dark:shadow-[0_0_20px_rgba(157,0,255,0.1)] dark:hover:shadow-[0_0_25px_rgba(157,0,255,0.18)]"
           >
             <svg className="w-4 h-4 shrink-0 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3 21l7-7" />
@@ -185,7 +185,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           {/* Button 2: Mysterious Dream Interpretation */}
           <button
             onClick={() => setIsDreamModalOpen(true)}
-            className="w-full max-w-[328px] h-[56px] rounded-lg font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-ink-black/10 bg-[#f9f7f0]/80 hover:bg-white/90 text-ink-black/90 shadow-[0_4px_15px_rgba(0,0,0,0.02)] dark:border-white/10 dark:bg-black/40 dark:hover:bg-white/5 dark:text-white dark:shadow-none"
+            className="w-full max-w-[328px] h-[56px] rounded-none font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-ink-black/10 bg-[#f9f7f0]/80 hover:bg-white/90 text-ink-black/90 shadow-[0_4px_15px_rgba(0,0,0,0.02)] dark:border-white/10 dark:bg-black/40 dark:hover:bg-white/5 dark:text-white dark:shadow-none"
           >
             <Moon className="w-4 h-4 opacity-80" />
             <span>{lang === 'ko' ? '신묘한 꿈해몽' : 'Dream Interpretation'}</span>
@@ -205,7 +205,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm px-4">
           <button
             onClick={() => location.href = '/basic/what-is-saju'}
-            className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-purple-600 dark:hover:text-mythic-gold transition-all flex items-center gap-2 group"
+            className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-ink-black/70 dark:hover:text-white/70 transition-all flex items-center gap-2 group"
           >
             {t.moreInfo}
           </button>
@@ -216,20 +216,20 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
               {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-sans text-ink-black/70 dark:text-white/50 justify-items-center">
-              <a href="/basic/what-is-saju" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가?"}</a>
-              <a href="/basic/what-is-yongshin" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가?"}</a>
-              <a href="/basic/what-is-ilgan" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가?"}</a>
-              <a href="/basic/what-is-sipsin" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가?"}</a>
+              <a href="/basic/what-is-saju" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가?"}</a>
+              <a href="/basic/what-is-yongshin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가?"}</a>
+              <a href="/basic/what-is-ilgan" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가?"}</a>
+              <a href="/basic/what-is-sipsin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가?"}</a>
             </div>
             
             <div className="mt-4 flex flex-col items-center gap-1.5 border-t border-ink-black/5 dark:border-white/5 pt-3 text-[9px] font-sans tracking-wide text-ink-black/50 dark:text-white/40">
               <div>
                 <span>✉️ {lang === "en" ? "Contact: " : "제보 및 문의: "}</span>
-                <a href="mailto:yongshinhalmom@gmail.com" className="underline hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">yongshinhalmom@gmail.com</a>
+                <a href="mailto:yongshinhalmom@gmail.com" className="underline hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">yongshinhalmom@gmail.com</a>
               </div>
               <div>
                 <span>📸 Instagram: </span>
-                <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">@yongshinhalmom.saju</a>
+                <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="underline hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">@yongshinhalmom.saju</a>
               </div>
             </div>
 

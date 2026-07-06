@@ -85,6 +85,9 @@ export const storageService = {
   },
 
   findCachedReport: (data: any, year: number, level: 'simple' | 'detailed'): any | null => {
+    if (data.customQuestion && data.customQuestion.trim()) {
+      return null;
+    }
     const hash = JSON.stringify({
       birthDate: data.birthDate,
       birthTime: data.birthTime,

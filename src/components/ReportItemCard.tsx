@@ -153,7 +153,7 @@ const getSlotClass = (idx: number, title?: string, isLast?: boolean) => {
     }
     switch (idx) {
       case 5: return `${baseSpan} bg-mythic-red/90 text-white`;
-      case 7: return `${baseSpan} bg-mythic-gold/5 border-mythic-gold/20`;
+      case 7: return `${baseSpan} bg-ink-black/5 border-ink-black/20 dark:bg-white/5 dark:border-white/20`;
       default: return `${baseSpan}`;
     }
   }
@@ -166,13 +166,13 @@ const getSlotClass = (idx: number, title?: string, isLast?: boolean) => {
   }
   switch (idx) {
     case 0: return "col-span-12 pb-20"; // Detailed Saju
-    case 1: return "col-span-12 md:col-span-6 border-mythic-gold/20"; // Today's Report
+    case 1: return "col-span-12 md:col-span-6 border-ink-black/20 dark:border-white/20"; // Today's Report
     case 2: return "col-span-12 md:col-span-6 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Overview
     case 3: return "col-span-12 md:col-span-12"; // Monthly (Solar Detail)
     case 4: return "col-span-12 md:col-span-4 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Health
     case 5: return "col-span-12 md:col-span-4 bg-mythic-red/90 text-white"; // Love
     case 6: return "col-span-12 md:col-span-4 bg-ink-black/5 dark:bg-[#1a1a1a]"; // Career
-    case 7: return "col-span-12 bg-mythic-gold/5 border-mythic-gold/20"; // Remedy
+    case 7: return "col-span-12 bg-ink-black/5 border-ink-black/20 dark:bg-white/5 dark:border-white/20"; // Remedy
     case 8: return "col-span-12 bg-white/60 dark:bg-black border-t border-ink-black/10 dark:border-white/10 p-8 md:p-12";
     default: return "col-span-12 md:col-span-6";
   }
@@ -223,7 +223,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
               {parsedFortune.score}점 • {parsedFortune.evaluation}
             </span>
             {parsedFortune.sajuTag && (
-              <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-mythic-gold/15 text-mythic-gold dark:text-mythic-gold border border-mythic-gold/30 uppercase tracking-widest rounded-sm">
+              <span className="inline-block px-2 py-0.5 text-[11px] font-sans font-black bg-ink-black/10 text-ink-black/70 dark:text-white/70 dark:bg-white/10 border border-ink-black/20 dark:border-white/20 uppercase tracking-widest rounded-sm">
                 {parsedFortune.sajuTag}
               </span>
             )}
@@ -239,8 +239,8 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
       {
         title: lang === "ko" ? "오늘 좋은 기운" : "Today's Good Energy",
         content: parsedFortune.goodEnergy,
-        colorClass: "border-mythic-gold/20 hover:border-mythic-gold/40 dark:border-mythic-gold/20 dark:hover:border-mythic-gold/40",
-        titleStyle: "text-mythic-gold dark:text-mythic-gold"
+        colorClass: "border-ink-black/20 hover:border-ink-black/40 dark:border-white/20 dark:hover:border-white/40",
+        titleStyle: "text-ink-black/70 dark:text-white/70"
       },
       {
         title: lang === "ko" ? "오늘의 성공운/재물운" : "Today's Success & Wealth",
@@ -328,7 +328,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             {idx === 0 ? "FREE" : `CHAPTER ${String(idx).padStart(2, "0")}`}
           </div>
           {isRefreshing && (
-            <span className="text-[10px] text-mythic-gold animate-pulse font-sans font-bold tracking-widest">
+            <span className="text-[10px] text-ink-black/70 dark:text-white/70 animate-pulse font-sans font-bold tracking-widest">
               REFRESHING...
             </span>
           )}
@@ -363,7 +363,7 @@ export default function ReportItemCard({ idx, section, isRefreshingDaily, lang =
             <Link
               id="strongest-element-link"
               to={`/element/${elementSlug}`}
-              className="text-[11px] font-sans font-black tracking-[0.2em] text-ink-black/40 dark:text-white/40 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all cursor-pointer flex items-center gap-1"
+              className="text-[11px] font-sans font-black tracking-[0.2em] text-ink-black/40 dark:text-white/40 hover:text-ink-black/70 dark:hover:text-white/70 transition-all cursor-pointer flex items-center gap-1"
             >
               {lang === "en"
                 ? `Characteristics of Strong ${strongest.element} (${elementSlug.toUpperCase()}) Energy >`

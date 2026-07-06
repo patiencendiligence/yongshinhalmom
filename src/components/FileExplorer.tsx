@@ -151,13 +151,13 @@ export function getThemeColors(category?: string, slug?: string): ThemeColors {
         };
       case "earth":
         return {
-          text: "text-mythic-gold dark:text-mythic-gold",
-          border: "border-mythic-gold/50 dark:border-mythic-gold/30",
-          borderMuted: "border-mythic-gold/15 dark:border-mythic-gold/15",
-          bgLight: "bg-mythic-gold/5 dark:bg-mythic-gold/5",
-          badgeText: "text-amber-800 dark:text-mythic-gold",
-          badgeBg: "bg-mythic-gold/10 dark:bg-mythic-gold/20",
-          accentBg: "bg-mythic-gold dark:bg-mythic-gold",
+          text: "text-amber-600 dark:text-amber-500",
+          border: "border-amber-600/50 dark:border-amber-500/30",
+          borderMuted: "border-amber-600/15 dark:border-amber-500/15",
+          bgLight: "bg-amber-600/5 dark:bg-amber-500/5",
+          badgeText: "text-amber-800 dark:text-amber-400",
+          badgeBg: "bg-amber-600/10 dark:bg-amber-500/20",
+          accentBg: "bg-amber-600 dark:bg-amber-500",
           bullet: "⛰️",
           themeName: "Earth"
         };
@@ -188,15 +188,15 @@ export function getThemeColors(category?: string, slug?: string): ThemeColors {
     }
   }
 
-  // Fallback for Saju Basics (Elegant Traditional Golden/Amber Guidance)
+  // Fallback for Saju Basics (Elegant Guidance)
   return {
-    text: "text-mythic-gold dark:text-mythic-gold",
-    border: "border-mythic-gold/50 dark:border-mythic-gold/30",
-    borderMuted: "border-mythic-gold/15 dark:border-mythic-gold/15",
-    bgLight: "bg-mythic-gold/5 dark:bg-mythic-gold/5",
-    badgeText: "text-amber-800 dark:text-mythic-gold",
-    badgeBg: "bg-mythic-gold/10 dark:bg-mythic-gold/20",
-    accentBg: "bg-mythic-gold dark:bg-mythic-gold",
+    text: "text-ink-black/70 dark:text-white/70",
+    border: "border-ink-black/30 dark:border-white/30",
+    borderMuted: "border-ink-black/15 dark:border-white/15",
+    bgLight: "bg-ink-black/5 dark:bg-white/5",
+    badgeText: "text-ink-black/80 dark:text-white/80",
+    badgeBg: "bg-ink-black/10 dark:bg-white/10",
+    accentBg: "bg-ink-black/70 dark:bg-white/70",
     bullet: "✦",
     themeName: "Guidance"
   };
@@ -260,7 +260,7 @@ export default function FileExplorer({
                 <span className="text-ink-black/40 dark:text-white/30 group-hover:text-ink-black/70 dark:group-hover:text-white/60 transition-colors">
                   {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </span>
-                <span className={category.key === "element" ? "text-holo-cyan" : category.key === "dream" ? "text-amber-400 dark:text-amber-300" : "text-mythic-gold"}>
+                <span className={category.key === "element" ? "text-holo-cyan" : category.key === "dream" ? "text-amber-400 dark:text-amber-300" : "text-ink-black/70 dark:text-white/70"}>
                   {isExpanded ? (
                     <FolderOpen className="w-4 h-4" />
                   ) : (

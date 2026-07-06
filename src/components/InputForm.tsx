@@ -8,9 +8,10 @@ interface InputFormProps {
   onSubmit: (data: any) => void;
   initialData?: any;
   lang: Language;
+  onLoadSavedQna?: (result: any, userData: any) => void;
 }
 
-export default function InputForm({ onSubmit, initialData, lang }: InputFormProps) {
+export default function InputForm({ onSubmit, initialData, lang, onLoadSavedQna }: InputFormProps) {
   const t = translations[lang];
   const currentYear = new Date().getFullYear();
   const nextYear = currentYear + 1;
@@ -21,8 +22,24 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
     isLunar: initialData?.isLunar ?? false,
     gender: initialData?.gender || "female",
     birthPlace: initialData?.birthPlace || "",
-    targetYear: initialData?.targetYear || currentYear
+    targetYear: initialData?.targetYear || currentYear,
+    customQuestion: initialData?.customQuestion || ""
   });
+
+  const [isAskingQuestion, setIsAskingQuestion] = useState(!!initialData?.customQuestion);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  const getTodayStr = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const todayStr = getTodayStr();
+  const lastAsked = typeof window !== "undefined" ? localStorage.getItem("yongshin_last_question_asked_date") : null;
+  const hasAskedToday = lastAsked === todayStr;
 
   // Keep form in sync if initialData changes (e.g. after profile selection or error recovery)
   React.useEffect(() => {
@@ -36,23 +53,65 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
         isLunar: initialData.isLunar ?? prev.isLunar,
         gender: initialData.gender ?? prev.gender,
         birthPlace: initialData.birthPlace ?? prev.birthPlace,
-        targetYear: initialData.targetYear ?? prev.targetYear
+        targetYear: initialData.targetYear ?? prev.targetYear,
+        customQuestion: initialData.customQuestion ?? prev.customQuestion
       }));
+      setIsAskingQuestion(!!initialData.customQuestion);
     }
   }, [initialData]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.birthDate || !formData.birthPlace) {
-      alert(t.missingFields);
+  const handleAskQuestionClick = () => {
+    if (hasAskedToday) {
+      setErrorMsg(t.askQuestionLimitExceeded);
+      setIsAskingQuestion(false);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    setIsAskingQuestion(true);
+    setErrorMsg(null);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    if (!formData.birthDate || !formData.birthPlace) {
+      setErrorMsg(t.missingFields);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (isAskingQuestion && hasAskedToday) {
+      setErrorMsg(t.askQuestionLimitExceeded);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (isAskingQuestion && !formData.customQuestion.trim()) {
+      setErrorMsg(lang === "ko" ? "궁금한 질문을 작성해주시게!" : "Please write down your question!");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (isAskingQuestion && formData.customQuestion.trim()) {
+      const todayStr = getTodayStr();
+      localStorage.setItem("yongshin_last_question_asked_date", todayStr);
+    }
+
     onSubmit(formData);
   };
 
   return (
     <div className="bg-white/40 dark:bg-black/40 border border-ink-black/10 dark:border-white/10 p-6 md:p-12 md:p-20 relative overflow-hidden max-w-4xl mx-auto shadow-xl dark:shadow-2xl transition-all duration-300">
       <div className="absolute inset-0 dragon-pattern opacity-10 pointer-events-none" />
+
+      {errorMsg && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 p-4 mb-6 flex justify-between items-center text-xs font-sans tracking-widest uppercase font-bold"
+        >
+          <span>{errorMsg}</span>
+          <button type="button" onClick={() => setErrorMsg(null)} className="font-black hover:opacity-85 ml-4 text-sm cursor-pointer p-1 rounded-none">✕</button>
+        </motion.div>
+      )}
 
       <header className="mb-20 text-center">
         <h2 className="text-4xl md:text-7xl font-serif font-black text-ink-black dark:text-white italic mb-6 leading-none tracking-tighter">
@@ -146,26 +205,93 @@ export default function InputForm({ onSubmit, initialData, lang }: InputFormProp
 
         <div className="space-y-8 sm:space-y-2 pt-4 sm:pt-2">
           <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">{t.selectYear}</label>
-          <div className="flex gap-4">
-            {[
-              { value: currentYear, kr: t.thisYear },
-              { value: nextYear, kr: t.nextYear }
-            ].map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setFormData({ ...formData, targetYear: opt.value })}
-                className={`flex-1 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
-                  formData.targetYear === opt.value 
-                  ? "bg-ink-black text-white border-ink-black dark:bg-white dark:text-black dark:border-white shadow-md dark:shadow-2xl" 
-                  : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
-                }`}
-              >
-                {opt.kr}
-              </button>
-            ))}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-1 gap-4">
+              {[
+                { value: currentYear, kr: t.thisYear },
+                { value: nextYear, kr: t.nextYear }
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => {
+                    setFormData({ ...formData, targetYear: opt.value, customQuestion: "" });
+                    setIsAskingQuestion(false);
+                  }}
+                  className={`flex-1 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
+                    formData.targetYear === opt.value && !isAskingQuestion
+                    ? "bg-ink-black text-white border-ink-black dark:bg-white dark:text-black dark:border-white shadow-md dark:shadow-2xl" 
+                    : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
+                  }`}
+                >
+                  {opt.kr}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={handleAskQuestionClick}
+              className={`flex-1 sm:flex-none sm:px-8 py-5 border transition-all text-[11px] font-black tracking-[0.4em] uppercase ${
+                isAskingQuestion
+                ? "bg-purple-600 text-white border-purple-600 dark:bg-holo-cyan dark:text-black dark:border-holo-cyan shadow-md dark:shadow-2xl"
+                : "bg-transparent text-ink-black/40 dark:text-white/30 border-ink-black/10 dark:border-white/10 hover:border-ink-black/30 dark:hover:border-white/30 hover:text-ink-black dark:hover:text-white"
+              }`}
+            >
+              {t.askQuestionBtn}
+            </button>
           </div>
         </div>
+
+        {isAskingQuestion && (
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-6 md:p-8 bg-purple-500/5 border border-purple-500/20 dark:bg-holo-cyan/5 dark:border-holo-cyan/20 rounded-none space-y-4 relative mt-4"
+          >
+            <div className="absolute top-4 right-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAskingQuestion(false);
+                  setFormData(prev => ({ ...prev, customQuestion: "" }));
+                }}
+                className="text-ink-black/45 dark:text-white/35 hover:text-ink-black dark:hover:text-white transition-colors font-black text-xs"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex gap-4 items-start">
+              <div className="w-10 h-10 shrink-0 bg-purple-600 dark:bg-holo-cyan flex items-center justify-center text-white dark:text-black text-xs font-serif font-black italic rounded-full shadow-md">
+                할멈
+              </div>
+              <div className="space-y-1 flex-1">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-purple-600 dark:text-holo-cyan font-sans font-black">
+                  {t.title}
+                </div>
+                <p className="text-xs sm:text-sm text-ink-black/80 dark:text-white/80 font-sans leading-relaxed">
+                  "{t.askQuestionIntro}"
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <label className="text-[10px] uppercase tracking-[0.4em] text-ink-black/40 dark:text-white/30 font-black italic">
+                {t.askQuestionPlaceholder}
+              </label>
+              <textarea
+                className="w-full bg-white/50 dark:bg-black/50 border border-ink-black/10 dark:border-white/10 p-4 outline-none focus:border-purple-500 dark:focus:border-holo-cyan transition-all font-sans text-sm text-ink-black dark:text-white h-[100px] resize-none"
+                placeholder={lang === "ko" ? "예: 제가 올해 새로운 일이나 이직을 시도해보면 좋을지 조언해주십시오." : "e.g., I wonder if this is a good year for me to start a new business or shift careers."}
+                value={formData.customQuestion}
+                onChange={(e) => setFormData({ ...formData, customQuestion: e.target.value })}
+                maxLength={200}
+              />
+              <div className="text-right text-[10px] text-ink-black/30 dark:text-white/20">
+                {formData.customQuestion.length}/200
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         <button
           type="submit"

@@ -366,7 +366,7 @@ async function tryOpenAI(prompt: string, systemInstruction: string): Promise<str
 // Gemini report API with OpenAI fallback
 app.post("/api/generate-report", async (req, res) => {
   try {
-    const { pillars, zodiac, targetYear, lang, level } = req.body;
+    const { pillars, zodiac, targetYear, lang, level, customQuestion } = req.body;
     if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
 
     const apiKey = getApiKey();
@@ -395,7 +395,7 @@ app.post("/api/generate-report", async (req, res) => {
   ${level === "detailed" ? detailPrintContent : ""}
   `;
 
-  const finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
+  let finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
     .replace(/{{today}}/g, kstToday)
     .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
     .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
@@ -403,6 +403,23 @@ app.post("/api/generate-report", async (req, res) => {
     .replace(/{{timePillar}}/g, pillars.timePillar || "")
     .replace(/{{zodiac}}/g, String(correctZodiacIndex))
     .replace(/{{analysisLevel}}/g, level || "simple").replace(/{{language}}/g, lang || "ko");
+
+  if (customQuestion && customQuestion.trim()) {
+    finalPrompt += `
+    
+    ---
+    [사용자 직접 질문 사항 - 자네가 가장 궁금한 질문]
+    질문 내용: "${customQuestion}"
+    
+    자네는 사용자의 사주 정보(년주: ${pillars.yearPillar}, 월주: ${pillars.monthPillar}, 일주: ${pillars.dayPillar}, 시주: ${pillars.timePillar})와 대운, 오행, 명리, 역학적 기운의 흐름을 바탕으로 위의 질문에 대해 대단히 구체적이고 명확하게 답변해 주어야 하네.
+    
+    사용자가 직접 던진 질문이므로, 반환되는 JSON 데이터의 'sections' 배열의 가장 맨 앞(첫 번째) 요소로 다음 정보의 섹션을 생성해서 추가해 주게나:
+    {
+      "title": "할멈의 명쾌한 답변",
+      "content": "이곳에 자네가 사용자의 사주와 오행, 명리학적 기운을 철저하게 분석하여 사용자의 질문 '${customQuestion}'에 대해 아주 자세하고 정성스럽게 답한 응답 내용을 구수하고 연륜이 묻어나는 할멈의 존댓말 사투리로 작성해 주게. 최소 400자 이상 아주 정밀하고 깊이 있는 통찰을 적어주어야 하네."
+    }
+    `;
+  }
 
   console.log(JSON.stringify(pillars), ":::finalPrompt")
     const prompt = `

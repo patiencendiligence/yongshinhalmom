@@ -58,10 +58,10 @@ export default function PremiumLockBox({
       >
         <div className="mb-8 text-center max-w-md">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <span className="flex items-center gap-2 px-3 py-1 bg-mythic-gold/15 border border-mythic-gold/30 rounded-none text-[10px] font-black text-mythic-gold uppercase tracking-widest text-xs">
+            <span className="flex items-center gap-2 px-3 py-1 bg-purple-600/15 border border-purple-500/30 rounded-none text-[10px] font-black text-purple-600 dark:bg-holo-cyan/15 dark:border-holo-cyan/30 dark:text-holo-cyan uppercase tracking-widest text-xs">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-mythic-gold opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-mythic-gold"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-600 dark:bg-holo-cyan opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-600 dark:bg-holo-cyan"></span>
               </span>
               {lang === "ko" ? "심층 사주 해독 중" : "INTERPRETING DETAILS"}
             </span>

@@ -56,7 +56,7 @@ export default function ChoiceModal({ isOpen, onClose, onChoose, lang }: ChoiceM
             </div>
 
             <div className="absolute top-0 right-0 p-6">
-              <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-all group">
+              <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-none transition-all group">
                 <X className="w-5 h-5 text-white/20 group-hover:text-white transition-all" />
               </button>
             </div>

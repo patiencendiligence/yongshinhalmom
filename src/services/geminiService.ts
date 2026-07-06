@@ -47,6 +47,7 @@ export async function getReport(userData: {
   gender: string;
   birthPlace: string;
   targetYear: number;
+  customQuestion?: string;
 }, lang: Language = "ko", level: 'simple' | 'detailed' = 'simple'): Promise<ReportResult> {
   const manse = getManseRyeok(userData.birthDate, userData.birthTime || "12:00", userData.isLunar || false);
   const pillars = manse ? {
@@ -68,7 +69,8 @@ export async function getReport(userData: {
       zodiac: correctZodiacIndex, 
       targetYear: userData.targetYear, 
       lang, 
-      level
+      level,
+      customQuestion: userData.customQuestion
     })
   });
 

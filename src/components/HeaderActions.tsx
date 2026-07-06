@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Languages, HelpCircle, LogIn, LogOut, Sun, Moon } from "lucide-react";
+import { HelpCircle, LogOut, Sun, Moon, Languages } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { translations, Language } from "../lib/translations";
 import { useTheme } from "../lib/ThemeContext";
@@ -8,80 +8,98 @@ interface HeaderActionsProps {
   lang: Language;
   toggleLang: () => void;
   setIsInfoModalOpen: (open: boolean) => void;
+  onOpenProfiles?: () => void;
 }
 
-export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen }: HeaderActionsProps) {
-  const { user, profile, login, logout } = useAuth();
+export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen, onOpenProfiles }: HeaderActionsProps) {
+  const { user, login, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const t = translations[lang];
 
   return (
-    <div className="fixed top-2 right-2 min-[400px]:top-4 min-[400px]:right-4 z-50 flex flex-row items-center gap-2 min-[400px]:gap-4">
-      {/* Auth State */}
-      <div className="md:flex items-center gap-2">
+    <div className="absolute top-3 right-3 min-[400px]:top-4 min-[400px]:right-4 z-50 flex items-center">
+      <div className="flex items-center bg-[#f9f7f0]/95 dark:bg-[#07080d]/95 border border-ink-black/10 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.3)] backdrop-blur-md rounded-md overflow-hidden h-[34px] min-[400px]:h-[40px]">
+        {/* DATA Link */}
+        <a 
+          href="/basic/what-is-saju" 
+          className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-ink-black/60 dark:text-white/60 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/5 dark:hover:bg-white/5 transition-all duration-200"
+        >
+          DATA
+        </a>
+        
+        <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
+
+        {/* INSIGHTS or LOGIN */}
         {user ? (
-          <div className="flex items-center gap-1.5 min-[400px]:gap-3">
-            <div className="hidden md:flex flex-col items-end">
-              <span className="text-[9px] font-black tracking-widest text-ink-black/40 dark:text-white/40 uppercase leading-none mb-1">Authenticated</span>
-              <span className="text-[10px] text-ink-black/60 dark:text-white/60 font-serif italic whitespace-nowrap overflow-hidden text-ellipsis max-w-[100px] text-right">{user.email}</span>
-            </div>
-            {profile?.isPremium && (
-              <span className="hidden md:flex px-2 py-0.5 bg-ink-black/5 dark:bg-white/5 border border-ink-black/20 dark:border-white/20 rounded-none text-[8px] font-black text-ink-black dark:text-white uppercase tracking-tighter italic">PREMIUM</span>
-            )}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={logout}
-              className="h-[24px] w-[24px] min-[400px]:h-[44px] min-[400px]:w-[44px] flex items-center justify-center bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black/60 dark:text-white/60"
+          <div className="h-full flex items-center">
+            <button
+              onClick={onOpenProfiles || logout}
+              className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-purple-600 dark:text-holo-cyan hover:bg-purple-500/10 dark:hover:bg-holo-cyan/10 transition-all duration-200 relative border-x border-transparent"
+              style={{
+                background: theme === 'dark' 
+                  ? 'linear-gradient(135deg, rgba(0, 242, 255, 0.05), rgba(255, 0, 255, 0.05))' 
+                  : 'rgba(168, 85, 247, 0.08)'
+              }}
+              title={`Logged in as ${user.email}. Click to view profiles.`}
             >
-              <LogOut className="w-3.5 h-3.5 min-[400px]:w-5 min-[400px]:h-5" />
-            </motion.button>
+              INSIGHTS
+            </button>
+            <button 
+              onClick={logout}
+              className="h-full px-1.5 min-[400px]:px-2.5 flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-colors"
+              title="Logout"
+            >
+              <LogOut className="w-3 h-3 min-[400px]:w-3.5 min-[400px]:h-3.5" />
+            </button>
           </div>
         ) : (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={login}
-            className="holo-button h-[24px] min-[400px]:h-[44px] flex items-center gap-1.5 min-[400px]:gap-2 px-3 min-[400px]:px-6 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.2em] min-[400px]:tracking-[0.4em]"
+            className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-ink-black/80 dark:text-white/80 hover:bg-ink-black/5 dark:hover:bg-white/5 transition-all duration-200"
+            style={{
+              background: theme === 'dark' 
+                ? 'transparent' 
+                : 'linear-gradient(135deg, rgba(244, 114, 182, 0.1), rgba(168, 85, 247, 0.1))'
+            }}
           >
-            <LogIn className="w-3.5 h-3.5 min-[400px]:w-4 min-[400px]:h-4" />
-            {t.login}
-          </motion.button>
+            LOGIN
+          </button>
         )}
-      </div>
 
-      {/* Info Toggle */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsInfoModalOpen(true)}
-        className="h-[24px] w-[24px] min-[400px]:h-[44px] min-[400px]:w-[44px] flex items-center justify-center bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all backdrop-blur-md text-ink-black/40 dark:text-white/40"
-      >
-        <HelpCircle className="w-3.5 h-3.5 min-[400px]:w-5 min-[400px]:h-5" />
-      </motion.button>
-      {/* Language / Theme Toggles */}
-      <div className="flex items-center gap-1.5 min-[400px]:gap-2">
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
+
+        {/* Info button (?) */}
+        <button
+          onClick={() => setIsInfoModalOpen(true)}
+          className="h-full px-2.5 min-[400px]:px-3.5 flex items-center justify-center text-ink-black/50 dark:text-white/50 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/5 dark:hover:bg-white/5 transition-all duration-200"
+        >
+          <HelpCircle className="w-3.5 h-3.5 min-[400px]:w-4 min-[400px]:h-4 opacity-75" />
+        </button>
+
+        <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
+
+        {/* Language switcher */}
+        <button
           onClick={toggleLang}
-          className="h-[24px] min-[400px]:h-[44px] flex items-center gap-1.5 min-[400px]:gap-3 px-2 min-[400px]:px-5 bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all backdrop-blur-md"
+          className="h-full px-2 min-[400px]:px-3 flex items-center justify-center gap-1 min-[400px]:gap-1.5 font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.05em] text-ink-black/60 dark:text-white/60 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/5 dark:hover:bg-white/5 transition-all duration-200"
         >
-          <Languages className="w-3.5 h-3.5 min-[400px]:w-5 min-[400px]:h-5 text-ink-black/40 dark:text-white/40" />
-          <span className="text-[8px] min-[400px]:text-[10px] font-black uppercase tracking-widest text-ink-black/80 dark:text-white/80">
-            {lang === "ko" ? "ENG" : "KOR"}
-          </span>
-        </motion.button>
+          <Languages className="w-3 h-3 min-[400px]:w-3.5 min-[400px]:h-3.5 opacity-70" />
+          <span>{lang === "ko" ? "ENG" : "KOR"}</span>
+        </button>
 
-        {/* Theme Toggle */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
+
+        {/* Theme toggle */}
+        <button
           onClick={toggleTheme}
-          className="h-[24px] w-[24px] min-[400px]:h-[44px] min-[400px]:w-[44px] flex items-center justify-center bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 rounded-none hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all backdrop-blur-md text-ink-black/60 dark:text-white/60"
+          className="h-full px-2.5 min-[400px]:px-3.5 flex items-center justify-center text-ink-black/50 dark:text-white/50 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/5 dark:hover:bg-white/5 transition-all duration-200"
         >
-          {theme === 'dark' ? <Sun className="w-3.5 h-3.5 min-[400px]:w-5 min-[400px]:h-5" /> : <Moon className="w-3.5 h-3.5 min-[400px]:w-5 min-[400px]:h-5" />}
-        </motion.button>
+          {theme === 'dark' ? (
+            <Sun className="w-3.5 h-3.5 min-[400px]:w-4 min-[400px]:h-4 text-amber-400" />
+          ) : (
+            <Moon className="w-3.5 h-3.5 min-[400px]:w-4 min-[400px]:h-4 text-indigo-600" />
+          )}
+        </button>
       </div>
     </div>
   );

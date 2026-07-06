@@ -38,6 +38,7 @@ export default function MainApp() {
     handleChoice,
     handleReset,
     handleStart,
+    loadSavedReport,
     handleSelectProfile,
     handleBack,
     handlePurchase,
@@ -57,9 +58,22 @@ export default function MainApp() {
     handleChoice('simple', data);
   };
 
-  const onSelectProfileUpdate = (profile: any, selectedViewMode: "today" | "full") => {
-    setViewMode(selectedViewMode);
-    handleSelectProfile(profile);
+  const onSelectProfileUpdate = (profile: any, selectedViewMode: "today" | "full" | "qna") => {
+    if (selectedViewMode === "qna") {
+      const saved = localStorage.getItem("yongshin_today_custom_question");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setViewMode("full");
+          loadSavedReport(parsed.result, parsed.userData);
+        } catch (e) {
+          console.error("Failed to load saved today's qna in profile selection", e);
+        }
+      }
+    } else {
+      setViewMode(selectedViewMode);
+      handleSelectProfile(profile);
+    }
     setIsProfileModalOpen(false);
   };
 
@@ -120,7 +134,7 @@ export default function MainApp() {
 
               {state === "INPUT" && (
                 <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
-                  <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} />
+                  <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} onLoadSavedQna={loadSavedReport} />
                 </motion.div>
               )}
 
@@ -128,7 +142,6 @@ export default function MainApp() {
 
               {state === "RESULT" && report && (
                 <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
-                  {viewMode === "today" && <div className="yongshin-circle mx-auto"></div>}
                   <ReportResultView 
                       report={report} 
                       viewMode={viewMode}
@@ -168,7 +181,7 @@ export default function MainApp() {
       
       {/* Decorative Ornaments */}
       <div className="fixed top-0 left-0 p-8 pointer-events-none opacity-20 hidden md:block">
-        <div className="writing-mode-vertical-rl text-xs tracking-widest text-mythic-gold uppercase font-serif">
+        <div className="writing-mode-vertical-rl text-xs tracking-widest text-ink-black/40 dark:text-white/40 uppercase font-serif">
           {t.title} · {t.subtitle}
         </div>
       </div>

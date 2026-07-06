@@ -164,9 +164,9 @@ export default function DreamModal({ isOpen, onClose, lang }: DreamModalProps) {
                 <>
                   {/* Guidelines Segment */}
                   <div className="p-6 bg-white/[0.02] border border-white/5 rounded-none space-y-4">
-                    <div className="flex items-center gap-2 text-mythic-gold">
-                      <Scroll className="w-4 h-4 text-[#ffd700]" />
-                      <span className="font-serif italic text-sm text-[#ffd700]">
+                    <div className="flex items-center gap-2 text-white/70">
+                      <Scroll className="w-4 h-4 text-white/70" />
+                      <span className="font-serif italic text-sm text-white/70">
                         {lang === "ko" ? "꿈을 올바르게 풀이하는 법" : "How to properly unfold a dream"}
                       </span>
                     </div>
@@ -176,7 +176,7 @@ export default function DreamModal({ isOpen, onClose, lang }: DreamModalProps) {
                           <p className="font-serif font-black italic text-base text-white/95">
                             "꿈은 대충 들으면 대충밖에 못 푸는 법이라네. 자네가 아래 내용을 한 번에 자세히 적어주면, 내가 꿈속 기운부터 현실과 이어지는 의미까지 차근차근 풀어주겠네."
                           </p>
-                          <div className="pl-2 border-l border-[#ffd700]/30 space-y-3 text-white/75">
+                          <div className="pl-2 border-l border-white/20 space-y-3 text-white/75">
                             <p>
                               <strong className="text-white">🌙 아래 내용을 함께 적어보게.</strong>
                             </p>
@@ -218,7 +218,7 @@ export default function DreamModal({ isOpen, onClose, lang }: DreamModalProps) {
                           <p className="font-serif font-black italic text-base text-white/95">
                             "A poorly told dream can only be poorly solved. If you write down the following details together, I will unfold your dream's energy and its connection to reality."
                           </p>
-                          <div className="pl-2 border-l border-[#ffd700]/30 space-y-3 text-white/75">
+                          <div className="pl-2 border-l border-white/20 space-y-3 text-white/75">
                             <p>
                               <strong className="text-white">🌙 Please include these details:</strong>
                             </p>

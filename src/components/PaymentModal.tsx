@@ -23,7 +23,7 @@ export default function PaymentModal({ isOpen, onClose, lang }: PaymentModalProp
           >
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/[0.02]">
               <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/30 italic">Secure Payment Terminal</span>
-              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-all group">
+              <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-none transition-all group">
                 <X className="w-5 h-5 text-white/40 group-hover:text-white" />
               </button>
             </div>

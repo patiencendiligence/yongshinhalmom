@@ -23,7 +23,7 @@ export default function SuccessView({ lang }: SuccessViewProps) {
         animate={{ scale: 1, opacity: 1 }}
         className="max-w-md w-full p-12 border border-white/10 rounded-2xl bg-neutral-900 shadow-2xl"
       >
-        <div className="flex justify-center mb-8 text-mythic-gold">
+        <div className="flex justify-center mb-8 text-emerald-500">
           <CheckCircle className="w-20 h-20" />
         </div>
         
@@ -45,7 +45,7 @@ export default function SuccessView({ lang }: SuccessViewProps) {
 
         <button
           onClick={handleClose}
-          className="holo-button w-full py-6 bg-white text-black text-[12px] font-black uppercase tracking-[0.5em] transition-all"
+          className="holo-button w-full py-6 bg-white text-black text-[12px] font-black uppercase tracking-[0.5em] transition-all rounded-none"
         >
           {lang === 'ko' ? "이 탭 닫기" : "Close This Tab"}
         </button>

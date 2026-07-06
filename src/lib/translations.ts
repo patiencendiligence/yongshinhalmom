@@ -140,7 +140,11 @@ export const translations = {
       oneTime: "단회성 결제 (구독 없음)",
       disclaimer: "결제 즉시 분석이 시작되며 디지털 콘텐츠 특성상 환불이 불가능합니다."
     },
-    moreInfo: "더 알아보기"
+    moreInfo: "더 알아보기",
+    askQuestionBtn: "궁금한 질문 하기",
+    askQuestionPlaceholder: "자네가 가장 궁금한 질문을 하나 물어보게.",
+    askQuestionLimitExceeded: "에잉, 질문은 하루에 한 번만 할 수 있다네. 내일 다시 오게나!",
+    askQuestionIntro: "할멈이 자네의 사주팔자와 대운, 오행을 기반으로 궁금증을 시원하게 풀어주겠네."
   },
  en: {
   moreInfo: "More info",
@@ -355,5 +359,48 @@ export const translations = {
     "Policies & Terms",
   coffee: "Buy me a coffee",
   copiedShareText: "Please paste it into the medium you want to share it on.",
+  askQuestionBtn: "Ask a Burning Question",
+  askQuestionPlaceholder: "Ask me the question you are most curious about.",
+  askQuestionLimitExceeded: "Hmph, you can only ask one question a day. Come back tomorrow!",
+  askQuestionIntro: "I shall answer your question deeply based on your Saju chart, Daeun, and elements.",
+  policyView: {
+    back: "Go Back",
+    label: "Notice",
+    title: "Yongshin Halmeom Lifestyle Analysis",
+    intro: "Review your personal lifestyle patterns through this report. This service provides general insights based on date-related patterns, helping you reflect on habits, tendencies, and daily routines.",
+    whatYouGet: "Included Contents:",
+    items: [
+      "Personal lifestyle patterns overview",
+      "Habits & productivity insights",
+      "Questions for self-reflection",
+      "General guides for daily life"
+    ],
+    disclaimer: "This report is produced solely for informational and self-reflection purposes. It does not provide any predictions or professional advice.",
+    support: "Customer Support",
+    responseTime: "Response within 24 hours",
+    refundTitle: "Refund Policy",
+    refundText: "Due to the nature of digital products, all sales are final and non-refundable once the report is generated. If technical issues occur, please contact us.",
+    cancelTitle: "Cancellation Policy",
+    cancelText: "This service is a one-time purchase. No subscriptions or recurring payments are included.",
+    legalTitle: "Legal Notice",
+    legalText: "This service may not be available in regions where such content is restricted.",
+    termsTitle: "Terms of Service",
+    termsText: "By purchasing this product, you agree that the content is provided for general informational purposes only and does not constitute financial, medical, or legal advice."
+  },
+  pricingView: {
+    back: "Go Back",
+    label: "Premium Service",
+    title: "View Detailed Report",
+    subtitle: "Analyze your lifestyle patterns deeply.",
+    price: "$0.99 USD",
+    purchase: "Purchase Now",
+    features: [
+      "Personal lifestyle patterns overview",
+      "Habits & productivity insights",
+      "Action guide for self-reflection"
+    ],
+    oneTime: "One-time payment (No subscription)",
+    disclaimer: "Analysis begins immediately upon payment. No refunds are available due to the digital nature of the content."
+  }
 }
 };

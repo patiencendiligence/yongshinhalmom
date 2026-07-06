@@ -169,18 +169,34 @@ export function useReportFlow(
         
         // Safety wrap for caching
         try {
-          storageService.setReportCache({
-            inputHash: JSON.stringify({
-              birthDate: activeData.birthDate,
-              birthTime: activeData.birthTime,
-              isLunar: activeData.isLunar,
-              gender: activeData.gender
-            }),
-            year: year,
-            level: actualLevel,
-            date: new Date().toISOString().split('T')[0],
-            result: result
-          });
+          if (!activeData.customQuestion || !activeData.customQuestion.trim()) {
+            storageService.setReportCache({
+              inputHash: JSON.stringify({
+                birthDate: activeData.birthDate,
+                birthTime: activeData.birthTime,
+                isLunar: activeData.isLunar,
+                gender: activeData.gender
+              }),
+              year: year,
+              level: actualLevel,
+              date: new Date().toISOString().split('T')[0],
+              result: result
+            });
+          } else {
+            // Save today's custom question and result under daily calendar limit
+            const d = new Date();
+            const yearStr = d.getFullYear();
+            const monthStr = String(d.getMonth() + 1).padStart(2, "0");
+            const dayStr = String(d.getDate()).padStart(2, "0");
+            const todayStr = `${yearStr}-${monthStr}-${dayStr}`;
+
+            localStorage.setItem("yongshin_today_custom_question", JSON.stringify({
+              date: todayStr,
+              question: activeData.customQuestion,
+              userData: activeData,
+              result: result
+            }));
+          }
         } catch (e) {
           console.warn("[Flow] Failed to set cache:", e);
         }
@@ -293,6 +309,12 @@ export function useReportFlow(
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");
   }, [user, state, userData, report]);
 
+  const loadSavedReport = (savedReport: any, savedUserData: any) => {
+    setReport(savedReport);
+    setUserData(savedUserData);
+    setState("RESULT");
+  };
+
   return {
     state,
     setState,
@@ -306,6 +328,7 @@ export function useReportFlow(
     handleChoice,
     handleReset,
     handleStart,
+    loadSavedReport,
     handleSelectProfile,
     handleBack,
     handlePurchase,

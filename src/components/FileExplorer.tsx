@@ -83,6 +83,16 @@ export const fileTreeData: CategoryInfo[] = [
   { slug: "jeonggwan", filename: "jeonggwan.md", titleKo: "정관", titleEn: "Jeong-Gwan (Direct Officer)" },
   { slug: "pyeonin", filename: "pyeonin.md", titleKo: "편인", titleEn: "Pyeon-In (Indirect Resource)" },
   { slug: "jeongin", filename: "jeongin.md", titleKo: "정인", titleEn: "Jeong-In (Direct Resource)" }
+  ]},
+  {key: "dream",
+  name: "dream",
+  items: [
+    { slug: "what-is-dream-interpretation", filename: "what-is-dream-interpretation.md", titleKo: "꿈해몽이란 무엇인가?", titleEn: "What is Dream Interpretation?" },
+    { slug: "what-is-lucky-dream", filename: "what-is-lucky-dream.md", titleKo: "길몽(吉夢)이란?", titleEn: "What is a Lucky Dream?" },
+    { slug: "what-is-unlucky-dream", filename: "what-is-unlucky-dream.md", titleKo: "흉몽(凶夢)이란?", titleEn: "What is an Unlucky Dream?" },
+    { slug: "what-is-pregnancy-dream", filename: "what-is-pregnancy-dream.md", titleKo: "태몽(胎夢)이란?", titleEn: "What is a Pregnancy Dream?" },
+    { slug: "what-is-precognitive-dream", filename: "what-is-precognitive-dream.md", titleKo: "예지몽(豫知夢)이란?", titleEn: "What is a Precognitive Dream?" },
+    { slug: "what-is-nightmare", filename: "what-is-nightmare.md", titleKo: "악몽(惡夢)이란?", titleEn: "What is a Nightmare?" },
   ]}
 ];
 
@@ -99,6 +109,20 @@ export interface ThemeColors {
 }
 
 export function getThemeColors(category?: string, slug?: string): ThemeColors {
+  if (category === "dream") {
+    return {
+      text: "text-amber-400 dark:text-amber-300",
+      border: "border-amber-400/50 dark:border-amber-300/30",
+      borderMuted: "border-amber-400/15 dark:border-amber-300/15",
+      bgLight: "bg-amber-400/5 dark:bg-amber-300/5",
+      badgeText: "text-amber-700 dark:text-amber-300",
+      badgeBg: "bg-amber-400/10 dark:bg-amber-300/10",
+      accentBg: "bg-amber-400 dark:bg-amber-300",
+      bullet: "🌙",
+      themeName: "Dream"
+    };
+  }
+
   if (category === "element") {
     switch (slug) {
       case "wood":
@@ -195,6 +219,7 @@ export default function FileExplorer({
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({
     basic: true,
     element: true,
+    dream: true,
   });
 
   const toggleFolder = (key: string) => {
@@ -235,7 +260,7 @@ export default function FileExplorer({
                 <span className="text-ink-black/40 dark:text-white/30 group-hover:text-ink-black/70 dark:group-hover:text-white/60 transition-colors">
                   {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </span>
-                <span className={isElementCat ? "text-holo-cyan" : "text-mythic-gold"}>
+                <span className={category.key === "element" ? "text-holo-cyan" : category.key === "dream" ? "text-amber-400 dark:text-amber-300" : "text-mythic-gold"}>
                   {isExpanded ? (
                     <FolderOpen className="w-4 h-4" />
                   ) : (

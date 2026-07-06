@@ -69,78 +69,87 @@ export default function MainApp() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center bg-cream dark:bg-dark-deep transition-colors duration-300">
-                
+    <div className="min-h-screen w-full relative overflow-hidden flex items-center justify-center bg-[#f3efe0] dark:bg-[#030407] transition-colors duration-300 p-0 sm:p-4">
+     
+      {/* Decorative Blur Background on the sides */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/5 via-transparent to-cyan-500/5 dark:from-purple-950/10 dark:to-cyan-950/10 pointer-events-none" />
 
-      <HeaderActions 
-        lang={lang} 
-        toggleLang={toggleLang} 
-        setIsInfoModalOpen={setIsInfoModalOpen} 
-      />
+     
 
-      <Routes>
-        <Route path="/policies" element={
-          <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
-            <PolicyView onBack={handleBack} lang={lang} />
-          </motion.div>
-        } />
-        
-        <Route path="/pricing" element={
-          <motion.div key="pricing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
-            <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />
-          </motion.div>
-        } />
-        <Route path="/:category/:slug" element={<SeoPage onBack={handleBack} lang={lang} />}/>
-        <Route path="/success" element={<SuccessView lang={lang} />} />
-        <Route path="*" element={
-          <AnimatePresence mode="wait">
-            {state === "LANDING" && (
-              <div key="landing" className="w-full h-full flex flex-col items-center">
-                <Landing 
-                  onStart={handleStart} 
-                  onOpenProfiles={() => setIsProfileModalOpen(true)} 
-                  hasProfiles={profiles.length > 0} 
-                  lang={lang} 
-                />
-                <Link 
-                  to="/policies"
-                  className="mt-8 mb-12 text-[10px] uppercase tracking-[0.5em] font-black pointer-events-auto hover:text-white transition-colors text-white/10 italic font-sans"
-                >
-                  {t.policy}
-                </Link>
-              </div>
-            )}
+      {/* Main Content Area */}
+      <div className="flex-1 w-full h-full relative overflow-y-auto overflow-x-hidden flex flex-col">
+        <HeaderActions 
+          lang={lang} 
+          toggleLang={toggleLang} 
+          setIsInfoModalOpen={setIsInfoModalOpen} 
+          onOpenProfiles={() => setIsProfileModalOpen(true)}
+        />
 
-            {state === "INPUT" && (
-              <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
-                <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} />
-              </motion.div>
-            )}
+        <Routes>
+          <Route path="/policies" element={
+            <motion.div key="policy" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
+              <PolicyView onBack={handleBack} lang={lang} />
+            </motion.div>
+          } />
+          
+          <Route path="/pricing" element={
+            <motion.div key="pricing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full h-full flex flex-col items-center overflow-y-auto">
+              <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />
+            </motion.div>
+          } />
+          <Route path="/:category/:slug" element={<SeoPage onBack={handleBack} lang={lang} />}/>
+          <Route path="/success" element={<SuccessView lang={lang} />} />
+          <Route path="*" element={
+            <AnimatePresence mode="wait">
+              {state === "LANDING" && (
+                <div key="landing" className="w-full h-full flex flex-col items-center">
+                  <Landing 
+                    onStart={handleStart} 
+                    onOpenProfiles={() => setIsProfileModalOpen(true)} 
+                    hasProfiles={profiles.length > 0} 
+                    lang={lang} 
+                  />
+                  <Link 
+                    to="/policies"
+                    className="mt-8 mb-12 text-[10px] uppercase tracking-[0.5em] font-black pointer-events-auto hover:text-white transition-colors text-white/10 italic font-sans"
+                  >
+                    {t.policy}
+                  </Link>
+                </div>
+              )}
 
-            {state === "LOADING" && <LoadingView lang={lang} />}
+              {state === "INPUT" && (
+                <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
+                  <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} />
+                </motion.div>
+              )}
 
-            {state === "RESULT" && report && (
-              <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
-                {viewMode === "today" && <div className="yongshin-circle mx-auto"></div>}
-                <ReportResultView 
-                   report={report} 
-                   viewMode={viewMode}
-                   setViewMode={setViewMode}
-                   onReset={handleResetWithViewMode} 
-                   onUpgrade={() => handleChoice('detailed')}
-                   onOpenPolicy={() => setState("POLICY" as any)} 
-                   onLogin={loginAndPersist}
-                   triggerPayment={triggerPayment}
-                   userData={userData} 
-                   lang={lang} 
-                   isUpgradingDetail={isUpgradingDetail}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        } />
-        
-      </Routes>
+              {state === "LOADING" && <LoadingView lang={lang} />}
+
+              {state === "RESULT" && report && (
+                <motion.div key="result" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="w-full h-full py-12">
+                  {viewMode === "today" && <div className="yongshin-circle mx-auto"></div>}
+                  <ReportResultView 
+                      report={report} 
+                      viewMode={viewMode}
+                      setViewMode={setViewMode}
+                      onReset={handleResetWithViewMode} 
+                      onUpgrade={() => handleChoice('detailed')}
+                      onOpenPolicy={() => setState("POLICY" as any)} 
+                      onLogin={loginAndPersist}
+                      triggerPayment={triggerPayment}
+                      userData={userData} 
+                      lang={lang} 
+                      isUpgradingDetail={isUpgradingDetail}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          } />
+          
+        </Routes>
+      </div>
+
 
       <ProfileModal 
         isOpen={isProfileModalOpen} 

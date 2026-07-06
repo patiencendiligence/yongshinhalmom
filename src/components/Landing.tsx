@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { motion } from "motion/react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Moon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import { faqSchema }from "../utils/sajuUtils.ts";
 import { Language, translations } from "../lib/translations";
+import DreamModal from "./DreamModal";
 
 interface LandingProps {
   onStart: () => void;
@@ -13,6 +15,7 @@ interface LandingProps {
 
 export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: LandingProps) {
   const t = translations[lang];
+  const [isDreamModalOpen, setIsDreamModalOpen] = useState(false);
   
   const websiteSchema = {
     "@context": "https://schema.org",
@@ -56,7 +59,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center px-4 relative overflow-hidden bg-cream text-ink-black dark:bg-dark-deep dark:text-white bg-paper-pattern transition-colors duration-300">
+    <div className="flex flex-col items-center justify-start min-h-full w-full text-center px-4 pt-16 pb-12 relative overflow-y-auto overflow-x-hidden bg-transparent text-ink-black dark:text-white transition-colors duration-300">
       <Helmet>
         <title>{lang === "en" ? "Yongshin Halmeom - Korean Saju Report & Today's Fortune" : "용신할멈 - 사주명리 & 오늘의 운세"}</title>
         <meta name="description" content={lang === "en" ? 
@@ -94,118 +97,151 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         </script>
       </Helmet>
       
-      {/* Decorative Accents */}
+      {/* Grid of plus signs background */}
+      <div 
+        className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-[0.07] text-ink-black dark:text-white" 
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='50' height='50' viewBox='0 0 50 50' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 25h2M25 24v2' stroke='currentColor' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+        }} 
+      />
+
+      {/* Dynamic Ambient Blur Accent */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
         <motion.div 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.05 }}
-          className="absolute -top-20 -left-20 w-[60vw] h-[60vw] rounded-full bg-indigo-900/10 blur-[120px] dark:bg-indigo-300/5" 
+          animate={{ opacity: 0.08 }}
+          className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80vw] h-[80vw] rounded-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 blur-[140px] dark:opacity-10" 
         />
       </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 5 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="relative z-20 mb-8"
-      >
-        <div className="inline-block px-4 py-1 border border-ink-black/10 dark:border-white/10 rounded-none bg-ink-black/5 dark:bg-white/5 backdrop-blur-sm">
-          <span className="text-[9px] font-sans font-black tracking-[0.5em] uppercase text-ink-black/60 dark:text-white/40 italic">{t.traditionalWisdom}</span>
-        </div>
-      </motion.div>
+      <div className="relative z-10 max-w-md w-full flex flex-col items-center">
+        
+        {/* Category Header: Saju Analysis */}
+        <motion.div
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="relative z-20 mb-4"
+        >
+          <span className="text-[12px] min-[400px]:text-[14px] font-sans font-black tracking-[0.5em] uppercase text-ink-black/40 dark:text-white/40 italic">
+            Saju Analysis
+          </span>
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="relative z-10"
-      >
-        <h1 className="flex flex-col items-center mb-12">
-          <span className="text-[11px] font-sans font-black tracking-[0.8em] uppercase text-ink-black dark:text-white mb-6 opacity-80">{t.ancientOracle}</span>
-          <div className="flex flex-col items-center">
-            <span className="text-6xl md:text-8xl lg:text-[7rem] font-serif font-black italic tracking-tighter leading-[1.15] py-6 px-4 block overflow-visible gradient-title">
+        {/* Brand Main Heading Area */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.3 }}
+          className="relative z-10 mb-8"
+        >
+          <h1 className="flex flex-col items-center">
+            {/* Primary Calligraphy Title */}
+            <span className="text-6xl min-[400px]:text-7xl md:text-8xl font-serif font-black italic tracking-tighter leading-none py-4 px-2 block overflow-visible gradient-title filter drop-shadow-[0_2px_12px_rgba(244,114,182,0.15)] dark:drop-shadow-[0_2px_16px_rgba(0,242,255,0.12)]">
               {t.title}
             </span>
-            <span className="text-2xl md:text-3xl font-serif text-ink-black/40 dark:text-white/20 italic tracking-[0.4em] mt-4 uppercase">
-              {t.grandmother}
+            {/* Sub-Brand Romanization */}
+            <span className="text-[12px] min-[400px]:text-[15px] font-serif font-medium text-ink-black/50 dark:text-white/30 italic tracking-[0.65em] mt-3 uppercase">
+              S C A R Y &nbsp; G R A N D M A
             </span>
-          </div>
-        </h1>
-      </motion.div>
+          </h1>
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.2 }}
-        className="max-w-xl mx-auto mb-16 relative z-10"
-      >
-        <p className="text-ink-black/70 dark:text-white/60 text-sm md:text-base font-sans leading-relaxed tracking-tight max-w-sm">
-          {t.landingQuote}
-        </p>
-      </motion.div>
+        {/* Grandma Quote */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+          className="max-w-xs min-[400px]:max-w-sm mx-auto mb-12 relative z-10"
+        >
+          <p className="text-ink-black/80 dark:text-white/70 text-[12px] min-[400px]:text-sm font-sans leading-relaxed tracking-tight whitespace-pre-line">
+            {t.landingQuote}
+          </p>
+        </motion.div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className="flex flex-col items-center gap-10 relative z-20 mb-10"
-      >
-        <div className="flex flex-col md:flex-row gap-6">
+        {/* Primary Interactive Actions - Stacked with identical sizing */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="flex flex-col items-center gap-4 relative z-20 w-full px-4"
+        >
+          {/* Button 1: See For Yourself */}
           <button
             onClick={onStart}
-            className="holo-button group px-16 py-5 min-w-[280px] bg-ink-black text-white dark:bg-transparent dark:text-white/90 font-sans font-black text-[11px] uppercase tracking-[0.5em] flex items-center justify-center gap-4 transition-all hover:opacity-90"
+            className="w-full max-w-[328px] h-[56px] rounded-lg font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-pink-200/40 bg-gradient-to-r from-pink-100/40 via-purple-50/30 to-cyan-100/40 text-ink-black/90 hover:opacity-95 shadow-[0_4px_20px_rgba(244,114,182,0.06)] dark:border-white/10 dark:from-[rgba(0,242,255,0.12)] dark:via-[rgba(157,0,255,0.12)] dark:to-[rgba(255,0,255,0.12)] dark:text-white dark:shadow-[0_0_20px_rgba(157,0,255,0.1)] dark:hover:shadow-[0_0_25px_rgba(157,0,255,0.18)]"
           >
-            {t.enterOracle} <Sparkles className="w-3.5 h-3.5" />
+            <svg className="w-4 h-4 shrink-0 opacity-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 21l7-7" />
+              <path d="M5 17l4-4" />
+              <path d="M7 19l4-4" />
+              <path d="M15 4l1.5 3.5L20 9l-3.5 1.5L15 14l-1.5-3.5L10 9l3.5-1.5z" />
+            </svg>
+            <span>{t.enterOracle}</span>
+            <Sparkles className="w-3.5 h-3.5 opacity-80" />
           </button>
 
+          {/* Button 2: Mysterious Dream Interpretation */}
+          <button
+            onClick={() => setIsDreamModalOpen(true)}
+            className="w-full max-w-[328px] h-[56px] rounded-lg font-sans font-black text-[12px] uppercase tracking-[0.4em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] border border-ink-black/10 bg-[#f9f7f0]/80 hover:bg-white/90 text-ink-black/90 shadow-[0_4px_15px_rgba(0,0,0,0.02)] dark:border-white/10 dark:bg-black/40 dark:hover:bg-white/5 dark:text-white dark:shadow-none"
+          >
+            <Moon className="w-4 h-4 opacity-80" />
+            <span>{lang === 'ko' ? '신묘한 꿈해몽' : 'Dream Interpretation'}</span>
+          </button>
+
+          {/* Low-profile Profiles Trigger Button if existing profiles are found */}
           {hasProfiles && (
             <button
               onClick={onOpenProfiles}
-              className="px-10 py-5 border border-ink-black/20 dark:border-white/10 bg-transparent text-ink-black/60 dark:text-white/50 font-sans font-black text-[10px] uppercase tracking-[0.5em] transition-all hover:text-ink-black hover:border-ink-black/40 dark:hover:text-white dark:hover:border-white/30"
+              className="mt-2 text-[10px] font-sans font-bold uppercase tracking-[0.3em] text-ink-black/40 dark:text-white/40 hover:text-ink-black dark:hover:text-white transition-all underline decoration-dotted underline-offset-4"
             >
               {t.loadProfiles}
             </button>
           )}
+        </motion.div>
+
+        <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm px-4">
+          <button
+            onClick={() => location.href = '/basic/what-is-saju'}
+            className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-purple-600 dark:hover:text-mythic-gold transition-all flex items-center gap-2 group"
+          >
+            {t.moreInfo}
+          </button>
+
+          {/* Beautiful, traditional, semantic footer for SEO and internal link crawling */}
+          <footer className="mt-8 pt-6 border-t border-ink-black/10 dark:border-white/10 w-full text-left opacity-80 z-10">
+            <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-ink-black/50 dark:text-white/40 mb-3 text-center">
+              {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
+            </h2>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-sans text-ink-black/70 dark:text-white/50 justify-items-center">
+              <a href="/basic/what-is-saju" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가?"}</a>
+              <a href="/basic/what-is-yongshin" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가?"}</a>
+              <a href="/basic/what-is-ilgan" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가?"}</a>
+              <a href="/basic/what-is-sipsin" className="hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가?"}</a>
+            </div>
+            
+            <div className="mt-4 flex flex-col items-center gap-1.5 border-t border-ink-black/5 dark:border-white/5 pt-3 text-[9px] font-sans tracking-wide text-ink-black/50 dark:text-white/40">
+              <div>
+                <span>✉️ {lang === "en" ? "Contact: " : "제보 및 문의: "}</span>
+                <a href="mailto:yongshinhalmom@gmail.com" className="underline hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">yongshinhalmom@gmail.com</a>
+              </div>
+              <div>
+                <span>📸 Instagram: </span>
+                <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="underline hover:text-purple-600 dark:hover:text-mythic-gold transition-colors">@yongshinhalmom.saju</a>
+              </div>
+            </div>
+
+            <p className="mt-6 text-[9px] text-ink-black/40 dark:text-white/30 leading-relaxed text-center font-sans tracking-wide">
+              {lang === "en" 
+                ? "Yongshin Halmeom © All traditional Saju analysis, fortune guides, and element characters are calculated based on orthodox Eastern astrology."
+                : "용신할멈 © 용한 신점 수준의 사주 대운, 세운 흐름 분석과 정밀한 만세력 기운 계산은 정통 동양 사주 명리학 이론을 바탕으로 작동합니다."}
+            </p>
+          </footer>
         </div>
-      </motion.div>
-       <div className="flex flex-col items-center gap-8 mt-10 w-full max-w-lg">
-        <button
-          onClick={ () => location.href ='/basic/what-is-saju'}
-          className="text-[10px] font-sans font-black uppercase tracking-[0.5em] text-ink-black/70 dark:text-white/60 hover:text-mythic-gold dark:hover:text-mythic-gold transition-all flex items-center gap-4 group"
-        >
-          {t.moreInfo}
-        </button>
-
-        {/* Beautiful, traditional, semantic footer for SEO and internal link crawling */}
-        <footer className="mt-12 pt-8 border-t border-ink-black/10 dark:border-white/10 w-full text-left px-2 opacity-80 z-10">
-          <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-ink-black/60 dark:text-white/40 mb-4">
-            {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
-          </h2>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-2 text-[11px] font-sans text-ink-black/80 dark:text-white/60">
-            <a href="/basic/what-is-saju" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가? (무료 사주)"}</a>
-            <a href="/basic/what-is-yongshin" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가? (용신 찾기)"}</a>
-            <a href="/basic/what-is-ilgan" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가? (오행 분석)"}</a>
-            <a href="/basic/what-is-sipsin" className="hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가? (사주 GPT)"}</a>
-          </div>
-          
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-ink-black/5 dark:border-white/5 pt-4 text-[10px] font-sans tracking-wider text-ink-black/60 dark:text-white/40">
-            <div>
-              <span>✉️ {lang === "en" ? "Contact: " : "제보 및 문의: "}</span>
-              <a href="mailto:yongshinhalmom@gmail.com" className="underline hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">yongshinhalmom@gmail.com</a>
-            </div>
-            <div>
-              <span>📸 Instagram: </span>
-              <a href="https://www.instagram.com/yongshinhalmom.saju" target="_blank" rel="noopener noreferrer" className="underline hover:text-mythic-gold dark:hover:text-mythic-gold transition-colors">@yongshinhalmom.saju</a>
-            </div>
-          </div>
-
-          <p className="mt-8 text-[10px] text-ink-black/50 dark:text-white/30 leading-relaxed text-center font-sans tracking-wide">
-            {lang === "en" 
-              ? "Yongshin Halmeom © All traditional Saju analysis, fortune guides, and element characters are calculated based on orthodox Eastern astrology."
-              : "용신할멈 © 용한 신점 수준의 사주 대운, 세운 흐름 분석과 정밀한 만세력 기운 계산은 정통 동양 사주 명리학 이론을 바탕으로 작동합니다."}
-          </p>
-        </footer>
       </div>
+      <DreamModal isOpen={isDreamModalOpen} onClose={() => setIsDreamModalOpen(false)} lang={lang} />
     </div>
   );
 }

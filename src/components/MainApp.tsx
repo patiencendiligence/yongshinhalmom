@@ -47,9 +47,18 @@ export default function MainApp() {
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isLoadPromptOpen, setIsLoadPromptOpen] = useState(false);
   const [viewMode, setViewMode] = useState<"today" | "full">("full");
 
   const t = translations[lang];
+
+  const onStartClick = () => {
+    if (profiles.length > 0) {
+      setIsLoadPromptOpen(true);
+    } else {
+      handleStart();
+    }
+  };
 
   const handleSubmit = (data: any) => {
     setViewMode("full");
@@ -118,7 +127,7 @@ export default function MainApp() {
               {state === "LANDING" && (
                 <div key="landing" className="w-full h-full flex flex-col items-center">
                   <Landing 
-                    onStart={handleStart} 
+                    onStart={onStartClick} 
                     onOpenProfiles={() => setIsProfileModalOpen(true)} 
                     hasProfiles={profiles.length > 0} 
                     lang={lang} 
@@ -178,6 +187,63 @@ export default function MainApp() {
         onClose={() => setIsInfoModalOpen(false)} 
         lang={lang} 
       />
+
+      {/* Stored Profile Loading Choice Prompt */}
+      <AnimatePresence>
+        {isLoadPromptOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="w-full max-w-sm bg-[#faf8f5] dark:bg-[#0c0d12] border border-ink-black/20 dark:border-white/10 p-6 md:p-8 text-center relative overflow-hidden shadow-2xl"
+            >
+              {/* Decorative Corner Borders */}
+              <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-ink-black/40 dark:border-white/30" />
+              <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-ink-black/40 dark:border-white/30" />
+              <div className="absolute bottom-0 left-0 w-2 h-2 border-b border-l border-ink-black/40 dark:border-white/30" />
+              <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-ink-black/40 dark:border-white/30" />
+
+              <h3 className="font-serif font-black italic text-lg text-ink-black dark:text-white mb-3 flex items-center justify-center gap-1.5">
+                🔮 {(t as any).loadSavedPromptTitle}
+              </h3>
+              
+              <p className="text-xs min-[400px]:text-sm text-ink-black/70 dark:text-white/70 font-sans leading-relaxed mb-6 whitespace-pre-line">
+                {(t as any).loadSavedPromptDesc}
+              </p>
+
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => {
+                    setIsLoadPromptOpen(false);
+                    setIsProfileModalOpen(true);
+                  }}
+                  className="w-full h-11 border border-ink-black/20 bg-[#f4f1ea] text-ink-black/90 hover:bg-[#eae7e0] dark:bg-[#14151a] dark:border-white/20 dark:text-white dark:hover:bg-white/5 font-sans font-black text-xs uppercase tracking-widest transition-all"
+                >
+                  {(t as any).btnLoadSaved}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    setIsLoadPromptOpen(false);
+                    handleStart();
+                  }}
+                  className="w-full h-11 border border-ink-black bg-ink-black text-white hover:bg-ink-black/95 dark:bg-white dark:text-black dark:hover:bg-white/95 dark:border-white font-sans font-black text-xs uppercase tracking-widest transition-all"
+                >
+                  {(t as any).btnInputNew}
+                </button>
+                
+                <button
+                  onClick={() => setIsLoadPromptOpen(false)}
+                  className="mt-2 text-[10px] font-sans font-bold uppercase tracking-wider text-ink-black/40 dark:text-white/40 hover:text-ink-black dark:hover:text-white transition-all underline decoration-dotted"
+                >
+                  {lang === "ko" ? "닫기" : "Close"}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
       
       {/* Decorative Ornaments */}
       <div className="fixed top-0 left-0 p-8 pointer-events-none opacity-20 hidden md:block">

@@ -159,7 +159,7 @@ export default function DreamModal({ isOpen, onClose, lang }: DreamModalProps) {
             </div>
 
             {/* Scrollable Content Container */}
-            <div className="p-6 md:p-8 space-y-6 max-h-[70vh] overflow-y-auto no-scrollbar relative z-10">
+            <div className="p-2 md:p-2 space-y-6 max-h-[70vh] overflow-y-auto no-scrollbar relative z-10">
               {!result ? (
                 <>
                   {/* Guidelines Segment */}

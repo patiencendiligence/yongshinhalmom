@@ -148,7 +148,8 @@ export default function SeoPage({
 }) {
   const { category, slug } = useParams();
 
-  const [content, setContent] = useState("용신할멈 무료 사주 및 오늘의 운세 서비스\n👵 용신할멈이 알려주는 나만의 사주팔자와 오늘의 정교한 기운 가이드. 무료 오늘의 운세 및 명리학 보고서를 상세하게 분석해 드립니다.\n사주 기초, 음양오행, 천간지지, 일주론, 십성 풀이까지 사주 명리학의 모든 지혜를 알기 쉽게 해설하고, 나에게 꼭 맞는 수호용신(用神)을 찾아내 삶의 균형을 잡아줍니다.\n오늘의 바이오리듬과 기운 변화에 맞는 행운의 색상, 추천 음식, 추천 처방 아이템을 매일 실시간으로 점검해 드립니다.");
+  const [content, setContent] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [seoTitle, setSeoTitle] = useState("용신할멈 | YongshinHalmom");
   const [seoDesc, setSeoDesc] = useState("용신할멈의 사주명리 분석, 일주 해석, 오행 분석, 용신 풀이");
   const [isMobileExplorerOpen, setIsMobileExplorerOpen] = useState(false);
@@ -182,6 +183,7 @@ export default function SeoPage({
   };
 
   useEffect(() => {
+    setIsLoading(true);
     let path = `../data/${category}/${slug}.md`;
     if (lang === "en") {
       const enPath = `../data/${category}/${slug}-en.md`;
@@ -194,6 +196,7 @@ export default function SeoPage({
 
     if (!loader) {
       setContent(lang === "en" ? "# Document not found" : "# 없는 문서라네");
+      setIsLoading(false);
       return;
     }
 
@@ -213,6 +216,9 @@ export default function SeoPage({
 
       setSeoTitle(pageTitle);
       setSeoDesc(pageDesc);
+      setIsLoading(false);
+    }).catch(() => {
+      setIsLoading(false);
     });
     // Scroll back to top whenever active document page shifts
     window.scrollTo(0, 0);
@@ -279,7 +285,7 @@ export default function SeoPage({
       
         </Helmet>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
-      <div className="flex items-start justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
+      <div className="flex items-end justify-between gap-4 mt-12 mb-8 pb-4 border-b border-ink-black/10 dark:border-white/10">
         <motion.button
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
@@ -293,7 +299,7 @@ export default function SeoPage({
         {/* Mobile Explorer Drawer Trigger */}
         <button
           onClick={() => setIsMobileExplorerOpen(true)}
-          className={`lg:hidden flex items-center gap-2 px-3.5 py-2 rounded-lg bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 text-xs font-sans font-bold hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black dark:text-white`}
+          className={`lg:hidden flex items-center gap-2 px-3.5 py-2  bg-ink-black/5 dark:bg-white/5 border border-ink-black/10 dark:border-white/10 text-xs font-sans font-bold hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all text-ink-black dark:text-white`}
         >
           <Menu className="w-4 h-4 shrink-0" />
           <span>{explorerLabel}</span>
@@ -313,81 +319,106 @@ export default function SeoPage({
 
         {/* Markdown Content Viewer */}
         <article className="prose prose-lg max-w-none text-ink-black/90 dark:text-white/95 leading-relaxed">
-          <ReactMarkdown
-            components={{
-              h1: ({ children }) => (
-                <>
-                  {category === "element" && (
-                    <div 
-                      className="w-full max-w-[465px] aspect-[465/384] mb-8 overflow-hidden rounded-xl border border-ink-black/10 dark:border-white/10 relative shadow-sm hover:shadow-md transition-shadow duration-300 bg-cream/30 dark:bg-zinc-900/30"
-                    >
-                      <div 
-                        role="img"
-                        aria-label={`용신할멈 AI 사주명리 오행 분석 - ${slug} (${theme.themeName}) 상징 일러스트`}
-                        className="absolute inset-0 select-none pointer-events-none"
-                        style={{
-                          backgroundImage: "url('/assets/o-hang.png')",
-                          backgroundSize: "300% 200%",
-                          backgroundPosition: getOHangBackgroundPosition(slug || ""),
-                          backgroundRepeat: "no-repeat"
-                        }}
-                      />
-                    </div>
-                  )}
-                  <h1 className={`text-3xl sm:text-4xl font-serif font-black mb-8 ${theme.text} tracking-tight border-b ${theme.borderMuted} pb-4`}>
-                    {children}
-                  </h1>
-                </>
-              ),
-
-              h2: ({ children }) => (
-                <h2 className="text-2xl font-serif font-bold mt-12 mb-5 text-ink-black dark:text-white tracking-tight flex items-center gap-3">
-                  <span className={`w-1.5 h-6 ${theme.accentBg} rounded-full inline-block shrink-0`} />
-                  {children}
-                </h2>
-              ),
-
-              h3: ({ children }) => (
-                <h3 className={`text-xl font-sans font-bold mt-8 mb-4 text-ink-black/90 dark:text-white/90`}>
-                  {children}
-                </h3>
-              ),
-
-              p: ({ children }) => (
-                <p className="leading-8 mb-6 text-ink-black/80 dark:text-white/80 font-sans">
-                  {children}
-                </p>
-              ),
-
-              ul: ({ children }) => (
-                <ul className="list-none pl-1 space-y-3 mb-6">
-                  {children}
-                </ul>
-              ),
-
-              li: ({ children }) => (
-                <li className="flex gap-2.5 items-start text-ink-black/80 dark:text-white/80 text-sm sm:text-base">
-                  <span className={`w-1.5 h-1.5 ${theme.accentBg} rounded-full inline-block shrink-0 mt-2`} />
-                  <span className="leading-relaxed text-left">{children}</span>
-                </li>
-              ),
-
-              blockquote: ({ children }) => (
-                <blockquote className={`border-l-4 ${theme.border} pl-5 pr-4 py-4 italic my-8 ${theme.bgLight} rounded-r-xl text-ink-black/75 dark:text-white/75 relative overflow-hidden font-editorial`}>
-                  <div className="absolute top-0 right-0 p-2 text-4xl opacity-10 dark:opacity-15 font-black select-none pointer-events-none">
-                    👵
-                  </div>
-                  {children}
-                </blockquote>
-              ),
+          {isLoading ? (
+            <div className="space-y-6 animate-pulse mt-4">
+              {/* 타이틀 스켈레톤 */}
+              <div className="h-10 w-3/4 bg-ink-black/10 dark:bg-white/10 rounded-xs" />
+              <div className="h-[1px] w-full bg-ink-black/10 dark:bg-white/10 mb-8" />
               
-              hr: () => (
-                <hr className={`my-10 ${theme.borderMuted}`} />
-              )
-            }}
-          >
-            {content}
-          </ReactMarkdown>
+              {/* 본문 블록 스켈레톤 */}
+              <div className="space-y-4">
+                <div className="h-4 w-full bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+                <div className="h-4 w-11/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+                <div className="h-4 w-4/5 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+                <div className="h-4 w-5/6 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+              </div>
+
+              {/* 블록쿼트 형태의 스켈레톤 */}
+              <div className="h-32 w-full bg-ink-black/[0.02] dark:bg-white/[0.01] border border-ink-black/5 dark:border-white/5 rounded-xl p-5 mt-8" />
+
+              <div className="space-y-4 pt-6">
+                <div className="h-4 w-11/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+                <div className="h-4 w-10/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+                <div className="h-4 w-4/5 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
+              </div>
+            </div>
+          ) : (
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => (
+                  <>
+                    {category === "element" && (
+                      <div 
+                        className="w-full max-w-[465px] aspect-[465/384] mb-8 overflow-hidden rounded-xl border border-ink-black/10 dark:border-white/10 relative shadow-sm hover:shadow-md transition-shadow duration-300 bg-cream/30 dark:bg-zinc-900/30"
+                      >
+                        <div 
+                          role="img"
+                          aria-label={`용신할멈 AI 사주명리 오행 분석 - ${slug} (${theme.themeName}) 상징 일러스트`}
+                          className="absolute inset-0 select-none pointer-events-none"
+                          style={{
+                            backgroundImage: "url('/assets/o-hang.png')",
+                            backgroundSize: "300% 200%",
+                            backgroundPosition: getOHangBackgroundPosition(slug || ""),
+                            backgroundRepeat: "no-repeat"
+                          }}
+                        />
+                      </div>
+                    )}
+                    <h1 className={`text-3xl sm:text-4xl font-serif font-black mb-8 ${theme.text} tracking-tight border-b ${theme.borderMuted} pb-4`}>
+                      {children}
+                    </h1>
+                  </>
+                ),
+
+                h2: ({ children }) => (
+                  <h2 className="text-2xl font-serif font-bold mt-12 mb-5 text-ink-black dark:text-white tracking-tight flex items-center gap-3">
+                    <span className={`w-1.5 h-6 ${theme.accentBg} rounded-full inline-block shrink-0`} />
+                    {children}
+                  </h2>
+                ),
+
+                h3: ({ children }) => (
+                  <h3 className={`text-xl font-sans font-bold mt-8 mb-4 text-ink-black/90 dark:text-white/90`}>
+                    {children}
+                  </h3>
+                ),
+
+                p: ({ children }) => (
+                  <p className="leading-8 mb-6 text-ink-black/80 dark:text-white/80 font-sans">
+                    {children}
+                  </p>
+                ),
+
+                ul: ({ children }) => (
+                  <ul className="list-none pl-1 space-y-3 mb-6">
+                    {children}
+                  </ul>
+                ),
+
+                li: ({ children }) => (
+                  <li className="flex gap-2.5 items-start text-ink-black/80 dark:text-white/80 text-sm sm:text-base">
+                    <span className={`w-1.5 h-1.5 ${theme.accentBg} rounded-full inline-block shrink-0 mt-2`} />
+                    <span className="leading-relaxed text-left">{children}</span>
+                  </li>
+                ),
+
+                blockquote: ({ children }) => (
+                  <blockquote className={`border-l-4 ${theme.border} pl-5 pr-4 py-4 italic my-8 ${theme.bgLight} rounded-r-xl text-ink-black/75 dark:text-white/75 relative overflow-hidden font-editorial`}>
+                    <div className="absolute top-0 right-0 p-2 text-4xl opacity-10 dark:opacity-15 font-black select-none pointer-events-none">
+                      👵
+                    </div>
+                    {children}
+                  </blockquote>
+                ),
+                
+                hr: () => (
+                  <hr className={`my-10 ${theme.borderMuted}`} />
+                )
+              }}
+            >
+              {content}
+            </ReactMarkdown>
+          )}
 
           {/* Related Posts Section for Internal Link Strength (SEO) */}
           <div className={`mt-16 pt-12 border-t ${theme.borderMuted}`}>
@@ -414,7 +445,7 @@ export default function SeoPage({
                   <Link
                     key={`${related.category}-${related.slug}`}
                     to={pathUrl}
-                    className={`block p-5 rounded-xl border border-ink-black/10 dark:border-white/10 hover:border-ink-black/20 dark:hover:border-white/20 hover:scale-[1.01] transition-all bg-white/45 dark:bg-zinc-900/40 hover:bg-white/85 dark:hover:bg-zinc-900/60 shadow-sm group`}
+                    className={`block p-5 border border-ink-black/10 dark:border-white/10 hover:border-ink-black/20 dark:hover:border-white/20 hover:scale-[1.01] transition-all bg-white/45 dark:bg-zinc-900/40 hover:bg-white/85 dark:hover:bg-zinc-900/60 shadow-sm group`}
                   >
                     <div className="flex items-center justify-between gap-1 mb-2">
                       <span className={`text-[10px] font-sans font-black tracking-widest uppercase ${relatedTheme.text}`}>
@@ -462,7 +493,7 @@ export default function SeoPage({
                 </span>
                 <button
                   onClick={() => setIsMobileExplorerOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-ink-black/5 dark:hover:bg-white/5 transition-colors text-ink-black/50 dark:text-white/40 hover:text-ink-black dark:hover:text-white"
+                  className="p-1.5  hover:bg-ink-black/5 dark:hover:bg-white/5 transition-colors text-ink-black/50 dark:text-white/40 hover:text-ink-black dark:hover:text-white"
                 >
                   <X className="w-5 h-5" />
                 </button>

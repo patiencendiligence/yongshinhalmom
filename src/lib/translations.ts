@@ -144,7 +144,11 @@ export const translations = {
     askQuestionBtn: "궁금한 질문 하기",
     askQuestionPlaceholder: "자네가 가장 궁금한 질문을 하나 물어보게.",
     askQuestionLimitExceeded: "에잉, 질문은 하루에 한 번만 할 수 있다네. 내일 다시 오게나!",
-    askQuestionIntro: "할멈이 자네의 사주팔자와 대운, 오행을 기반으로 궁금증을 시원하게 풀어주겠네."
+    askQuestionIntro: "할멈이 자네의 사주팔자와 대운, 오행을 기반으로 궁금증을 시원하게 풀어주겠네.",
+    loadSavedPromptTitle: "저장된 사주 정보가 있구나",
+    loadSavedPromptDesc: "기존에 저장된 사주 정보를 불러와서 분석해 볼 테냐, 아니면 새로 입력하겠느냐?",
+    btnLoadSaved: "저장된 기록 불러오기",
+    btnInputNew: "새로 입력하기"
   },
  en: {
   moreInfo: "More info",
@@ -401,6 +405,10 @@ export const translations = {
     ],
     oneTime: "One-time payment (No subscription)",
     disclaimer: "Analysis begins immediately upon payment. No refunds are available due to the digital nature of the content."
-  }
+  },
+  loadSavedPromptTitle: "Saved Profile Found",
+  loadSavedPromptDesc: "Would you like to load your saved profile to read your fortune, or enter new details?",
+  btnLoadSaved: "Load Stored Profile",
+  btnInputNew: "Enter New Details"
 }
 };

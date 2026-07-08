@@ -116,7 +116,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                                 e.stopPropagation();
                                 onSelect(profile, "qna");
                               }}
-                              className="w-full py-4 px-4 text-xs font-sans font-black uppercase tracking-widest text-center bg-purple-600 hover:bg-purple-500 text-white border border-purple-600 dark:bg-transparent dark:hover:bg-white/10 dark:text-holo-cyan dark:border-holo-cyan hover:scale-102 transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
+                              className="w-full py-4 px-4 text-xs font-sans font-black uppercase tracking-widest text-center border border-ink-black/20 bg-[#f4f1ea] text-ink-black/90 hover:bg-[#eae7e0] dark:bg-[#14151a] dark:border-white/20 dark:text-white dark:hover:bg-white/5 hover:scale-102 transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
                             >
                               {lang === "ko" ? "신묘한 문답 다시보기" : "View Mystical Q&A"}
                             </button>
@@ -130,7 +130,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                                   e.stopPropagation();
                                   onSelect(profile, "today");
                                 }}
-                                className="w-full py-3.5 px-4 text-xs font-sans font-black uppercase tracking-widest text-center bg-cream/55 dark:bg-zinc-900 border border-ink-black/20 dark:border-white/20 hover:bg-ink-black/5 dark:hover:bg-white/5 text-ink-black dark:text-white transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
+                                className="w-full py-3.5 px-4 text-xs font-sans font-black uppercase tracking-widest text-center border border-ink-black/20 bg-[#f4f1ea] text-ink-black/90 hover:bg-[#eae7e0] dark:bg-[#14151a] dark:border-white/20 dark:text-white dark:hover:bg-white/5 transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
                               >
                                 {t.viewTodayFortune}
                               </button>
@@ -139,7 +139,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                                   e.stopPropagation();
                                   onSelect(profile, "full");
                                 }}
-                                className="w-full py-3.5 px-4 text-xs font-sans font-black uppercase tracking-widest text-center bg-ink-black text-white dark:bg-white dark:text-black hover:bg-ink-black/90 dark:hover:bg-white/90 transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
+                                className="w-full py-3.5 px-4 text-xs font-sans font-black uppercase tracking-widest text-center border border-ink-black bg-ink-black text-white hover:bg-ink-black/95 dark:bg-white dark:text-black dark:hover:bg-white/95 dark:border-white transition-all cursor-pointer rounded-none border-b-[1.5px] active:translate-y-[0.5px]"
                               >
                                 {t.viewFullReport}
                               </button>
@@ -152,7 +152,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                                   e.stopPropagation();
                                   onSelect(profile, "today");
                                 }}
-                                className="flex-1 py-3.5 px-3 text-xs font-sans font-black uppercase tracking-widest text-center bg-cream/55 dark:bg-zinc-900 border border-ink-black/20 dark:border-white/20 hover:bg-ink-black/5 dark:hover:bg-white/5 text-ink-black dark:text-white transition-all cursor-pointer rounded-none"
+                                className="flex-1 py-3.5 px-3 text-xs font-sans font-black uppercase tracking-widest text-center border border-ink-black/20 bg-[#f4f1ea] text-ink-black/90 hover:bg-[#eae7e0] dark:bg-[#14151a] dark:border-white/20 dark:text-white dark:hover:bg-white/5 transition-all cursor-pointer rounded-none"
                               >
                                 {todayFortuneTextMobile}
                               </button>
@@ -161,7 +161,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
                                   e.stopPropagation();
                                   onSelect(profile, "full");
                                 }}
-                                className="flex-1 py-3.5 px-3 text-xs font-sans font-black uppercase tracking-widest text-center bg-ink-black text-white dark:bg-white dark:text-black hover:bg-ink-black/90 dark:hover:bg-white/90 transition-all cursor-pointer rounded-none"
+                                className="flex-1 py-3.5 px-3 text-xs font-sans font-black uppercase tracking-widest text-center border border-ink-black bg-ink-black text-white hover:bg-ink-black/95 dark:bg-white dark:text-black dark:hover:bg-white/95 dark:border-white transition-all cursor-pointer rounded-none"
                               >
                                 {fullReportTextMobile}
                               </button>
@@ -187,7 +187,7 @@ export default function ProfileModal({ isOpen, onClose, onSelect, profiles, onDe
             </div>
 
             <div className="p-8 bg-ink-black/[0.01] border-t border-ink-black/10 dark:bg-white/[0.01] dark:border-t dark:border-white/10 text-center relative z-10">
-              <p className="text-[10px] text-ink-black/20 dark:text-white/10 uppercase tracking-[0.4em] font-black">
+              <p className="text-[10px] text-ink-black/30 dark:text-white/30 uppercase tracking-[0.4em] font-black">
                 {t.browserStorageNote}
               </p>
             </div>

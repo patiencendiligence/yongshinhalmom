@@ -24,7 +24,7 @@ export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen, onOpenProf
           href="/basic/what-is-saju" 
           className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-ink-black/60 dark:text-white/60 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all duration-200"
         >
-          DATA
+          Saju Info
         </a>
         
         <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
@@ -37,7 +37,7 @@ export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen, onOpenProf
               className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-purple-600 dark:text-holo-cyan hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all duration-200 relative border-x border-transparent"
               title={`Logged in as ${user.email}. Click to view profiles.`}
             >
-              INSIGHTS
+              {t.storedProfiles}
             </button>
             <button 
               onClick={logout}

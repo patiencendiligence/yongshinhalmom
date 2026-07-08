@@ -295,7 +295,7 @@ export default function InputForm({ onSubmit, initialData, lang, onLoadSavedQna 
 
         <button
           type="submit"
-          className="holo-button w-full py-8 sm:py-2 mt-12 sm:mt-6 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
+          className="holo-button w-full py-4 sm:py-4 mt-12 sm:mt-6 bg-ink-black text-white dark:bg-transparent dark:text-white font-sans font-black text-[12px] uppercase tracking-[0.6em] transition-all flex items-center justify-center gap-6"
         >
           {t.checkData} <ArrowRight className="w-5 h-5" />
         </button>

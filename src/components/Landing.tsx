@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { faqSchema }from "../utils/sajuUtils.ts";
 import { Language, translations } from "../lib/translations";
 import DreamModal from "./DreamModal";
+import InstallPrompt from "./InstallPrompt.tsx";
 
 interface LandingProps {
   onStart: () => void;
@@ -203,6 +204,7 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         </motion.div>
 
         <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm px-4">
+          <InstallPrompt />
           <button
             onClick={() => location.href = '/basic/what-is-saju'}
             className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-ink-black/70 dark:hover:text-white/70 transition-all flex items-center gap-2 group"

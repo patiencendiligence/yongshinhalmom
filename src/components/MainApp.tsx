@@ -12,6 +12,7 @@ import SuccessView from "./SuccessView";
 import SeoPage from "../pages/SeoPage";
 import { HeaderActions } from "./HeaderActions";
 import { LoadingView } from "./LoadingView";
+import InstallPrompt from "./InstallPrompt";
 import { translations } from "../lib/translations";
 import { useAuth } from "../lib/AuthContext";
 import { useLanguage } from "../hooks/useLanguage";
@@ -140,7 +141,7 @@ export default function MainApp() {
                   </Link>
                 </div>
               )}
-
+              
               {state === "INPUT" && (
                 <motion.div key="input" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full max-w-7xl px-4 py-20">
                   <InputForm onSubmit={handleSubmit} initialData={userData || preFilledData} lang={lang} onLoadSavedQna={loadSavedReport} />
@@ -171,7 +172,7 @@ export default function MainApp() {
           
         </Routes>
       </div>
-
+      
 
       <ProfileModal 
         isOpen={isProfileModalOpen} 

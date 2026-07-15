@@ -246,10 +246,11 @@ export default function SeoPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
         <Helmet>
           <html lang={lang} />
-          <title>{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
+          <title>용신할멈 - AI 사주명리, 무료 사주, 용한 신점 &amp; 오늘의 운세 (Yongshin Halmeom) |{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
           <meta name="description" content={seoDesc} />
           <meta property="og:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />
           <meta property="og:description" content={seoDesc} />
+          <meta property="og:site_name" content="용신할멈" />
           <meta property="og:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
           <link
             rel="canonical"
@@ -282,6 +283,14 @@ export default function SeoPage({
           </script>
           
       )}
+      <link rel="manifest" href="/manifest.json" />
+      <link rel="icon" href="/icon-192.png" />
+
+      {/* iOS 홈 화면 지원 */}
+      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+      <meta name="apple-mobile-web-app-title" content="용신할멈" />
+      <link rel="apple-touch-icon" href="/icon-192.png" />
       
         </Helmet>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}
@@ -438,7 +447,8 @@ export default function SeoPage({
                   element: "오행 분석",
                   ilgan: "일간 분석",
                   ilju: "일주론",
-                  sipseong: "십성 풀이"
+                  sipseong: "십성 풀이",
+                  dream: "꿈 해몽"
                 };
                 
                 return (

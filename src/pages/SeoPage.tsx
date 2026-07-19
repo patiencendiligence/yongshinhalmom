@@ -284,13 +284,13 @@ export default function SeoPage({
           
       )}
       <link rel="manifest" href="/manifest.json" />
-      <link rel="icon" href="/icon-192.png" />
+      <link rel="icon" href="/favicon-192.png" />
 
       {/* iOS 홈 화면 지원 */}
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       <meta name="apple-mobile-web-app-title" content="용신할멈" />
-      <link rel="apple-touch-icon" href="/icon-192.png" />
+      <link rel="apple-touch-icon" href="/favicon-192.png" />
       
         </Helmet>
       {/* Top Header Panel: Navigation Back & Mobile Explorer Toggle */}

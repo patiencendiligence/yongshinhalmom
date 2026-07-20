@@ -106,12 +106,13 @@ export default function InstallPrompt() {
 
 const styles: Record<string, CSSProperties> = {
   installButton: {
-    padding: "10px 16px",
+    padding: "6px 10px",
     borderRadius: "8px",
     border: "1px solid #ccc",
-    background: "#fff",
+    background: "#f9f7f0cc",
     fontWeight: 500,
     cursor: "pointer",
+    fontSize:"11px"
   },
   overlay: {
     position: "fixed",

@@ -1,100 +1,108 @@
 <!-- ko -->
-# 천을귀인(天乙貴人)이란 무엇인가?
+# 문창귀인(文昌貴人)이란 무엇인가?
 
-천을귀인은 신살 중에서도 대표적인 길신, 즉 좋은 기운이라네.
+문창귀인은 학문과 지혜를 밝혀주는 길신이라네.
 
-'하늘이 내린 귀한 사람'이라는 뜻처럼, 어려움에 처했을 때 뜻밖의 도움을 받는 힘을 상징하지.
+'글월 문(文)에 창성할 창(昌)'이라는 이름처럼, 배움과 표현의 재능을 크게 키워주는 기운을 뜻하지.
 
-사주에 천을귀인이 있으면 위기의 순간마다 귀인이 나타나 도와주는 인생을 산다고 전해진다네.
+사주에 문창귀인이 있으면 총명함과 문장력, 학업운이 남다르게 따르는 경우가 많다네.
 <!-- /ko -->
 <!-- en -->
-# What is Cheoneulgwiin (Heavenly Noble Star)?
+# What is Munchang-gwiin (Literary Star)?
 
-Cheoneulgwiin is one of the most representative auspicious stars among all Sinsal, a truly benevolent energy.
+Munchang-gwiin is an auspicious star that illuminates scholarship and wisdom.
 
-Meaning "a noble person sent by heaven," it symbolizes receiving unexpected help exactly when it's needed most.
+True to its name, combining "literature" and "flourishing," it represents an energy that greatly nurtures talent in learning and expression.
 
-Having Cheoneulgwiin in one's chart is said to bring a life where a helpful benefactor appears at each critical moment.
+Having Munchang-gwiin in one's chart often brings exceptional intelligence, writing ability, and academic fortune.
 <!-- /en -->
 
 ---
 
 <!-- ko -->
-## 천을귀인의 핵심 의미
+## 문창귀인의 핵심 의미
 
-천을귀인의 본질은 '나를 지켜주는 보이지 않는 손'이라네.
+문창귀인의 본질은 '배움이 즐거운 힘'이라네.
 
-혼자 힘으로 버거운 순간에 뜻밖의 사람이나 기회가 나타나 위기를 넘기게 도와주지.
+억지로 외우지 않아도 이해가 빠르고, 글이나 말로 생각을 풀어내는 능력이 자연스럽게 따라오지.
 
-이 기운이 있으면 큰 화를 작게, 작은 화를 무사히 넘기는 흐름이 자주 나타난다네.
+이 기운이 있으면 시험, 자격증, 학위와 같은 결실을 잘 맺는다네.
 <!-- /ko -->
 <!-- en -->
-## Core Meaning of Cheoneulgwiin
+## Core Meaning of Munchang-gwiin
 
-The essence of Cheoneulgwiin is an unseen hand that watches over you.
+The essence of Munchang-gwiin is finding joy in learning.
 
-At moments too heavy to carry alone, an unexpected person or opportunity appears to help you through the crisis.
+Understanding comes quickly without forced memorization, and the ability to express thoughts through writing or speech comes naturally.
 
-With this energy present, big troubles often shrink and small troubles tend to pass safely.
+With this energy present, achievements like exams, certifications, and academic degrees tend to come together well.
 <!-- /en -->
 
 ---
 
 <!-- ko -->
-## 천을귀인이 있는 사람의 특징
+## 문창귀인이 있는 사람의 특징
 
-* 위기의 순간마다 도와주는 사람이 나타난다
-* 인복이 좋고 귀한 인연을 만난다
-* 큰 사고나 위험에서 크게 다치지 않고 넘어간다
-* 온화한 인상으로 신뢰를 얻는다
-* 어려운 상황에서도 묘하게 길이 열린다
+* 이해력과 응용력이 뛰어나다
+* 글쓰기나 말하기에 재능이 있다
+* 시험운, 학업운이 좋은 편이다
+* 새로운 지식을 배우는 것을 즐긴다
+* 논리적이고 차분하게 설명하는 힘이 있다
 
-주변의 도움을 자연스럽게 끌어당기는 사람들이라네.
+배움 자체를 즐기며 성장해가는 사람들이라네.
 <!-- /ko -->
 <!-- en -->
-## Traits of a Cheoneulgwiin Chart
+## Traits of a Munchang-gwiin Chart
 
-* Someone helpful tends to appear at every critical moment
-* Blessed with good people-luck and valuable connections
-* Tends to escape major accidents or dangers without serious harm
-* Earns trust through a warm, gentle impression
-* A way forward strangely opens up even in difficult situations
+* Excellent comprehension and application skills
+* Talented at writing or speaking
+* Good fortune with exams and academics
+* Enjoys learning new knowledge
+* Explains things logically and calmly
 
-They are people who naturally draw support from those around them.
+They are people who genuinely enjoy the process of learning itself.
 <!-- /en -->
 
 ---
 
 <!-- ko -->
-## 천을귀인의 도움이 필요한 순간
+## 문창귀인에 어울리는 분야
 
-새로운 일을 시작할 때, 낯선 환경에 놓일 때, 건강이나 안전이 걱정될 때 이 기운이 특히 힘을 발휘한다네.
+* 학자·연구원
+* 작가·기자
+* 교육자
+* 변호사
+* 시험을 통해 자격을 얻는 전문직
 
-혼자가 아니라는 든든함이 실제 인생의 고비마다 방패가 되어준다네.
+지식과 표현을 다루는 모든 분야에서 두각을 나타낸다네.
 <!-- /ko -->
 <!-- en -->
-## Moments When Cheoneulgwiin's Help Shows
+## Fields Suited to Munchang-gwiin
 
-This energy tends to show its power especially when starting something new, entering an unfamiliar environment, or facing worries about health and safety.
+* Scholars and researchers
+* Writers and journalists
+* Educators
+* Lawyers
+* Licensed professions earned through examinations
 
-The reassurance of not being alone becomes an actual shield at each turning point in life.
+They stand out in any field that involves handling knowledge and expression.
 <!-- /en -->
 
 ---
 
 <!-- ko -->
-## 천을귀인을 잘 쓰는 법
+## 문창귀인을 잘 살리는 법
 
-귀인의 도움을 받는 만큼 나 역시 누군가에게 귀인이 되어주려는 마음가짐이 이 기운을 더 크게 키운다네.
+타고난 재능이라도 꾸준함이 더해지지 않으면 빛을 보기 어렵다네.
 
-베푼 만큼 돌아온다는 이치가 천을귀인에는 유독 뚜렷하게 작용하지.
+매일 조금씩 읽고 쓰는 습관을 들이면 이 기운이 훨씬 크게 자라난다네.
 <!-- /ko -->
 <!-- en -->
-## How to Make the Most of Cheoneulgwiin
+## How to Make the Most of Munchang-gwiin
 
-Just as one receives help from noble people, striving to become someone else's noble helper actually amplifies this energy further.
+Even inborn talent is hard to bring to light without consistency.
 
-The principle of "what you give comes back to you" applies especially clearly to Cheoneulgwiin.
+Building a habit of reading and writing a little each day helps this energy grow far larger.
 <!-- /en -->
 
 ---
@@ -102,14 +110,14 @@ The principle of "what you give comes back to you" applies especially clearly to
 <!-- ko -->
 ## 용신할멈 한마디
 
-> 천을귀인은 하늘이 붙여준 동행자라네.
+> 문창은 펼쳐진 책과 같다네.
 >
-> 혼자 걷는다 느껴질 때도, 실은 늘 곁에 있다는 걸 잊지 말게나.
+> 펼치기만 하고 읽지 않으면 그저 종이일 뿐이지.
 <!-- /ko -->
 <!-- en -->
 ## Halmeom's Wise Words
 
-> Cheoneulgwiin is a companion sent by heaven to walk beside you.
+> Munchang is like an open book.
 >
-> Even when it feels like you're walking alone, remember they are always near.
+> Left unread, even an open book is just paper.
 <!-- /en -->

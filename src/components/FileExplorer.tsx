@@ -106,6 +106,16 @@ export const fileTreeData: CategoryInfo[] = [
       { slug: "what-is-dohwasal", filename: "what-is-dohwasal.md", titleKo: "도화살이란?", titleEn: "What is a Dohwa-sal?" },
       { slug: "what-is-hwagaesal", filename: "what-is-hwagaesal.md", titleKo: "화개살이란?", titleEn: "What is a Hwagae-sal?" },
       { slug: "what-is-yeokmasal", filename: "what-is-yeokmasal.md", titleKo: "역마살이란?", titleEn: "What is a Yeokma-sal?" },
+       { slug: "what-is-wonjinsal", filename: "what-is-wonjinsal.md", titleKo: "원진이란?", titleEn: "What is a Wonjin-sal?" },
+        { slug: "what-is-gwimungwansal", filename: "what-is-gwimungwansal.md", titleKo: "귀문관살이란?", titleEn: "What is a Gwimungwan-sal?" },
+         { slug: "what-is-baekhosal", filename: "what-is-baekhosal.md", titleKo: "백호살이란?", titleEn: "What is a Baekho-sal?" },
+          { slug: "what-is-goegangsal", filename: "what-is-goegangsal.md", titleKo: "괴강살이란?", titleEn: "What is a Goegang-sal?" },
+           { slug: "what-is-yanginsal", filename: "what-is-yanginsal.md", titleKo: "양인살이란?", titleEn: "What is a Yangin-sal?" },
+            { slug: "what-is-cheoneulgwiin", filename: "what-is-cheoneulgwiin.md", titleKo: "천을귀인이란?", titleEn: "What is a Cheoneul-gwiin?" },
+             { slug: "what-is-munchanggwiin", filename: "what-is-munchanggwiin.md", titleKo: "문창귀인이란?", titleEn: "What is a Munchang-gwiin?" },
+              { slug: "what-is-hongyeomsal", filename: "what-is-hongyeomsal.md", titleKo: "홍염살이란?", titleEn: "What is a Hongyeom-sal?" },
+               { slug: "what-is-hyeongchunghoehap", filename: "what-is-hyeongchunghoehap.md", titleKo: "형충회합이란?", titleEn: "What is a Hyeongchunghoehap?" },
+                { slug: "what-is-gyeokguk", filename: "what-is-gyeokguk.md", titleKo: "격국이란?", titleEn: "What is a Gyeok-guk?" },
     ]
   }
 ];

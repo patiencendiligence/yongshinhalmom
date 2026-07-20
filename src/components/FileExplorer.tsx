@@ -26,6 +26,11 @@ export const fileTreeData: CategoryInfo[] = [
       { slug: "what-is-saju", filename: "what-is-saju.md", titleKo: "사주란 무엇인가?", titleEn: "What is Saju?" },
       { slug: "what-is-sipsin", filename: "what-is-sipsin.md", titleKo: "십성이란 무엇인가?", titleEn: "What is Sipsin?" },
       { slug: "what-is-yongshin", filename: "what-is-yongshin.md", titleKo: "용신이란 무엇인가?", titleEn: "What is Yongshin?" },
+ { slug: "what-is-gunghap", filename: "what-is-gunghap.md", titleKo: "궁합이란 무엇인가?", titleEn: "What is Gung-hap?" },
+  { slug: "what-is-gongmang", filename: "what-is-gongmang.md", titleKo: "공망이란 무엇인가?", titleEn: "What is Gong-mang?" },
+   { slug: "what-is-samjae", filename: "what-is-samjae.md", titleKo: "삼재란 무엇인가?", titleEn: "What is Sam-jae?" },
+    { slug: "what-is-singang", filename: "what-is-singang.md", titleKo: "신강/신약이란 무엇인가?", titleEn: "What is Sin-gang?" },
+     { slug: "what-is-seun", filename: "what-is-seun.md", titleKo: "세운이란 무엇인가?", titleEn: "What is Se-un?" },
     ]
   },
   {
@@ -93,7 +98,16 @@ export const fileTreeData: CategoryInfo[] = [
     { slug: "what-is-pregnancy-dream", filename: "what-is-pregnancy-dream.md", titleKo: "태몽(胎夢)이란?", titleEn: "What is a Pregnancy Dream?" },
     { slug: "what-is-precognitive-dream", filename: "what-is-precognitive-dream.md", titleKo: "예지몽(豫知夢)이란?", titleEn: "What is a Precognitive Dream?" },
     { slug: "what-is-nightmare", filename: "what-is-nightmare.md", titleKo: "악몽(惡夢)이란?", titleEn: "What is a Nightmare?" },
-  ]}
+  ]},
+  {key: "sinsal",
+    name: "sinsal",
+    items: [
+      { slug: "what-is-sinsal", filename: "what-is-sinsal.md", titleKo: "신살이란?", titleEn: "What is a Sin-sal?" },
+      { slug: "what-is-dohwasal", filename: "what-is-dohwasal.md", titleKo: "도화살이란?", titleEn: "What is a Dohwa-sal?" },
+      { slug: "what-is-hwagaesal", filename: "what-is-hwagaesal.md", titleKo: "화개살이란?", titleEn: "What is a Hwagae-sal?" },
+      { slug: "what-is-yeokmasal", filename: "what-is-yeokmasal.md", titleKo: "역마살이란?", titleEn: "What is a Yeokma-sal?" },
+    ]
+  }
 ];
 
 export interface ThemeColors {

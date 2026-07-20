@@ -109,7 +109,7 @@ const styles: Record<string, CSSProperties> = {
     padding: "6px 10px",
     borderRadius: "8px",
     border: "1px solid #ccc",
-    background: "#f9f7f0cc",
+    background: "rgb(249 247 240 / 40%)",
     fontWeight: 500,
     cursor: "pointer",
     fontSize:"11px"

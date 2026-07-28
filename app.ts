@@ -22,9 +22,8 @@ let _supabaseAdmin: any = null;
 
 function getSupabaseAdmin() {
   if (!_supabaseAdmin) {
-    // In Vercel, prioritize non-VITE prefixed keys for server-side
     const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!url || !key) {
       console.error("[Supabase Admin] URL or Key missing", { url: !!url, key: !!key });
@@ -339,16 +338,14 @@ const MODELS_TO_TRY = [
 
 function getApiKey() {
   const key = process.env.GEMINI_API_KEY || 
-              process.env.GOOGLE_API_KEY || 
-              process.env.VITE_GEMINI_API_KEY || 
-              process.env.VITE_GOOGLE_API_KEY || "";
+              process.env.GOOGLE_API_KEY || "";
   
   if (!key) return "";
   return String(key).replace(/['"\\\r\n\t]+/g, '').trim();
 }
 
 async function tryOpenAI(prompt: string, systemInstruction: string): Promise<string> {
-  const openAiKey = process.env.OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY || "";
+  const openAiKey = process.env.OPENAI_API_KEY || "";
   const cleanedKey = String(openAiKey).replace(/['"\\\r\n\t]+/g, '').trim();
   if (!cleanedKey) {
     throw new Error("OpenAI API key missing from environment");

@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Link } from "react-router-dom";
 import { HelpCircle, LogOut, Sun, Moon, Languages } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { translations, Language } from "../lib/translations";
@@ -20,12 +21,12 @@ export function HeaderActions({ lang, toggleLang, setIsInfoModalOpen, onOpenProf
     <div className="absolute top-3 right-3 min-[400px]:top-4 min-[400px]:right-4 z-50 flex items-center">
       <div className="flex items-center bg-[#f9f7f0]/95 dark:bg-[#07080d]/95 border border-ink-black/10 dark:border-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.3)] backdrop-blur-md rounded-none overflow-hidden h-[34px] min-[400px]:h-[40px]">
         {/* DATA Link */}
-        <a 
-          href="/basic/what-is-saju" 
+        <Link 
+          to="/basic/what-is-saju" 
           className="h-full px-2.5 min-[400px]:px-4 flex items-center justify-center font-sans font-black text-[8px] min-[400px]:text-[10px] uppercase tracking-[0.15em] text-ink-black/60 dark:text-white/60 hover:text-ink-black dark:hover:text-white hover:bg-ink-black/10 dark:hover:bg-white/10 transition-all duration-200"
         >
           Saju Info
-        </a>
+        </Link>
         
         <div className="w-[1px] h-3 min-[400px]:h-4 bg-ink-black/10 dark:bg-white/10" />
 

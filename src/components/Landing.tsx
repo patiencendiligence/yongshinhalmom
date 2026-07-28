@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { Sparkles, Moon } from "lucide-react";
 import { Helmet } from "react-helmet-async";
@@ -15,6 +16,7 @@ interface LandingProps {
 }
 
 export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: LandingProps) {
+  const navigate = useNavigate();
   const t = translations[lang];
   const [isDreamModalOpen, setIsDreamModalOpen] = useState(false);
   
@@ -206,8 +208,9 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
         <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm px-4">
           <InstallPrompt />
           <button
-            onClick={() => location.href = '/basic/what-is-saju'}
-            className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-ink-black/70 dark:hover:text-white/70 transition-all flex items-center gap-2 group"
+            type="button"
+            onClick={() => navigate('/basic/what-is-saju')}
+            className="text-[10px] font-sans font-black uppercase tracking-[0.4em] text-ink-black/50 dark:text-white/50 hover:text-ink-black/70 dark:hover:text-white/70 transition-all flex items-center gap-2 group cursor-pointer"
           >
             {t.moreInfo}
           </button>
@@ -218,10 +221,10 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
               {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-sans text-ink-black/70 dark:text-white/50 justify-items-center">
-              <a href="/basic/what-is-saju" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가?"}</a>
-              <a href="/basic/what-is-yongshin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가?"}</a>
-              <a href="/basic/what-is-ilgan" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가?"}</a>
-              <a href="/basic/what-is-sipsin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가?"}</a>
+              <Link to="/basic/what-is-saju" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Saju?" : "사주란 무엇인가?"}</Link>
+              <Link to="/basic/what-is-yongshin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Yongshin?" : "용신이란 무엇인가?"}</Link>
+              <Link to="/basic/what-is-ilgan" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Ilgan?" : "일간이란 무엇인가?"}</Link>
+              <Link to="/basic/what-is-sipsin" className="hover:text-ink-black/70 dark:hover:text-white/70 transition-colors">↳ {lang === "en" ? "What is Sipsin?" : "십성이란 무엇인가?"}</Link>
             </div>
             
             <div className="mt-4 flex flex-col items-center gap-1.5 border-t border-ink-black/5 dark:border-white/5 pt-3 text-[9px] font-sans tracking-wide text-ink-black/50 dark:text-white/40">

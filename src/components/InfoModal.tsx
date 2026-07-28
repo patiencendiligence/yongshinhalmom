@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Info, GraduationCap, MapPin, Clock, AlertCircle } from "lucide-react";
 import { Language, translations } from "../lib/translations";
@@ -9,6 +10,7 @@ interface InfoModalProps {
 }
 
 export default function InfoModal({ isOpen, onClose, lang }: InfoModalProps) {
+  const navigate = useNavigate();
   const t = translations[lang];
   return (
     <AnimatePresence>
@@ -58,8 +60,12 @@ export default function InfoModal({ isOpen, onClose, lang }: InfoModalProps) {
                   ))}
                 </div>
                 <button
-                    onClick={ () => location.href ='/basic/what-is-saju'}
-                    className="w-full px-10 py-2 bg-white/30 text-slate font-sans font-black text-[11px] uppercase tracking-[0.4em] transition-all hover:scale-105 active:scale-95"
+                    type="button"
+                    onClick={() => {
+                      navigate('/basic/what-is-saju');
+                      onClose();
+                    }}
+                    className="w-full px-10 py-2 bg-white/30 text-slate font-sans font-black text-[11px] uppercase tracking-[0.4em] transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   >
                     {lang === 'ko' ? '더 알아보기' : 'Learn more'}
                   </button>

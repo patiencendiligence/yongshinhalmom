@@ -1,5 +1,7 @@
 import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (e) {}
 
 import express from "express";
 import path from "path";
@@ -8,7 +10,7 @@ import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok.js";
+import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok";
 
 dotenv.config();
 
@@ -755,7 +757,7 @@ async function startServer() {
     } catch (e) {
       console.warn("[App] Vite not found, skipping middleware");
     }
-  } else {
+  } else if (!process.env.VERCEL) {
     const distPath = path.join(process.cwd(), 'dist');
     console.log(`[App] Production mode. Static: ${distPath}`);
     app.use(express.static(distPath));

@@ -330,13 +330,11 @@ const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_T
 const PROMPT_PAID_DETAIL_TEMPLATE = process.env.PROMPT_PAID_DETAIL_TEMPLATE || process.env.VITE_PROMPT_PAID_DETAIL_TEMPLATE || "";
 const PROMPT_PAID_DETAIL_PRINT = process.env.PROMPT_PAID_DETAIL_PRINT || process.env.VITE_PROMPT_PAID_DETAIL_PRINT || "";
 
-
 const MODELS_TO_TRY = [
-  "gemini-2.5-flash",
   "gemini-3.1-flash-lite",
-  "gemini-2.0-flash",
-  "gemini-1.5-flash",
-  "gemini-2.5-pro"
+  "gemini-3.5-flash",
+  "gemini-2.5-flash",
+  "gemini-3.1-pro-preview"
 ];
 
 function getApiKey() {
@@ -390,7 +388,7 @@ app.post("/api/generate-report", async (req, res) => {
     let detailTemplateContent = PROMPT_PAID_DETAIL_TEMPLATE;
     let detailPrintContent = PROMPT_PAID_DETAIL_PRINT;
 
-    const baseTemplate = PROMPT_TEMPLATE.trim() ? `${PROMPT_TEMPLATE}\n${PROMPT_PRINT}` : ''
+    const baseTemplate = `${PROMPT_TEMPLATE}\n${PROMPT_PRINT}`;
 
     const promptTemplate = `
     ${baseTemplate}
@@ -502,7 +500,7 @@ app.post("/api/generate-daily", async (req, res) => {
     const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
     const systemInstructionToUse = SYSTEM_INSTRUCTION.trim();
 
-    const baseDailyTemplate = DAILY_PROMPT_TEMPLATE.trim() ? `${DAILY_PROMPT_TEMPLATE}\n${DAILY_PROMPT_PRINT}` : "";
+    const baseDailyTemplate = `${DAILY_PROMPT_TEMPLATE}\n${DAILY_PROMPT_PRINT}`;
 
     const finalPrompt = baseDailyTemplate.replace(/{{formattedToday}}/g, formattedToday)
       .replace(/{{todayPillar}}/g, todayPillar || "")

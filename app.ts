@@ -329,11 +329,14 @@ const PROMPT_PRINT = process.env.PROMPT_PRINT || process.env.VITE_PROMPT_PRINT |
 const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_TEMPLATE || "";
 const PROMPT_PAID_DETAIL_TEMPLATE = process.env.PROMPT_PAID_DETAIL_TEMPLATE || process.env.VITE_PROMPT_PAID_DETAIL_TEMPLATE || "";
 const PROMPT_PAID_DETAIL_PRINT = process.env.PROMPT_PAID_DETAIL_PRINT || process.env.VITE_PROMPT_PAID_DETAIL_PRINT || "";
+
+
 const MODELS_TO_TRY = [
-  "gemini-3.1-flash-lite",
-  "gemini-3.5-flash",
   "gemini-2.5-flash",
-  "gemini-3.1-pro-preview"
+  "gemini-3.1-flash-lite",
+  "gemini-2.0-flash",
+  "gemini-1.5-flash",
+  "gemini-2.5-pro"
 ];
 
 function getApiKey() {
@@ -382,64 +385,54 @@ app.post("/api/generate-report", async (req, res) => {
     const currentYear = targetYear || kstNow.getFullYear();
     const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
+    const systemInstructionToUse = SYSTEM_INSTRUCTION.trim();
 
+    let detailTemplateContent = PROMPT_PAID_DETAIL_TEMPLATE;
+    let detailPrintContent = PROMPT_PAID_DETAIL_PRINT;
 
+    const baseTemplate = PROMPT_TEMPLATE.trim() ? `${PROMPT_TEMPLATE}\n${PROMPT_PRINT}` : ''
 
-  let detailTemplateContent = PROMPT_PAID_DETAIL_TEMPLATE;
-  let detailPrintContent = PROMPT_PAID_DETAIL_PRINT;
-
-
-
-  const promptTemplate = `
-  ${PROMPT_TEMPLATE}
-  ${PROMPT_PRINT}
-  ${level === "detailed" ? detailTemplateContent : ""}
-  ${level === "detailed" ? detailPrintContent : ""}
-  `;
-
-  let finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
-    .replace(/{{today}}/g, kstToday)
-    .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
-    .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
-    .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
-    .replace(/{{timePillar}}/g, pillars.timePillar || "")
-    .replace(/{{zodiac}}/g, String(correctZodiacIndex))
-    .replace(/{{analysisLevel}}/g, level || "simple").replace(/{{language}}/g, lang || "ko");
-
-  if (customQuestion && customQuestion.trim()) {
-    finalPrompt += `
-    
-    ---
-    [사용자 직접 질문 사항 - 자네가 가장 궁금한 질문]
-    질문 내용: "${customQuestion}"
-    
-    자네는 사용자의 사주 정보(년주: ${pillars.yearPillar}, 월주: ${pillars.monthPillar}, 일주: ${pillars.dayPillar}, 시주: ${pillars.timePillar})와 대운, 오행, 명리, 역학적 기운의 흐름을 바탕으로 위의 질문에 대해 대단히 구체적이고 명확하게 답변해 주어야 하네.
-    
-    사용자가 직접 던진 질문이므로, 반환되는 JSON 데이터의 'sections' 배열의 가장 맨 앞(첫 번째) 요소로 다음 정보의 섹션을 생성해서 추가해 주게나:
-    {
-      "title": "할멈의 명쾌한 답변",
-      "content": "이곳에 자네가 사용자의 사주와 오행, 명리학적 기운을 철저하게 분석하여 사용자의 질문 '${customQuestion}'에 대해 아주 자세하고 정성스럽게 답한 응답 내용을 구수하고 연륜이 묻어나는 할멈의 존댓말 사투리로 작성해 주게. 최소 400자 이상 아주 정밀하고 깊이 있는 통찰을 적어주어야 하네."
-    }
+    const promptTemplate = `
+    ${baseTemplate}
+    ${level === "detailed" ? detailTemplateContent : ""}
+    ${level === "detailed" ? detailPrintContent : ""}
     `;
-  }
 
-  console.log(JSON.stringify(pillars), ":::finalPrompt")
+    let finalPrompt = promptTemplate.replace(/{{currentYear}}/g, String(currentYear))
+      .replace(/{{today}}/g, kstToday)
+      .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
+      .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
+      .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
+      .replace(/{{timePillar}}/g, pillars.timePillar || "")
+      .replace(/{{zodiac}}/g, String(correctZodiacIndex))
+      .replace(/{{analysisLevel}}/g, level || "simple").replace(/{{language}}/g, lang || "ko");
+
+    if (customQuestion && customQuestion.trim()) {
+      finalPrompt += `
+      
+      ---
+      [사용자 직접 질문 사항 - 자네가 가장 궁금한 질문]
+      질문 내용: "${customQuestion}"
+      
+      자네는 사용자의 사주 정보(년주: ${pillars.yearPillar}, 월주: ${pillars.monthPillar}, 일주: ${pillars.dayPillar}, 시주: ${pillars.timePillar})와 대운, 오행, 명리, 역학적 기운의 흐름을 바탕으로 위의 질문에 대해 대단히 구체적이고 명확하게 답변한다.
+      
+      사용자가 직접 던진 질문이므로, 반환되는 JSON 데이터의 'sections' 배열의 가장 맨 앞(첫 번째) 요소로 다음 정보의 섹션을 생성해서 추가한다:
+      {
+        "title": "할멈의 명쾌한 답변",
+        "content": "이곳에 사용자의 사주와 오행, 명리학적 기운을 철저하게 분석하여 사용자의 질문 '${customQuestion}'에 대해 아주 자세하고 정성스럽게 답한 응답 내용을 구수하고 연륜이 묻어나는 할멈의 존댓말 사투리로 작성. 최소 400자 이상 아주 정밀하고 깊이 있는 통찰을 적어준다."
+      }
+      `;
+    }
+
     const prompt = `
-  ${SYSTEM_INSTRUCTION}
-  ${finalPrompt}
-  `;
+    ${systemInstructionToUse}
+    ${finalPrompt}
+    `;
 
     let parsed: any = null;
 
     if (apiKey) {
-      const ai = new GoogleGenAI({
-        apiKey: apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
+      const ai = new GoogleGenAI({ apiKey: apiKey });
 
       for (const modelName of MODELS_TO_TRY) {
         try {
@@ -448,17 +441,22 @@ app.post("/api/generate-report", async (req, res) => {
             model: modelName,
             contents: prompt,
             config: {
-              systemInstruction: SYSTEM_INSTRUCTION,
+              systemInstruction: systemInstructionToUse,
               responseMimeType: "application/json",
               temperature: 0.1,
             }
           });
 
           let text = response.text || "";
-          parsed = cleanAndParseJSON(text);
-          break;
+          if (text) {
+            parsed = cleanAndParseJSON(text);
+            if (parsed) {
+              console.log(`[Gemini Server] Successfully parsed result from ${modelName}`);
+              break;
+            }
+          }
         } catch (e: any) {
-           console.error(`[Gemini Server] ${modelName} failed:`, e.message);
+           console.error(`[Gemini Server] ${modelName} failed:`, e.message || e);
         }
       }
     } else {
@@ -470,10 +468,10 @@ app.post("/api/generate-report", async (req, res) => {
       try {
         console.log("[Gemini Server] Initiating OpenAI fallback...");
 
-        const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+        const text = await tryOpenAI(prompt, systemInstructionToUse);
         parsed = cleanAndParseJSON(text);
       } catch (err: any) {
-        console.error("[Gemini Server] OpenAI fallback failed:", err.message);
+        console.error("[Gemini Server] OpenAI fallback failed:", err.message || err);
       }
     }
 
@@ -502,40 +500,28 @@ app.post("/api/generate-daily", async (req, res) => {
     const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
     const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
+    const systemInstructionToUse = SYSTEM_INSTRUCTION.trim();
 
+    const baseDailyTemplate = DAILY_PROMPT_TEMPLATE.trim() ? `${DAILY_PROMPT_TEMPLATE}\n${DAILY_PROMPT_PRINT}` : "";
 
-  const promptTemplate = `
-  ${DAILY_PROMPT_TEMPLATE}
-  ${DAILY_PROMPT_PRINT}
-  `;
+    const finalPrompt = baseDailyTemplate.replace(/{{formattedToday}}/g, formattedToday)
+      .replace(/{{todayPillar}}/g, todayPillar || "")
+      .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
+      .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
+      .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
+      .replace(/{{timePillar}}/g, pillars.timePillar || "")
+      .replace(/{{zodiac}}/g, String(correctZodiacIndex))
+      .replace(/{{language}}/g, lang || "ko");
 
-  const finalPrompt = promptTemplate.replace(/{{formattedToday}}/g, formattedToday)
-    .replace(/{{todayPillar}}/g, todayPillar || "")
-    .replace(/{{yearPillar}}/g, pillars.yearPillar || "")
-    .replace(/{{monthPillar}}/g, pillars.monthPillar || "")
-    .replace(/{{dayPillar}}/g, pillars.dayPillar || "")
-    .replace(/{{timePillar}}/g, pillars.timePillar || "")
-    .replace(/{{zodiac}}/g, String(correctZodiacIndex))
-    .replace(/{{language}}/g, lang || "ko");
-
-    console.log(finalPrompt, ":::finalPrompt")
     const prompt = `
-  ${SYSTEM_INSTRUCTION}
-  ${finalPrompt}
-  `;
-
+    ${systemInstructionToUse}
+    ${finalPrompt}
+    `;
 
     let parsed: any = null;
 
     if (apiKey) {
-      const ai = new GoogleGenAI({
-        apiKey: apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
+      const ai = new GoogleGenAI({ apiKey: apiKey });
 
       for (const modelName of MODELS_TO_TRY) {
         try {
@@ -544,17 +530,22 @@ app.post("/api/generate-daily", async (req, res) => {
             model: modelName,
             contents: prompt,
             config: {
-              systemInstruction: SYSTEM_INSTRUCTION,
+              systemInstruction: systemInstructionToUse,
               responseMimeType: "application/json",
               temperature: 0.1,
             }
           });
 
           let text = response.text || "";
-          parsed = cleanAndParseJSON(text);
-          break;
+          if (text) {
+            parsed = cleanAndParseJSON(text);
+            if (parsed) {
+              console.log(`[Gemini Daily Server] Successfully parsed result from ${modelName}`);
+              break;
+            }
+          }
         } catch (e: any) {
-          console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message);
+          console.error(`[Gemini Daily Server] ${modelName} failed:`, e.message || e);
         }
       }
     } else {
@@ -565,10 +556,10 @@ app.post("/api/generate-daily", async (req, res) => {
     if (!parsed) {
       try {
         console.log("[Gemini Daily Server] Initiating OpenAI fallback...");
-        const text = await tryOpenAI(prompt, SYSTEM_INSTRUCTION);
+        const text = await tryOpenAI(prompt, systemInstructionToUse);
         parsed = cleanAndParseJSON(text);
       } catch (err: any) {
-        console.error("[Gemini Daily Server] OpenAI fallback failed:", err.message);
+        console.error("[Gemini Daily Server] OpenAI fallback failed:", err.message || err);
       }
     }
 
@@ -692,14 +683,7 @@ ${finalPrompt}
     let parsed: any = null;
 
     if (apiKey) {
-      const ai = new GoogleGenAI({
-        apiKey: apiKey,
-        httpOptions: {
-          headers: {
-            'User-Agent': 'aistudio-build',
-          }
-        }
-      });
+      const ai = new GoogleGenAI({ apiKey: apiKey });
 
       for (const modelName of MODELS_TO_TRY) {
         try {
@@ -715,10 +699,15 @@ ${finalPrompt}
           });
 
           let text = response.text || "";
-          parsed = cleanAndParseJSON(text);
-          break;
+          if (text) {
+            parsed = cleanAndParseJSON(text);
+            if (parsed) {
+              console.log(`[Gemini Dream Server] Successfully parsed result from ${modelName}`);
+              break;
+            }
+          }
         } catch (e: any) {
-          console.error(`[Gemini Dream Server] ${modelName} failed:`, e.message);
+          console.error(`[Gemini Dream Server] ${modelName} failed:`, e.message || e);
         }
       }
     } else {

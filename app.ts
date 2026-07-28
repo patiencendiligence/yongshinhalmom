@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
-import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok";
+import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok.js";
 
 dotenv.config();
 

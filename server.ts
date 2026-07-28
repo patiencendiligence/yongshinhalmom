@@ -1,7 +1,7 @@
 import dns from "dns";
 dns.setDefaultResultOrder("ipv4first");
 
-import app from "./app";
+import app from "./app.js";
 
 const PORT = 3000;
 app.listen(PORT, "0.0.0.0", () => {

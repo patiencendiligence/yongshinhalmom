@@ -25,17 +25,16 @@ export function useReportFlow(
   useEffect(() => {
     // Only restore if we are at home path and have zero data
     if (window.location.hash.length <= 2 && !userData && !report) {
-      const savedState = sessionStorage.getItem("yongshin_pending_state");
-      if (savedState) {
+      const parsed = storageService.getPendingState();
+      if (parsed) {
         try {
-          const parsed = JSON.parse(savedState);
           const { state: s, userData: ud, report: r, pendingAction } = parsed;
           
           if (ud) setUserData(ud);
           if (r) setReport(r);
           
           // Clear session right after extraction to prevent loops
-          sessionStorage.removeItem("yongshin_pending_state");
+          storageService.clearPendingState();
 
           if (s === "RESULT" && r) {
             setState("RESULT");
@@ -47,7 +46,7 @@ export function useReportFlow(
           }
         } catch (e) {
           console.error("Failed to restore state", e);
-          sessionStorage.removeItem("yongshin_pending_state");
+          storageService.clearPendingState();
         }
       }
     }
@@ -56,10 +55,10 @@ export function useReportFlow(
   // Handle success redirect context
   useEffect(() => {
     if (window.location.hash.includes('success')) {
-      const savedHash = sessionStorage.getItem("yongshin_pending_pay_hash");
+      const savedHash = storageService.getPendingPayHash();
       if (savedHash && user) {
         markAsPaid(savedHash);
-        sessionStorage.removeItem("yongshin_pending_pay_hash");
+        storageService.clearPendingPayHash();
         // Clear success from URL if possible
         window.history.replaceState({}, document.title, window.location.pathname);
       }
@@ -67,12 +66,12 @@ export function useReportFlow(
   }, [user, markAsPaid]);
 
   const loginAndPersist = useCallback(async (action?: string) => {
-    sessionStorage.setItem("yongshin_pending_state", JSON.stringify({
+    storageService.setPendingState({
       state,
       userData,
       report,
       pendingAction: action
-    }));
+    });
     await login();
   }, [state, userData, report, login]);
 
@@ -279,8 +278,8 @@ export function useReportFlow(
       pendingAction: 'detailed',
       reportHash
     };
-    sessionStorage.setItem("yongshin_pending_state", JSON.stringify(stateSnapshot));
-    sessionStorage.setItem("yongshin_pending_pay_hash", reportHash);
+    storageService.setPendingState(stateSnapshot);
+    storageService.setPendingPayHash(reportHash);
     
     // Gumroad Payment Link
     const gumroadUrl = "https://yshm.gumroad.com/l/jueghh";

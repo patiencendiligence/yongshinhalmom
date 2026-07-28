@@ -10,9 +10,19 @@ export interface UserProfile {
   createdAt: number;
 }
 
-const STORAGE_KEY = "yongshin_profiles";
-const CACHE_KEY = "yongshin_report_cache";
-const PAID_KEY = "yongshin_paid_hashes";
+export const STORAGE_KEYS = {
+  PROFILES: "yongshin_profiles",
+  REPORT_CACHE: "yongshin_report_cache",
+  PAID_HASHES: "yongshin_paid_hashes",
+  PENDING_STATE: "yongshin_pending_state",
+  PENDING_PAY_HASH: "yongshin_pending_pay_hash",
+  TODAY_CUSTOM_QUESTION: "yongshin_today_custom_question",
+  LAST_QUESTION_ASKED_DATE: "yongshin_last_question_asked_date",
+} as const;
+
+const STORAGE_KEY = STORAGE_KEYS.PROFILES;
+const CACHE_KEY = STORAGE_KEYS.REPORT_CACHE;
+const PAID_KEY = STORAGE_KEYS.PAID_HASHES;
 
 export interface ReportCacheEntry {
   inputHash: string;
@@ -117,5 +127,36 @@ export const storageService = {
       return entry.result;
     }
     return null;
+  },
+
+  // Pending State & Session Helpers
+  getPendingState: (): any | null => {
+    const data = sessionStorage.getItem(STORAGE_KEYS.PENDING_STATE);
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  },
+
+  setPendingState: (stateObj: any) => {
+    sessionStorage.setItem(STORAGE_KEYS.PENDING_STATE, JSON.stringify(stateObj));
+  },
+
+  clearPendingState: () => {
+    sessionStorage.removeItem(STORAGE_KEYS.PENDING_STATE);
+  },
+
+  getPendingPayHash: (): string | null => {
+    return sessionStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH);
+  },
+
+  setPendingPayHash: (hash: string) => {
+    sessionStorage.setItem(STORAGE_KEYS.PENDING_PAY_HASH, hash);
+  },
+
+  clearPendingPayHash: () => {
+    sessionStorage.removeItem(STORAGE_KEYS.PENDING_PAY_HASH);
   }
 };

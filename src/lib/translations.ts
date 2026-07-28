@@ -412,3 +412,6 @@ export const translations = {
   btnInputNew: "Enter New Details"
 }
 };
+
+export type TranslationDictionary = typeof translations.ko;
+

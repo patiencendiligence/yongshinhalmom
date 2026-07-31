@@ -7,6 +7,9 @@ const urls = [
   "",
   "/pricing",
   "/policies",
+  "/example/rich-ceo",
+  "/example/pop-star",
+  "/example/king-josun",
 ];
 
 function scan(dir, routePrefix = "") {

@@ -11,6 +11,7 @@ import { GoogleGenAI } from "@google/genai";
 import { createClient } from "@supabase/supabase-js";
 import OpenAI from "openai";
 import { getManseRyeok, getTodayPillar } from "./src/lib/manseRyeok.js";
+import { EXAMPLE_REPORTS } from "./src/data/exampleReports.js";
 
 dotenv.config();
 
@@ -729,6 +730,141 @@ ${finalPrompt}
     console.error("[Gemini Dream Server] Global route handler caught error:", globalErr);
     res.status(500).json({ error: globalErr.message || "An unexpected error occurred during dream generation." });
   }
+});
+
+app.get("/example/:slug", (req, res) => {
+  const { slug } = req.params;
+  const report = EXAMPLE_REPORTS[slug];
+  if (!report) {
+    return res.status(404).send("Example report not found");
+  }
+
+  const html = `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${report.titleKo} | 용신할멈 명리비책</title>
+  <meta name="description" content="${report.descriptionKo}" />
+  <link rel="canonical" href="https://yongshinhalmom.vercel.app/example/${report.slug}" />
+  <meta property="og:title" content="${report.titleKo} | 용신할멈" />
+  <meta property="og:description" content="${report.descriptionKo}" />
+  <meta property="og:url" content="https://yongshinhalmom.vercel.app/example/${report.slug}" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="용신할멈" />
+  <script type="application/ld+json">
+    ${JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "headline": report.titleKo,
+      "description": report.descriptionKo,
+      "url": `https://yongshinhalmom.vercel.app/example/${report.slug}`,
+      "publisher": {
+        "@type": "Organization",
+        "name": "용신할멈",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://yongshinhalmom.vercel.app/assets/yongshin.png"
+        }
+      }
+    })}
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: #f3efe0; color: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; padding: 1rem; }
+    @media (prefers-color-scheme: dark) {
+      body { background-color: #030407; color: #f3f4f6; }
+      .card { background-color: #0b0f17 !important; border-color: rgba(255,255,255,0.15) !important; }
+      .advice-box { background-color: #141b28 !important; border-color: #00f2ff !important; }
+      .badge { background-color: rgba(0,242,255,0.1) !important; color: #00f2ff !important; border-color: rgba(0,242,255,0.2) !important; }
+      .sub-box { background-color: rgba(0,0,0,0.4) !important; border-color: rgba(255,255,255,0.1) !important; }
+      .ch-box { background-color: #111622 !important; border-color: rgba(255,255,255,0.1) !important; }
+      .ch-tag { background-color: #092d38 !important; color: #00f2ff !important; border-color: #086275 !important; }
+      .text-muted { color: rgba(255,255,255,0.6) !important; }
+      a { color: #00f2ff !important; }
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 1rem 0; }
+    .card { background-color: #faf7ef; border: 1px solid rgba(0,0,0,0.15); padding: 2rem; margin-bottom: 2rem; }
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; background-color: rgba(236,72,153,0.1); color: #be185d; border: 1px solid rgba(236,72,153,0.2); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem; }
+    h1 { font-size: 1.75rem; font-family: Georgia, serif; font-weight: 900; margin-bottom: 0.5rem; text-align: center; }
+    .subtitle { font-size: 0.875rem; text-align: center; color: #666; margin-bottom: 1.5rem; }
+    .advice-box { background-color: #f3ece0; border-left: 4px solid #b45309; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .advice-title { font-size: 0.75rem; font-weight: 800; color: #92400e; margin-bottom: 0.5rem; text-transform: uppercase; }
+    .advice-quote { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; white-space: pre-line; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; text-align: center; font-size: 0.75rem; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.75rem; }
+    .grid-item { background: rgba(255,255,255,0.6); padding: 0.5rem; }
+    .grid-lbl { display: block; font-size: 0.65rem; color: #777; font-weight: 700; }
+    .sub-box { background-color: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); padding: 0.875rem; font-size: 0.85rem; margin-bottom: 2rem; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
+    .ch-box { background-color: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.1); padding: 1.25rem; margin-bottom: 1.25rem; }
+    .ch-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .ch-tag { font-family: monospace; font-size: 0.7rem; font-weight: 800; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 0.15rem 0.5rem; }
+    .ch-title { font-size: 1.15rem; font-family: Georgia, serif; font-weight: 700; }
+    .ch-content { font-size: 0.925rem; line-height: 1.7; color: #333; }
+    .cta-box { text-align: center; padding: 2rem; background: rgba(236,72,153,0.05); border: 1px solid rgba(236,72,153,0.2); margin-top: 2rem; }
+    .btn { display: inline-block; padding: 0.875rem 2rem; background: #111; color: #fff; text-decoration: none; font-weight: 800; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; margin-top: 1rem; }
+    a { color: #b45309; text-decoration: none; font-weight: 700; }
+    a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div style="margin-bottom: 1.5rem;">
+      <a href="/" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em;">← 메인으로 돌아가기</a>
+    </div>
+
+    <article class="card">
+      <div class="badge">용신할멈 명리비책 예시 리포트</div>
+      <h1>${report.titleKo}</h1>
+      <p class="subtitle">${report.subtitleKo}</p>
+
+      <div class="advice-box">
+        <div class="advice-title">👵 할멈의 조언</div>
+        <div class="advice-quote">${report.grandmaAdvice.quote}</div>
+        <div class="grid-3">
+          <div class="grid-item"><span class="grid-lbl">COLOR</span><strong>${report.grandmaAdvice.color}</strong></div>
+          <div class="grid-item"><span class="grid-lbl">ITEM</span><strong>${report.grandmaAdvice.item}</strong></div>
+          <div class="grid-item"><span class="grid-lbl">FOOD</span><strong>${report.grandmaAdvice.food}</strong></div>
+        </div>
+      </div>
+
+      <div class="sub-box">
+        <div><strong>사주 대상자:</strong> ${report.subjectInfo.birthDate}</div>
+        <div><strong>Data Pattern:</strong> <span style="color: #b45309;">${report.subjectInfo.dataPattern}</span></div>
+      </div>
+
+      <div>
+        ${report.chapters.map(ch => `
+          <section class="ch-box">
+            <div class="ch-header">
+              <span class="ch-tag">${ch.number}</span>
+              <h2 class="ch-title">${ch.title}</h2>
+            </div>
+            <p class="ch-content">${ch.content}</p>
+            ${ch.link ? `<div style="margin-top: 0.75rem; font-size: 0.8rem;"><a href="${ch.link.url}">${ch.link.label}</a></div>` : ''}
+          </section>
+        `).join('')}
+      </div>
+
+      <div class="cta-box">
+        <h3 style="font-size: 1.1rem; font-family: Georgia, serif; margin-bottom: 0.5rem;">나만의 정밀 사주팔자 리포트 풀어보기</h3>
+        <p class="text-muted" style="font-size: 0.8rem;">용신할멈이 생년월시와 명리 기운을 바탕으로 타고난 성향과 운세를 풀어드립니다.</p>
+        <a href="/" class="btn">무료 사주 분석 시작하기</a>
+      </div>
+    </article>
+
+    <div style="text-align: center; font-size: 0.75rem; padding: 1rem 0;" class="text-muted">
+      <p>다른 예시 리포트: 
+        <a href="/example/rich-ceo">재벌가 대표</a> · 
+        <a href="/example/pop-star">세계적 팝스타</a> · 
+        <a href="/example/king-josun">조선 세종대왕</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.send(html);
 });
 
 async function startServer() {

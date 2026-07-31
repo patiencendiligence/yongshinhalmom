@@ -11,6 +11,7 @@ import PolicyView from "./PolicyView";
 import PricingView from "./PricingView";
 import SuccessView from "./SuccessView";
 import SeoPage from "../pages/SeoPage";
+import ExampleReportView from "./ExampleReportView";
 import { HeaderActions } from "./HeaderActions";
 import { LoadingView } from "./LoadingView";
 import InstallPrompt from "./InstallPrompt";
@@ -122,6 +123,7 @@ export default function MainApp() {
               <PricingView onBack={handleBack} onPurchase={handlePurchase} lang={lang} />
             </motion.div>
           } />
+          <Route path="/example/:slug" element={<ExampleReportView lang={lang} />} />
           <Route path="/:category/:slug" element={<SeoPage onBack={handleBack} lang={lang} />}/>
           <Route path="/success" element={<SuccessView lang={lang} />} />
           <Route path="*" element={

@@ -1,113 +1,210 @@
 <!-- ko -->
+# 비견(比肩)이란 무엇인가?
 
-# 비견(比肩)의 성격과 나를 돕는 기운 해석
+비견은 사주 십성 중 하나로, 일간과 같은 오행과 같은 음양을 가진 기운이라네.
 
-> "같은 어깨를 나란히 한 벗, 그것이 비견일세. 힘이 되기도, 경쟁이 되기도 하지."
+쉽게 말해 나와 가장 비슷한 결을 가진 존재를 뜻하지.
 
-## 비견이란 무엇인가
+그래서 비견은 자기 자신, 자아, 독립성, 경쟁심, 형제자매, 친구와 같은 의미로 해석되는 경우가 많다네.
 
-비견은 일간과 오행이 같고 음양도 같은 기운을 말한다. 나와 똑같은 힘을 가진 존재가 옆에 서 있는 것과 같아서, '어깨를 나란히 한다'는 뜻 그대로 동료, 형제자매, 친구, 동업자를 상징한다.
-
-사주에 비견이 많으면 자립심과 주관이 강하고, 남에게 기대기보다 스스로 헤쳐나가려는 성향이 두드러진다.
-
-## 실생활 속 비견의 모습
-
-비견이 강한 사람은 어릴 때부터 "내 일은 내가 알아서 한다"는 태도가 뚜렷하다. 형제자매와 사이가 각별하거나, 반대로 같은 자리를 두고 경쟁하는 관계가 되기도 한다.
-
-직장에서는 동료와 협력할 때 큰 힘을 발휘하지만, 같은 자리를 두고 경쟁 구도가 생기면 자존심 싸움으로 번지기 쉽다.
-
-예를 들어 형제가 함께 가업을 물려받는 경우, 비견의 기운이 강하면 서로 돕는 동반자가 되거나 혹은 재산을 둘러싼 신경전의 당사자가 되기도 한다.
-
-## 연애운에서의 비견
-
-연애에서 비견이 강하면 상대에게 의존하기보다 대등한 관계를 원한다. 서로의 독립성을 존중하는 커플이라면 비견의 기운이 오히려 건강한 균형을 만들지만, 한쪽이 지나치게 주도권을 쥐려 하면 자존심 싸움으로 관계가 삐걱댈 수 있다.
-
-특히 재물을 다루는 십성(정재·편재)이 약한 상태에서 비견이 과다하면, 애정 문제가 아니라 돈 문제로 다툼이 생기기 쉬우니 유의해야 한다.
-
-## 직업운과 재물운
-
-비견이 발달한 사람은 동업이나 프리랜서, 자기 사업처럼 스스로 주도권을 쥐는 일에서 만족도가 높다.
-
-다만 비견이 과다하면 형제자매나 동료와 재물을 나누는 상황이 자주 생기고, 예상보다 지출이 늘어나는 경우도 있다.
-
-그래서 전통 명리학에서는 비견이 많은 사주일수록 재물 관리에 있어 동업 계약서나 명확한 지분 정리가 특히 중요하다고 본다.
-
-## 건강운
-
-비견은 오행 자체보다 '기운의 균형'과 관련이 깊다. 비견이 과다한 사주는 자기 주장이 강해 스트레스를 안으로 삭이지 않고 겉으로 표출하는 편이라 큰 병으로 이어지는 일은 적지만, 대신 사람 관계에서 오는 마찰이 만성 피로나 위장 장애로 이어지는 경우가 있다.
-
-## 겁재(劫財)와의 비교
-
-비견과 겁재는 모두 '나와 같은 오행'이라는 공통점이 있지만, 비견은 음양이 같고 겁재는 음양이 다르다.
-
-비견이 대등한 동료라면, 겁재는 겉으로는 친하지만 은근히 내 것을 가져가려는 경쟁자에 가깝다. 비견이 우호적인 경쟁이라면 겁재는 날카로운 경쟁이라고 볼 수 있다.
-
-## 용신할멈의 한마디
-
-> "어깨를 나란히 한 벗은 큰 힘이 되지만,
->
-> 같은 몫을 두고 다투면 남보다 못한 사이가 된다네.
->
-> 나눌 땐 확실히 나누고, 도울 땐 확실히 도우시게."
-
+사주에서 비견이 강하면 자기 힘으로 살아가려는 의지가 강하고 남에게 쉽게 기대지 않는 성향이 나타난다네.
 <!-- /ko -->
-
 <!-- en -->
+# What is Bi-Gyeon (Companion Star)?
 
-# Personality and Meaning of Bigyeon (比肩): The Energy of Equals and Self-Reliance
+Bi-Gyeon is one of the Ten Gods in Saju, representing the same element and same polarity as the Day Master.
 
-> "A companion who stands shoulder to shoulder with you—that is Bigyeon. It can become your greatest support or your strongest competition."
+It symbolizes people or energies most similar to oneself.
 
-## What Is Bigyeon?
+Bi-Gyeon often relates to selfhood, independence, rivalry, siblings, and close friends.
 
-Bigyeon refers to an energy that shares both the same Five Element and the same Yin-Yang polarity as the Day Master. It represents someone who possesses strength equal to your own. True to its meaning of "standing shoulder to shoulder," Bigyeon symbolizes siblings, friends, colleagues, partners, and companions who walk alongside you.
+When strong in a chart, it creates a powerful will to survive on one's own.
+<!-- /en -->
 
-When Bigyeon is prominent in a Four Pillars chart, it often creates strong independence, self-confidence, and a desire to rely on one's own abilities rather than depending on others.
+---
 
-## Bigyeon in Everyday Life
+<!-- ko -->
+## 비견의 핵심 의미
 
-People with strong Bigyeon energy often develop an attitude of "I can handle my own problems" from an early age. Relationships with siblings may be exceptionally close, or they may become highly competitive due to shared goals and resources.
+비견의 가장 큰 핵심은 "나"라네.
 
-In the workplace, Bigyeon can create excellent teamwork and cooperation among peers. However, when two individuals compete for the same position, recognition, or opportunity, the relationship can easily become a battle of pride.
+자기주관, 독립심, 경쟁심, 생존 본능이 여기에 담겨 있지.
 
-For example, when siblings inherit a family business together, strong Bigyeon energy may lead them to become powerful allies. On the other hand, it can also create rivalry and conflict over ownership, responsibility, or financial interests.
+비견이 적절히 있으면 삶의 중심이 흔들리지 않고 스스로 길을 찾는 힘이 생긴다네.
+<!-- /ko -->
+<!-- en -->
+## Core Meaning of Bi-Gyeon
 
-## Love and Relationships
+The essence of Bi-Gyeon is the self.
 
-In romantic relationships, people with strong Bigyeon generally prefer equality rather than dependence. They value mutual respect, personal freedom, and balanced partnerships.
+It governs independence, competition, and survival instinct.
 
-When both partners respect each other's independence, Bigyeon can contribute to a healthy and stable relationship. However, if one person attempts to dominate or control the relationship, conflicts fueled by pride and competitiveness may emerge.
+Balanced Bi-Gyeon creates inner stability and self-reliance.
+<!-- /en -->
 
-Particular caution is advised when Bigyeon is excessive while Wealth Stars (Jeongjae and Pyeonjae) are weak. In such cases, financial disagreements may become a more significant source of conflict than emotional issues.
+---
 
-## Career and Financial Fortune
+<!-- ko -->
+## 비견이 강한 사람의 성격
 
-People with strong Bigyeon often feel most fulfilled in careers where they maintain autonomy and control. Entrepreneurship, freelancing, self-employment, and partnership-based ventures frequently suit them well.
+* 독립심이 강하다
+* 남의 간섭을 싫어한다
+* 경쟁심이 크다
+* 자기 확신이 강하다
+* 쉽게 포기하지 않는다
 
-However, excessive Bigyeon may create situations where financial resources must constantly be shared with siblings, colleagues, partners, or associates. Unexpected expenses related to others can become a recurring theme.
+비견이 강한 사람은 자기만의 방식이 뚜렷한 경우가 많다네.
+<!-- /ko -->
+<!-- en -->
+## Personality Traits of Strong Bi-Gyeon
 
-For this reason, traditional Four Pillars practitioners often emphasize the importance of clear contracts, defined ownership structures, and transparent financial agreements whenever strong Bigyeon is present.
+* Strong independence
+* Dislikes interference
+* Highly competitive
+* Strong self-belief
+* Persistent
+<!-- /en -->
 
-## Health Fortune
+---
 
-Bigyeon is less associated with a specific organ system and more connected to the overall balance of personal energy. Individuals with excessive Bigyeon tend to express stress openly rather than suppressing it.
+<!-- ko -->
+## 비견과 인간관계
 
-Because of this, severe stress-related illnesses may be less common. However, repeated interpersonal conflicts and ongoing competition can gradually contribute to chronic fatigue, digestive discomfort, or emotional exhaustion.
+비견은 친구와 동료를 뜻하기도 한다네.
 
-## Comparing Bigyeon (比肩) and Geopjae (劫財)
+비견이 좋으면 좋은 동료와 협력할 수 있지만,
 
-Both Bigyeon and Geopjae represent energies that share the same Five Element as the Day Master. The difference lies in polarity: Bigyeon shares the same Yin-Yang polarity, while Geopjae has the opposite polarity.
+너무 강하면 경쟁심 때문에 충돌이 잦아질 수 있지.
+<!-- /ko -->
+<!-- en -->
+## Bi-Gyeon in Relationships
 
-Bigyeon resembles an equal companion or teammate standing beside you. Geopjae, by contrast, is more like a competitor who may appear friendly but is also capable of taking what belongs to you.
+Bi-Gyeon often represents friends and peers.
 
-If Bigyeon represents healthy competition among equals, Geopjae represents a sharper and more aggressive form of rivalry.
+When balanced, it creates strong teamwork.
 
+When excessive, rivalry can create conflict.
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견과 연애운
+
+연애에서는 독립성이 강해 상대를 답답하게 만들 수 있다네.
+
+하지만 서로 존중하는 관계에선 오래가는 힘이 있지.
+<!-- /ko -->
+<!-- en -->
+## Bi-Gyeon in Love
+
+Strong independence may make relationships challenging.
+
+Yet mutual respect can build long-lasting bonds.
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견에 어울리는 직업
+
+* 사업가
+* 프리랜서
+* 개발자
+* 운동선수
+* 영업
+* 자영업
+
+혼자 주도권을 잡는 일이 잘 맞는다네.
+<!-- /ko -->
+<!-- en -->
+## Careers for Bi-Gyeon
+
+* Entrepreneur
+* Freelancer
+* Developer
+* Athlete
+* Sales
+* Self-employed
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견과 재물운
+
+비견이 강하면 돈을 직접 벌려는 힘이 크다네.
+
+하지만 재물 경쟁이 많고 지출도 커질 수 있다네.
+<!-- /ko -->
+<!-- en -->
+## Wealth and Bi-Gyeon
+
+Bi-Gyeon gives strong earning power.
+
+But it can also bring competition and spending.
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견이 너무 많으면?
+
+고집이 세지고 협력이 어려워질 수 있다네.
+
+혼자 버티려는 성향이 지나치면 외로움이 깊어진다네.
+<!-- /ko -->
+<!-- en -->
+## When Bi-Gyeon is Excessive
+
+Too much Bi-Gyeon creates stubbornness and isolation.
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견이 부족하면?
+
+자기 확신이 약해지고 쉽게 휘둘릴 수 있다네.
+<!-- /ko -->
+<!-- en -->
+## When Bi-Gyeon is Weak
+
+Weak Bi-Gyeon may cause low confidence and dependency.
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 비견과 잘 맞는 십성
+
+* 식신
+* 정재
+* 정관
+
+이 조합이 안정감을 만든다네.
+<!-- /ko -->
+<!-- en -->
+## Compatible Stars with Bi-Gyeon
+
+* Sik-Sin
+* Jeong-Jae
+* Jeong-Gwan
+<!-- /en -->
+
+---
+
+<!-- ko -->
+## 용신할멈 한마디
+
+> 비견은 홀로 서는 힘이라네.
+>
+> 하지만 세상은 혼자만으로 굴러가지 않는 법이지.
+<!-- /ko -->
+<!-- en -->
 ## Halmeom's Wise Words
 
-> "A companion who walks beside you can become a tremendous source of strength.
+> Bi-Gyeon is the power to stand alone.
 >
-> But when two people fight over the same share, they may become worse than strangers.
->
-> When it is time to share, share clearly. When it is time to help, help wholeheartedly."
-
+> But no world turns by one person alone.
 <!-- /en -->

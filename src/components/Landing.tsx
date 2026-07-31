@@ -205,8 +205,9 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
           )}
         </motion.div>
 
-        <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm px-4">
+        <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-sm sm:max-w-md px-4">
           <InstallPrompt />
+          
           <button
             type="button"
             onClick={() => navigate('/basic/what-is-saju')}
@@ -217,7 +218,46 @@ export default function Landing({ onStart, onOpenProfiles, hasProfiles, lang }: 
 
           {/* Beautiful, traditional, semantic footer for SEO and internal link crawling */}
           <footer className="mt-8 pt-6 border-t border-ink-black/10 dark:border-white/10 w-full text-left opacity-80 z-10">
-            <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-ink-black/50 dark:text-white/40 mb-3 text-center">
+              {/* Enhanced Service Description Card for Users and Search Crawlers */}
+            <section className="w-full text-left p-5 rounded-none bg-white/40 dark:bg-white/[0.03] border border-ink-black/10 dark:border-white/10 text-xs leading-relaxed space-y-3">
+              <h2 className="text-sm font-serif font-black tracking-tight text-ink-black/90 dark:text-white/90 border-b border-ink-black/10 dark:border-white/10 pb-2">
+                👵 {lang === "en" ? "About Yongshin Halmeom Saju" : "용신할멈 사주명리 서비스 안내"}
+              </h2>
+              <p className="text-ink-black/80 dark:text-white/70">
+                {lang === "en"
+                  ? "Yongshin Halmeom provides in-depth traditional Eastern astrology (Saju / Four Pillars of Destiny) analysis based on your birth date and time. Discover your core element, Yongshin (balancing element), lifetime fortune trends, and daily guidance."
+                  : "용신할멈은 태어난 연(年)·월(月)·일(日)·시(時)에 담긴 천간과 지지의 여덟 글자(사주팔자)와 오행(木·火·土·金·水)의 상생상극 원리를 바탕으로 개인의 기질, 재물, 커리어, 건강 및 2026년 세운 흐름을 정밀 분석해 드리는 명리 운세 서비스입니다."}
+              </p>
+              <div className="pt-2 border-t border-ink-black/5 dark:border-white/5 grid grid-cols-2 gap-2 text-[11px] font-sans">
+                <div className="p-2 bg-ink-black/5 dark:bg-white/5 rounded-none">
+                  <span className="font-bold block text-ink-black/90 dark:text-white/90">✨ {lang === "en" ? "Yongshin Balancing" : "나만의 용신 찾기"}</span>
+                  <span className="text-[10px] text-ink-black/60 dark:text-white/50">{lang === "en" ? "Harmonizing life elements" : "사주 기운의 조화와 억부 조후 분석"}</span>
+                </div>
+                <div className="p-2 bg-ink-black/5 dark:bg-white/5 rounded-none">
+                  <span className="font-bold block text-ink-black/90 dark:text-white/90">📜 {lang === "en" ? "6 Core Chapters" : "6대 영역 상세 리포트"}</span>
+                  <span className="text-[10px] text-ink-black/60 dark:text-white/50">{lang === "en" ? "Fortune, career, health & more" : "대운, 세운, 건강, 인간관계, 재물"}</span>
+                </div>
+              </div>
+
+              {/* SSR Sample Report Links */}
+              <div className="pt-2">
+                <span className="block text-[10px] font-bold uppercase tracking-widest text-ink-black/50 dark:text-white/40 mb-1.5">
+                  📖 {lang === "en" ? "Sample Reports (SSR)" : "명리비책 실제 예시 리포트 미리보기"}
+                </span>
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <Link to="/example/rich-ceo" className="px-2.5 py-1 bg-amber-500/10 dark:bg-cyan-500/10 border border-amber-600/30 dark:border-cyan-400/30 font-bold hover:underline">
+                    재벌가 대표 사주 ›
+                  </Link>
+                  <Link to="/example/pop-star" className="px-2.5 py-1 bg-amber-500/10 dark:bg-cyan-500/10 border border-amber-600/30 dark:border-cyan-400/30 font-bold hover:underline">
+                    팝스타 사주 ›
+                  </Link>
+                  <Link to="/example/king-josun" className="px-2.5 py-1 bg-amber-500/10 dark:bg-cyan-500/10 border border-amber-600/30 dark:border-cyan-400/30 font-bold hover:underline">
+                    세종대왕 사주 ›
+                  </Link>
+                </div>
+              </div>
+            </section>
+            <h2 className="text-[10px] font-sans font-black uppercase tracking-[0.2em] text-ink-black/50 dark:text-white/40 my-3 text-center">
               {lang === "en" ? "Saju & Astrology Library" : "🔮 용신할멈 명리비책 서재 바로가기"}
             </h2>
             <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[11px] font-sans text-ink-black/70 dark:text-white/50 justify-items-center">

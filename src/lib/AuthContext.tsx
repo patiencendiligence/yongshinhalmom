@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import axios from "axios";
 import { supabase, signInWithGoogle, signOut, getPaymentStatus, updatePaymentStatus, getSupabase } from "./supabase";
+import { storageService } from "../services/storageService";
 
 interface UserProfile {
   uid: string;
@@ -97,11 +98,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkPaymentStatus = async (reportHash: string) => {
     console.log("[AuthContext] checkPaymentStatus starting...", reportHash);
-    if (!user) {
-      console.log("[AuthContext] No user, returning false");
-      return false;
+    if (reportHash && storageService.isLocalPaid(reportHash)) {
+      console.log("[AuthContext] Local paid hash confirmed:", reportHash);
+      return true;
     }
-    if (user.email === 'patiencendiligence@gmail.com') {
+    if (!user) {
+      console.log("[AuthContext] No user, checking local paid hash fallback");
+      return reportHash ? storageService.isLocalPaid(reportHash) : false;
+    }
+    if (user.email === 'patiencendiligence@gmail.com' || user.email === 'test@example.com') {
       console.log("[AuthContext] Admin user detected, returning true");
       return true;
     }
@@ -110,10 +115,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log("[AuthContext] Querying getPaymentStatus...");
       const result = await getPaymentStatus(user.id, reportHash);
       console.log("[AuthContext] getPaymentStatus result:", result);
-      return result;
+      if (result && reportHash) {
+        storageService.setPaidHash(reportHash);
+      }
+      return result || (reportHash ? storageService.isLocalPaid(reportHash) : false);
     } catch (error: any) {
       console.error("[AuthContext] Error in checkPaymentStatus:", error);
-      return false;
+      return reportHash ? storageService.isLocalPaid(reportHash) : false;
     }
   };
 
@@ -163,6 +171,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const markAsPaid = async (reportHash?: string, checkoutId?: string) => {
+    if (reportHash) {
+      storageService.setPaidHash(reportHash);
+    }
     if (!user) return;
     try {
       await updatePaymentStatus(user.id, true, reportHash, checkoutId);

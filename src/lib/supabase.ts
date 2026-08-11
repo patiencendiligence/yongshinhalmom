@@ -1,4 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { storageService } from '../services/storageService';
 
 let supabaseInstance: SupabaseClient | null = null;
 
@@ -68,52 +69,75 @@ export async function signOut() {
 }
 
 export async function getPaymentStatus(userId: string, reportHash?: string) {
+  if (reportHash && storageService.isLocalPaid(reportHash)) {
+    console.log("[Supabase] Local paid status confirmed for reportHash:", reportHash);
+    return true;
+  }
+
   if (!userId) return false;
   console.log("[Supabase] getPaymentStatus for:", userId, reportHash);
   const client = getSupabase();
   if (!client) {
     console.warn("[Supabase] Client not configured in getPaymentStatus");
-    return false;
+    return reportHash ? storageService.isLocalPaid(reportHash) : false;
   }
 
   try {
-    let query = client
+    const query = client
       .from('payments')
-      .select('is_premium')
+      .select('is_premium, report_hash')
       .eq('user_id', userId);
-      
-    if (reportHash) {
-      query = query.eq('report_hash', reportHash);
-    }
 
     console.log("[Supabase] Executing query...");
     
     // Add a 10s timeout to the query to prevent infinite hanging
-    const queryPromise = query.limit(1);
     const timeoutPromise = new Promise<{data: any, error: any}>((_, reject) => 
       setTimeout(() => reject(new Error("SUPABASE_QUERY_TIMEOUT")), 10000)
     );
 
     const { data, error } = await Promise.race([
-      queryPromise,
+      query,
       timeoutPromise as any
     ]);
     
     if (error) {
       console.error("[Supabase] Error fetching payment status:", error);
-      return false;
+      return reportHash ? storageService.isLocalPaid(reportHash) : false;
     }
     console.log("[Supabase] Query success, data:", data);
-    return data?.[0]?.is_premium || false;
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      return reportHash ? storageService.isLocalPaid(reportHash) : false;
+    }
+
+    const hasPaid = data.some((row: any) => {
+      if (!row.is_premium) return false;
+      if (!reportHash) return true;
+      return !row.report_hash || row.report_hash === reportHash || row.report_hash === '*';
+    });
+
+    if (hasPaid && reportHash) {
+      storageService.setPaidHash(reportHash);
+    }
+
+    return hasPaid || (reportHash ? storageService.isLocalPaid(reportHash) : false);
   } catch (e: any) {
     console.error(`[Supabase] ${e.message === 'SUPABASE_QUERY_TIMEOUT' ? 'Query Timed Out' : 'Fatal error'} in getPaymentStatus:`, e);
-    return false;
+    return reportHash ? storageService.isLocalPaid(reportHash) : false;
   }
 }
 
 export async function updatePaymentStatus(userId: string, isPremium: boolean, reportHash?: string, checkoutId?: string) {
   const client = getSupabase();
-  if (!client) throw new Error("Supabase is not configured.");
+  
+  if (reportHash && isPremium) {
+    storageService.setPaidHash(reportHash);
+  }
+
+  if (!client) {
+    console.warn("Supabase is not configured, updated local storage only.");
+    return;
+  }
 
   const payload: any = { 
     user_id: userId, 
@@ -124,9 +148,21 @@ export async function updatePaymentStatus(userId: string, isPremium: boolean, re
   if (reportHash) payload.report_hash = reportHash;
   if (checkoutId) payload.checkout_id = checkoutId;
 
-  const { error } = await client
-    .from('payments')
-    .upsert(payload, { onConflict: 'user_id' });
-  
-  if (error) throw error;
+  try {
+    const { error } = await client
+      .from('payments')
+      .upsert(payload, { onConflict: 'user_id' });
+    
+    if (error) {
+      console.warn("[Supabase] Upsert with onConflict user_id failed, trying direct insert/update:", error.message);
+      const { error: insertErr } = await client
+        .from('payments')
+        .insert(payload);
+      if (insertErr) {
+        console.error("[Supabase] Insert fallback error:", insertErr);
+      }
+    }
+  } catch (err) {
+    console.error("[Supabase] Error in updatePaymentStatus:", err);
+  }
 }

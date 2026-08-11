@@ -169,7 +169,7 @@ export const storageService = {
 
   // Pending State & Session Helpers
   getPendingState: (): any | null => {
-    const data = safeSessionStorage.getItem(STORAGE_KEYS.PENDING_STATE);
+    const data = safeLocalStorage.getItem(STORAGE_KEYS.PENDING_STATE) || safeSessionStorage.getItem(STORAGE_KEYS.PENDING_STATE);
     if (!data) return null;
     try {
       return JSON.parse(data);
@@ -179,22 +179,27 @@ export const storageService = {
   },
 
   setPendingState: (stateObj: any) => {
+    safeLocalStorage.setItem(STORAGE_KEYS.PENDING_STATE, JSON.stringify(stateObj));
     safeSessionStorage.setItem(STORAGE_KEYS.PENDING_STATE, JSON.stringify(stateObj));
   },
 
   clearPendingState: () => {
+    safeLocalStorage.removeItem(STORAGE_KEYS.PENDING_STATE);
     safeSessionStorage.removeItem(STORAGE_KEYS.PENDING_STATE);
   },
 
   getPendingPayHash: (): string | null => {
-    return safeSessionStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH);
+    return safeLocalStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH) || safeSessionStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH);
   },
 
   setPendingPayHash: (hash: string) => {
+    if (!hash) return;
+    safeLocalStorage.setItem(STORAGE_KEYS.PENDING_PAY_HASH, hash);
     safeSessionStorage.setItem(STORAGE_KEYS.PENDING_PAY_HASH, hash);
   },
 
   clearPendingPayHash: () => {
+    safeLocalStorage.removeItem(STORAGE_KEYS.PENDING_PAY_HASH);
     safeSessionStorage.removeItem(STORAGE_KEYS.PENDING_PAY_HASH);
   }
 };

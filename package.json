@@ -44,6 +44,7 @@
     "vite": "6.4.3"
   },
   "devDependencies": {
+    "cheerio": "^1.2.0",
     "vite-react-ssg": "0.9.2"
   }
 }

@@ -343,6 +343,130 @@ const PROMPT_TEMPLATE = process.env.PROMPT_TEMPLATE || process.env.VITE_PROMPT_T
 const PROMPT_PAID_DETAIL_TEMPLATE = process.env.PROMPT_PAID_DETAIL_TEMPLATE || process.env.VITE_PROMPT_PAID_DETAIL_TEMPLATE || "";
 const PROMPT_PAID_DETAIL_PRINT = process.env.PROMPT_PAID_DETAIL_PRINT || process.env.VITE_PROMPT_PAID_DETAIL_PRINT || "";
 
+const SECURITY_GUARDRAIL_INSTRUCTION = process.env.SECURITY_GUARDRAIL_INSTRUCTION || "";
+
+function isMaliciousInput(input: any): boolean {
+  if (!input) return false;
+
+  let strToTest = "";
+  if (typeof input === "string") {
+    strToTest = input;
+  } else if (typeof input === "object") {
+    try {
+      strToTest = JSON.stringify(input);
+    } catch (e) {
+      return true;
+    }
+  } else {
+    strToTest = String(input);
+  }
+
+  if (!strToTest || !strToTest.trim()) return false;
+
+  // 1. 프롬프트 인젝션 및 시스템 지침 탈취 시도 패턴
+  const promptInjectionPatterns = [
+    /system\s*instruction/i,
+    /system_instruction/i,
+    /system\s*prompt/i,
+    /ignore\s+(previous|all|above|prior)\s*(instruction|prompt|command|rule|text)/i,
+    /disregard\s+(previous|all|above|prior)/i,
+    /forget\s+(previous|all|above|prior)/i,
+    /override\s+(previous|all|above|system)/i,
+    /reveal\s+(your|the)\s+(system|prompt|instruction|rule)/i,
+    /show\s+(me\s+)?(your\s+)?(system\s+)?(prompt|instruction|rule)/i,
+    /print\s+(your\s+)?(system\s+)?(prompt|instruction|rule)/i,
+    /output\s+(your\s+)?(system\s+)?(prompt|instruction|rule)/i,
+    /tell\s+me\s+(your\s+)?(system\s+)?(prompt|instruction|rule)/i,
+    /what\s+(is|are)\s+your\s+(system\s+)?(prompt|instruction|rule)/i,
+    /jailbreak/i,
+    /dan\s*mode/i,
+    /developer\s*mode/i,
+    /you\s+are\s+now\s+a/i,
+    /act\s+as\s+an?\s+unrestricted/i,
+    /프롬프트/i,
+    /시스템\s*지침/i,
+    /시스템\s*명령/i,
+    /시스템\s*설정/i,
+    /시스템\s*프롬프트/i,
+    /지침\s*(알려|보여|출력|공개|복사|말해)/i,
+    /프롬프트\s*(알려|보여|출력|공개|복사|말해)/i,
+    /규칙\s*(알려|보여|출력|공개|말해)/i,
+    /이전\s*(지침|명령|규칙)\s*(무시|잊어|버려)/i,
+    /모든\s*(지침|명령|규칙)\s*(무시|잊어|버려)/i,
+    /개발자\s*모드/i,
+    /자체\s*프롬프트/i
+  ];
+
+  for (const pattern of promptInjectionPatterns) {
+    if (pattern.test(strToTest)) {
+      return true;
+    }
+  }
+
+  // 2. 버그 유발 및 코드/스크립트/SQL 인젝션 시도 패턴
+  const codeInjectionPatterns = [
+    /<script/i,
+    /<\/script>/i,
+    /javascript:/i,
+    /onerror\s*=/i,
+    /onload\s*=/i,
+    /<iframe/i,
+    /eval\s*\(/i,
+    /exec\s*\(/i,
+    /process\.env/i,
+    /require\s*\(/i,
+    /import\s+.*from/i,
+    /SELECT\s+.*FROM/i,
+    /DROP\s+TABLE/i,
+    /INSERT\s+INTO/i,
+    /DELETE\s+FROM/i,
+    /UNION\s+SELECT/i,
+    /\${/i,
+    /\{\{/i,
+    /\}\}/i
+  ];
+
+  for (const pattern of codeInjectionPatterns) {
+    if (pattern.test(strToTest)) {
+      return true;
+    }
+  }
+
+  // 3. 무의미한 특수문자/문자 30회 이상 극단적 연속 반복
+  if (/(.)\1{30,}/.test(strToTest)) {
+    return true;
+  }
+
+  return false;
+}
+
+function createAbuseResponse(zodiac: number = 0) {
+  return {
+    summary: "어느 안전이라고 장난질인게냐!",
+    zodiac: zodiac,
+    grandmaAdvice: {
+      quote: "어느 안전이라고 장난질인게냐! 당돌하게 엉뚱한 꾀나 주술을 부려 할멈을 시험하려 들다니, 썩 물러가지 못할까!",
+      color: "검은색",
+      item: "소금 한 뼘",
+      food: "따뜻한 맑은 물"
+    },
+    sections: [
+      {
+        title: "할멈의 매서운 호통",
+        content: "어느 안전이라고 장난질인게냐! 어디서 사악한 조작이나 속임수로 할멈을 현혹하려 드느냐! 사주팔자와 명리라는 것은 하늘의 뜻과 인간의 귀한 삶을 살피는 정성스러운 법이거늘, 그런 간사한 꾀와 장난질은 당장 거두어라!"
+      }
+    ],
+    luckInfo: {
+      color: "검은색",
+      item: "소금 한 뼘",
+      food: "따뜻한 맑은 물",
+      location: "동쪽 대문 밖"
+    },
+    isAbuse: true,
+    abuseMessage: "어느 안전이라고 장난질인게냐!"
+  };
+}
+
 const MODELS_TO_TRY = [
   "gemini-3.1-flash-lite",
   "gemini-3.5-flash",
@@ -383,6 +507,18 @@ app.post("/api/generate-report", async (req, res) => {
     const { pillars, zodiac, targetYear, lang, level, customQuestion } = req.body;
     if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
 
+    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
+
+    // Security Guardrail: Defense against malicious inputs, prompt injections & bug-inducing strings
+    if (
+      isMaliciousInput(customQuestion) ||
+      isMaliciousInput(pillars) ||
+      isMaliciousInput(req.body)
+    ) {
+      console.warn("[Security Guard] Malicious input or prompt injection attempt detected!");
+      return res.json(createAbuseResponse(correctZodiacIndex));
+    }
+
     const apiKey = getApiKey();
     
     // Use KST (UTC+9) for current date to match user expectations
@@ -392,9 +528,8 @@ app.post("/api/generate-report", async (req, res) => {
     const kstToday = kstNow.toISOString().split('T')[0];
     
     const currentYear = targetYear || kstNow.getFullYear();
-    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
 
-    const systemInstructionToUse = SYSTEM_INSTRUCTION.trim();
+    const systemInstructionToUse = `${SYSTEM_INSTRUCTION.trim()}\n\n${SECURITY_GUARDRAIL_INSTRUCTION.trim()}`;
 
     let detailTemplateContent = PROMPT_PAID_DETAIL_TEMPLATE;
     let detailPrintContent = PROMPT_PAID_DETAIL_PRINT;
@@ -502,14 +637,25 @@ app.post("/api/generate-daily", async (req, res) => {
   try {
     const { pillars, zodiac, lang } = req.body;
     if (!pillars?.yearPillar) return res.status(400).json({ error: "pillars calculation required" });
+
+    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
+
+    // Security Guardrail: Defense against malicious inputs, prompt injections & bug-inducing strings
+    if (
+      isMaliciousInput(pillars) ||
+      isMaliciousInput(req.body)
+    ) {
+      console.warn("[Security Guard Daily] Malicious input or prompt injection attempt detected!");
+      return res.json(createAbuseResponse(correctZodiacIndex));
+    }
+
     const apiKey = getApiKey();
     const todayPillar = getTodayPillar();
     const kstOffset = 9 * 60 * 60 * 1000;
     const kstTodayDate = new Date(new Date().getTime() + kstOffset);
     const formattedToday = `${kstTodayDate.getFullYear()}-${String(kstTodayDate.getMonth() + 1).padStart(2, '0')}-${String(kstTodayDate.getDate()).padStart(2, '0')}`;
 
-    const correctZodiacIndex = zodiac !== undefined ? zodiac : 0;
-    const systemInstructionToUse = SYSTEM_INSTRUCTION.trim();
+    const systemInstructionToUse = `${SYSTEM_INSTRUCTION.trim()}\n\n${SECURITY_GUARDRAIL_INSTRUCTION.trim()}`;
 
     const baseDailyTemplate = `${DAILY_PROMPT_TEMPLATE}\n${DAILY_PROMPT_PRINT}`;
 

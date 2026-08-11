@@ -139,6 +139,10 @@ async function main() {
         );
       });
     } else {
+      const parentDir = path.dirname(dest);
+      if (!fs.existsSync(parentDir)) {
+        fs.mkdirSync(parentDir, { recursive: true });
+      }
       fs.copyFileSync(src, dest);
     }
   }

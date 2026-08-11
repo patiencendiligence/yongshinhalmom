@@ -48,6 +48,10 @@ ${urls
 </urlset>
 `;
 
+if (!fs.existsSync("./public")) {
+  fs.mkdirSync("./public", { recursive: true });
+}
+
 fs.writeFileSync("./public/sitemap.xml", xml);
 
 console.log(`Generated sitemap (${urls.length} urls)`);

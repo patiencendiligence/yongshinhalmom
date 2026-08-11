@@ -148,10 +148,6 @@ export default function SeoPage({
 }) {
   const { category, slug } = useParams();
 
-  const [content, setContent] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [seoTitle, setSeoTitle] = useState("용신할멈 | YongshinHalmom");
-  const [seoDesc, setSeoDesc] = useState("용신할멈의 사주명리 분석, 일주 해석, 오행 분석, 용신 풀이");
   const [isMobileExplorerOpen, setIsMobileExplorerOpen] = useState(false);
   const [showScrollToTop, setShowScrollToTop] = useState(false);
   
@@ -162,66 +158,57 @@ export default function SeoPage({
   // Resolve dynamic theme colors for current active document
   const theme = getThemeColors(category, slug);
 
+  // Synchronous resolution of markdown content and SEO metadata for SSR/SSG pre-rendering
+  let path = `../data/${category}/${slug}.md`;
+  if (lang === "en") {
+    const enPath = `../data/${category}/${slug}-en.md`;
+    if (markdownModules[enPath]) {
+      path = enPath;
+    }
+  }
+
+  const rawText = markdownModules[path];
+  const content = rawText
+    ? filterContentByLanguage(rawText, lang)
+    : (lang === "en" ? "# Document not found" : "# 없는 문서라네");
+
+  const lines = content.split('\n').map(l => l.trim());
+  const titleLine = lines.find(line => line.startsWith('# '));
+  const seoTitle = titleLine ? titleLine.replace(/^#\s*/, '').trim() : (slug || "");
+
+  const cleanLines = lines.filter(line => line && !line.startsWith('#') && !line.startsWith('<!--') && !line.startsWith('---') && !line.startsWith('>'));
+  const seoDesc = cleanLines.length > 0 
+    ? cleanLines[0].replace(/[*_`\[\]]/g, '').substring(0, 150) + "..." 
+    : (lang === "en" ? "Explore traditional Saju wisdom with Yongshin Halmeom." : "용신할멈과 함께 알아보는 전통 사주명리 지혜.");
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 300) {
+      if (typeof window !== "undefined" && window.scrollY > 300) {
         setShowScrollToTop(true);
       } else {
         setShowScrollToTop(false);
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
+    if (typeof window !== "undefined") {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    if (typeof window !== "undefined") {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
   };
 
   useEffect(() => {
-    setIsLoading(true);
-    let path = `../data/${category}/${slug}.md`;
-    if (lang === "en") {
-      const enPath = `../data/${category}/${slug}-en.md`;
-      if (markdownModules[enPath]) {
-        path = enPath;
-      }
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
     }
-
-    const loader = markdownModules[path];
-
-    if (!loader) {
-      setContent(lang === "en" ? "# Document not found" : "# 없는 문서라네");
-      setIsLoading(false);
-      return;
-    }
-
-    loader().then((text: any) => {
-      const filtered = filterContentByLanguage(text, lang);
-      setContent(filtered);
-
-      // Extract a clean title and description for SEO
-      const lines = filtered.split('\n').map(l => l.trim());
-      const titleLine = lines.find(line => line.startsWith('# '));
-      const pageTitle = titleLine ? titleLine.replace(/^#\s*/, '').trim() : (slug || "");
-
-      const cleanLines = lines.filter(line => line && !line.startsWith('#') && !line.startsWith('<!--') && !line.startsWith('---') && !line.startsWith('>'));
-      const pageDesc = cleanLines.length > 0 
-        ? cleanLines[0].replace(/[*_`\[\]]/g, '').substring(0, 150) + "..." 
-        : (lang === "en" ? "Explore traditional Saju wisdom with Yongshin Halmeom." : "용신할멈과 함께 알아보는 전통 사주명리 지혜.");
-
-      setSeoTitle(pageTitle);
-      setSeoDesc(pageDesc);
-      setIsLoading(false);
-    }).catch(() => {
-      setIsLoading(false);
-    });
-    // Scroll back to top whenever active document page shifts
-    window.scrollTo(0, 0);
   }, [category, slug, lang]);
 
   // Sprite grid positioning for O-Hang elements (3 columns, 2 rows)
@@ -246,7 +233,7 @@ export default function SeoPage({
     <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 animate-fade-in" style={{minWidth: '98vw', wordBreak: 'keep-all'}}>
         <Helmet>
           <html lang={lang} />
-          <title>용신할멈 - AI 사주명리, 무료 사주, 용한 신점 &amp; 오늘의 운세 (Yongshin Halmeom) |{seoTitle} - {lang === "en" ? "Yongshin Halmeom" : "용신할멈"}</title>
+          <title>{`${seoTitle ? seoTitle + " | " : ""}${lang === "en" ? "Yongshin Halmeom" : "용신할멈 - 사주명리 지혜"}`}</title>
           <meta name="description" content={seoDesc} />
           <meta property="og:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />
           <meta property="og:description" content={seoDesc} />
@@ -328,32 +315,8 @@ export default function SeoPage({
 
         {/* Markdown Content Viewer */}
         <article className="prose prose-lg max-w-none text-ink-black/90 dark:text-white/95 leading-relaxed">
-          {isLoading ? (
-            <div className="space-y-6 animate-pulse mt-4">
-              {/* 타이틀 스켈레톤 */}
-              <div className="h-10 w-3/4 bg-ink-black/10 dark:bg-white/10 rounded-xs" />
-              <div className="h-[1px] w-full bg-ink-black/10 dark:bg-white/10 mb-8" />
-              
-              {/* 본문 블록 스켈레톤 */}
-              <div className="space-y-4">
-                <div className="h-4 w-full bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-                <div className="h-4 w-11/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-                <div className="h-4 w-4/5 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-                <div className="h-4 w-5/6 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-              </div>
-
-              {/* 블록쿼트 형태의 스켈레톤 */}
-              <div className="h-32 w-full bg-ink-black/[0.02] dark:bg-white/[0.01] border border-ink-black/5 dark:border-white/5 rounded-xl p-5 mt-8" />
-
-              <div className="space-y-4 pt-6">
-                <div className="h-4 w-11/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-                <div className="h-4 w-10/12 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-                <div className="h-4 w-4/5 bg-ink-black/5 dark:bg-white/5 rounded-xs" />
-              </div>
-            </div>
-          ) : (
-            <ReactMarkdown
-              components={{
+          <ReactMarkdown
+            components={{
                 h1: ({ children }) => (
                   <>
                     {category === "element" && (
@@ -427,7 +390,6 @@ export default function SeoPage({
             >
               {content}
             </ReactMarkdown>
-          )}
 
           {/* Related Posts Section for Internal Link Strength (SEO) */}
           <div className={`mt-16 pt-12 border-t ${theme.borderMuted}`}>

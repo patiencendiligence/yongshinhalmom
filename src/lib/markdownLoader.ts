@@ -5,5 +5,6 @@ export const markdownModules = import.meta.glob(
   {
     query: "?raw",
     import: "default",
+    eager: true,
   }
-);
+) as Record<string, string>;

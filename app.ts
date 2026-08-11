@@ -5,6 +5,7 @@ try {
 
 import express from "express";
 import path from "path";
+import fs from "fs";
 import axios from "axios";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
@@ -1042,6 +1043,17 @@ async function startServer() {
     app.use(express.static(distPath));
     app.get('*', (req, res) => {
       if (req.path.startsWith('/api/')) return;
+
+      const routeHtml = path.join(distPath, req.path, 'index.html');
+      if (fs.existsSync(routeHtml)) {
+        return res.sendFile(routeHtml);
+      }
+
+      const flatHtml = path.join(distPath, `${req.path}.html`);
+      if (fs.existsSync(flatHtml)) {
+        return res.sendFile(flatHtml);
+      }
+
       res.sendFile(path.join(distPath, 'index.html'));
     });
   }

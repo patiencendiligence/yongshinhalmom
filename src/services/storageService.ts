@@ -24,6 +24,44 @@ const STORAGE_KEY = STORAGE_KEYS.PROFILES;
 const CACHE_KEY = STORAGE_KEYS.REPORT_CACHE;
 const PAID_KEY = STORAGE_KEYS.PAID_HASHES;
 
+const safeLocalStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      return localStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      localStorage.setItem(key, value);
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window !== "undefined" && typeof localStorage !== "undefined") {
+      localStorage.removeItem(key);
+    }
+  }
+};
+
+const safeSessionStorage = {
+  getItem: (key: string): string | null => {
+    if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
+      return sessionStorage.getItem(key);
+    }
+    return null;
+  },
+  setItem: (key: string, value: string): void => {
+    if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem(key, value);
+    }
+  },
+  removeItem: (key: string): void => {
+    if (typeof window !== "undefined" && typeof sessionStorage !== "undefined") {
+      sessionStorage.removeItem(key);
+    }
+  }
+};
+
 export interface ReportCacheEntry {
   inputHash: string;
   year: number;
@@ -34,7 +72,7 @@ export interface ReportCacheEntry {
 
 export const storageService = {
   getProfiles: (): UserProfile[] => {
-    const data = localStorage.getItem(STORAGE_KEY);
+    const data = safeLocalStorage.getItem(STORAGE_KEY);
     return data ? JSON.parse(data) : [];
   },
 
@@ -51,21 +89,21 @@ export const storageService = {
 
     const newProfile: UserProfile = {
       ...profile,
-      id: crypto.randomUUID(),
+      id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
       createdAt: Date.now()
     };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([newProfile, ...profiles]));
+    safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify([newProfile, ...profiles]));
   },
 
   deleteProfile: (id: string) => {
     const profiles = storageService.getProfiles();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles.filter(p => p.id !== id)));
+    safeLocalStorage.setItem(STORAGE_KEY, JSON.stringify(profiles.filter(p => p.id !== id)));
   },
 
   // Paid tracking logic
   getPaidHashes: (): string[] => {
-    const data = localStorage.getItem(PAID_KEY);
+    const data = safeLocalStorage.getItem(PAID_KEY);
     return data ? JSON.parse(data) : [];
   },
 
@@ -73,7 +111,7 @@ export const storageService = {
     if (!hash) return;
     const hashes = storageService.getPaidHashes();
     if (!hashes.includes(hash)) {
-      localStorage.setItem(PAID_KEY, JSON.stringify([...hashes, hash]));
+      safeLocalStorage.setItem(PAID_KEY, JSON.stringify([...hashes, hash]));
     }
   },
 
@@ -84,14 +122,14 @@ export const storageService = {
 
   // Caching logic
   getReportCache: (): ReportCacheEntry[] => {
-    const data = localStorage.getItem(CACHE_KEY);
+    const data = safeLocalStorage.getItem(CACHE_KEY);
     return data ? JSON.parse(data) : [];
   },
 
   setReportCache: (entry: ReportCacheEntry) => {
     const cache = storageService.getReportCache();
     const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year || e.level !== entry.level);
-    localStorage.setItem(CACHE_KEY, JSON.stringify([entry, ...filtered]));
+    safeLocalStorage.setItem(CACHE_KEY, JSON.stringify([entry, ...filtered]));
   },
 
   findCachedReport: (data: any, year: number, level: 'simple' | 'detailed'): any | null => {
@@ -120,7 +158,7 @@ export const storageService = {
         if (!hasAnalysis) {
           console.log("[StorageService] Cached report is marked 'detailed' but lacks 'analysis' data. Busting cache to fetch new one from server.");
           const filtered = cache.filter(e => e.inputHash !== entry.inputHash || e.year !== entry.year || e.level !== entry.level);
-          localStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
+          safeLocalStorage.setItem(CACHE_KEY, JSON.stringify(filtered));
           return null;
         }
       }
@@ -131,7 +169,7 @@ export const storageService = {
 
   // Pending State & Session Helpers
   getPendingState: (): any | null => {
-    const data = sessionStorage.getItem(STORAGE_KEYS.PENDING_STATE);
+    const data = safeSessionStorage.getItem(STORAGE_KEYS.PENDING_STATE);
     if (!data) return null;
     try {
       return JSON.parse(data);
@@ -141,22 +179,22 @@ export const storageService = {
   },
 
   setPendingState: (stateObj: any) => {
-    sessionStorage.setItem(STORAGE_KEYS.PENDING_STATE, JSON.stringify(stateObj));
+    safeSessionStorage.setItem(STORAGE_KEYS.PENDING_STATE, JSON.stringify(stateObj));
   },
 
   clearPendingState: () => {
-    sessionStorage.removeItem(STORAGE_KEYS.PENDING_STATE);
+    safeSessionStorage.removeItem(STORAGE_KEYS.PENDING_STATE);
   },
 
   getPendingPayHash: (): string | null => {
-    return sessionStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH);
+    return safeSessionStorage.getItem(STORAGE_KEYS.PENDING_PAY_HASH);
   },
 
   setPendingPayHash: (hash: string) => {
-    sessionStorage.setItem(STORAGE_KEYS.PENDING_PAY_HASH, hash);
+    safeSessionStorage.setItem(STORAGE_KEYS.PENDING_PAY_HASH, hash);
   },
 
   clearPendingPayHash: () => {
-    sessionStorage.removeItem(STORAGE_KEYS.PENDING_PAY_HASH);
+    safeSessionStorage.removeItem(STORAGE_KEYS.PENDING_PAY_HASH);
   }
 };

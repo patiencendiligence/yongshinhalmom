@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import Landing from "./Landing";
 import InputForm from "./InputForm";
@@ -23,6 +23,14 @@ import { useReportFlow } from "../hooks/useReportFlow";
 import { getReportHash } from "../lib/hashUtils";
 
 export type AppState = "LANDING" | "INPUT" | "LOADING" | "CHOICE" | "RESULT" | "POLICY";
+
+function LegacyCategoryRedirect() {
+  const { category, slug } = useParams();
+  if (category && slug) {
+    return <Navigate to={`/${category}/${slug}`} replace />;
+  }
+  return <Navigate to="/" replace />;
+}
 
 export default function MainApp() {
   const { lang, toggleLang } = useLanguage();
@@ -124,6 +132,8 @@ export default function MainApp() {
             </motion.div>
           } />
           <Route path="/example/:slug" element={<ExampleReportView lang={lang} />} />
+          <Route path="/yongshinhalmom/:category/:slug" element={<LegacyCategoryRedirect />} />
+          <Route path="/yongshinhalmom/*" element={<Navigate to="/" replace />} />
           <Route path="/:category/:slug" element={<SeoPage onBack={handleBack} lang={lang} />}/>
           <Route path="/success" element={<SuccessView lang={lang} />} />
           <Route path="*" element={

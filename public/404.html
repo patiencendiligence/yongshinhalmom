@@ -6,16 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>용신할멈 - AI 사주명리, 무료 사주, 용한 신점 &amp; 오늘의 운세 (Yongshin Halmeom) | YONGSHIN HALMOM</title>
     <script type="text/javascript">
-      // GitHub Pages SPA 404 Fix
       (function() {
         var path = window.location.pathname;
         var basename = '/yongshinhalmom';
-        // If we are in the subpath, remove it for the hash
         if (path.indexOf(basename) === 0) {
-          path = path.slice(basename.length);
+          path = path.slice(basename.length) || '/';
         }
-        // Redirect to the root with the path as a hash
-        window.location.replace((basename || '') + '/#' + path + window.location.search);
+        var search = window.location.search || '';
+        var hash = window.location.hash || '';
+        var targetUrl = window.location.origin + path + search + hash;
+        if (targetUrl !== window.location.href) {
+          window.location.replace(targetUrl);
+        }
       })();
     </script>
     <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"용신할멈 - 사주명리 & 오늘의 운세","url":"https://yongshinhalmom.vercel.app/"}</script>

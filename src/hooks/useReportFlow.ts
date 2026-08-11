@@ -54,16 +54,27 @@ export function useReportFlow(
 
   // Handle success redirect context
   useEffect(() => {
-    if (window.location.hash.includes('success')) {
-      const savedHash = storageService.getPendingPayHash();
-      if (savedHash && user) {
-        markAsPaid(savedHash);
-        storageService.clearPendingPayHash();
-        // Clear success from URL if possible
-        window.history.replaceState({}, document.title, window.location.pathname);
+    const isSuccessRedirect = window.location.hash.includes('success') || window.location.search.includes('success');
+    if (isSuccessRedirect) {
+      const hashMatch = (window.location.hash + window.location.search).match(/report_hash=([^&]+)/);
+      const urlHash = hashMatch ? decodeURIComponent(hashMatch[1]) : null;
+      const savedHash = urlHash || storageService.getPendingPayHash() || (userData ? getReportHash(userData) : null);
+      
+      console.log("[Flow] Success redirect detected. Target hash:", savedHash, "User:", user?.id);
+
+      if (savedHash) {
+        storageService.setPaidHash(savedHash);
+        if (user) {
+          markAsPaid(savedHash);
+          storageService.clearPendingPayHash();
+        }
       }
+      
+      // Clean up success flag from URL
+      const cleanUrl = window.location.href.split('#')[0];
+      window.history.replaceState({}, document.title, cleanUrl);
     }
-  }, [user, markAsPaid]);
+  }, [user, userData, markAsPaid]);
 
   const loginAndPersist = useCallback(async (action?: string) => {
     storageService.setPendingState({
@@ -302,7 +313,7 @@ export function useReportFlow(
     
     // Use current URL path (e.g., pricing.html) instead of just origin
     const currentBase = window.location.href.split('#')[0];
-    const successUrl = `${currentBase}#/success?sale_id=[[sale_id]]&order_id=[[order_id]]`;
+    const successUrl = `${currentBase}#/success?report_hash=${encodeURIComponent(reportHash)}&sale_id=[[sale_id]]&order_id=[[order_id]]`;
     checkoutUrl.searchParams.set("redirect_url", successUrl);
     
     window.open(checkoutUrl.toString(), "_blank", "noreferrer");

@@ -257,8 +257,16 @@ export function useReportResult({
     if (viewMode === "today") return;
     if (!user || (isCurrentlyPaid && report.level === 'detailed')) return;
 
+    if (reportHash && storageService.isLocalPaid(reportHash)) {
+      setIsCurrentlyPaid(true);
+      setIsCheckingPayment(false);
+      return;
+    }
+
     let isMounted = true;
     let timerId: ReturnType<typeof setTimeout>;
+    let pollCount = 0;
+    const maxPolls = 15; // Limit polling to ~45 seconds maximum
 
     const checkStatus = async () => {
       if (!isMounted) return;
@@ -280,8 +288,11 @@ export function useReportResult({
         }
       }
 
-      if (isMounted && !isCurrentlyPaid) {
+      pollCount++;
+      if (isMounted && !isCurrentlyPaid && pollCount < maxPolls) {
         timerId = setTimeout(checkStatus, 3000);
+      } else if (pollCount >= maxPolls) {
+        setIsCheckingPayment(false);
       }
     };
 

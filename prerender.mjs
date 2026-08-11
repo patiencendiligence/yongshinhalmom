@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { pathToFileURL } from "url";
+import * as cheerio from "cheerio";
 
 // 1. Gather all static route URLs
 function getRoutes() {
@@ -65,42 +66,57 @@ async function main() {
     try {
       const { appHtml, helmet } = render(routeUrl);
 
-      let html = template;
+      // Parse the pristine template fresh for every route
+      const $ = cheerio.load(template, { decodeEntities: false });
 
-      // Extract helmet tags
+      // --- HTML / BODY attributes from helmet ---
+      if (helmet?.htmlAttributes) {
+        const htmlAttrsStr = helmet.htmlAttributes.toString();
+        if (htmlAttrsStr) {
+          htmlAttrsStr.split(/\s+/).forEach((pair) => {
+            const [key, ...rest] = pair.split("=");
+            if (!key) return;
+            const value = rest.join("=").replace(/^"|"$/g, "");
+            $("html").attr(key, value);
+          });
+        }
+      }
+      if (helmet?.bodyAttributes) {
+        const bodyAttrsStr = helmet.bodyAttributes.toString();
+        if (bodyAttrsStr) {
+          bodyAttrsStr.split(/\s+/).forEach((pair) => {
+            const [key, ...rest] = pair.split("=");
+            if (!key) return;
+            const value = rest.join("=").replace(/^"|"$/g, "");
+            $("body").attr(key, value);
+          });
+        }
+      }
+
+      // --- Replace <title> in <head> ---
       const titleStr = helmet?.title ? helmet.title.toString() : "";
+      if (titleStr) {
+        $("head title").remove();
+        $("head").append(titleStr);
+      }
+
+      // --- Remove default meta tags that Helmet will override, then append Helmet's ---
       const metaStr = helmet?.meta ? helmet.meta.toString() : "";
       const linkStr = helmet?.link ? helmet.link.toString() : "";
       const scriptStr = helmet?.script ? helmet.script.toString() : "";
-      const htmlAttrsStr = helmet?.htmlAttributes ? helmet.htmlAttributes.toString() : "";
-      const bodyAttrsStr = helmet?.bodyAttributes ? helmet.bodyAttributes.toString() : "";
 
-      // Replace <html> attributes if available
-      if (htmlAttrsStr) {
-        html = html.replace("<html", `<html ${htmlAttrsStr}`);
-      }
+      $('head meta[name="description"]').remove();
+      $('head meta[property^="og:"]').remove();
+      $('head link[rel="canonical"]').remove();
 
-      // Replace <body> attributes if available
-      if (bodyAttrsStr) {
-        html = html.replace("<body", `<body ${bodyAttrsStr}`);
-      }
+      if (metaStr) $("head").append(metaStr);
+      if (linkStr) $("head").append(linkStr);
+      if (scriptStr) $("head").append(scriptStr);
 
-      // Inject helmet head tags
-      const headContent = [titleStr, metaStr, linkStr, scriptStr].filter(Boolean).join("\n    ");
+      // --- Inject rendered app HTML into #root ---
+      $("#root").html(appHtml);
 
-      // Remove any default title tag from raw template if helmet supplied a new one
-      if (titleStr) {
-        html = html.replace(/<title>[\s\S]*?<\/title>/i, "");
-      }
-
-      // Inject head content before </head>
-      html = html.replace("</head>", `  ${headContent}\n</head>`);
-
-      // Inject rendered app HTML into #root
-      html = html.replace(
-        /<div id="root">[\s\S]*?<\/div>/,
-        `<div id="root">${appHtml}</div>`
-      );
+      const html = $.html();
 
       // Save output
       let destPath;

@@ -166,6 +166,19 @@ function sanitizeJSON(jsonStr: string): string {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- Legacy Base Path Redirect Middleware ---
+app.use((req: any, res: any, next: any) => {
+  if (req.path.startsWith('/yongshinhalmom/')) {
+    const cleanPath = req.path.replace(/^\/yongshinhalmom/, '') || '/';
+    const query = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    return res.redirect(301, cleanPath + query);
+  }
+  if (req.path === '/yongshinhalmom') {
+    return res.redirect(301, '/');
+  }
+  next();
+});
+
 // --- Explicit Static HTML Serving (High Priority) ---
 // This ensures /policies.html and /purchase.html are served as files, not handled by SPA fallback
 app.get("/policies.html", (req, res) => {

@@ -94,12 +94,20 @@ async function main() {
       }
 
       // --- Replace <title> in <head> ---
-      const titleStr = helmet?.title ? helmet.title.toString() : "";
-      if (titleStr) {
-        $("head title").remove();
-        $("head").append(titleStr);
-      }
-
+const titleStr = helmet?.title ? helmet.title.toString() : "";
+if (titleStr) {
+  const existingTitle = $("head > title");
+  if (existingTitle.length > 0) {
+    existingTitle.replaceWith(titleStr);
+  } else {
+    $("head").append(titleStr);
+  }
+  // 안전장치: 혹시라도 title이 2개 이상 남아있으면 첫 번째만 남기고 나머지 제거
+  const allTitles = $("head title");
+  if (allTitles.length > 1) {
+    allTitles.slice(1).remove();
+  }
+}
       // --- Remove default meta tags that Helmet will override, then append Helmet's ---
       const metaStr = helmet?.meta ? helmet.meta.toString() : "";
       const linkStr = helmet?.link ? helmet.link.toString() : "";

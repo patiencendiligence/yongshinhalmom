@@ -7,6 +7,7 @@ import { Language } from "../lib/translations";
 import { getStrongestElement, getStrongestElementFromReport } from "../utils/sajuUtils";
 import {  ArrowRight } from "lucide-react";
 interface ReportItemCardProps {
+  key?: React.Key;
   idx: number;
   section: ReportSection;
   isRefreshingDaily: boolean;

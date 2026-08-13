@@ -16,15 +16,11 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.ts"
+      "destination": "/api"
     },
     {
       "source": "/example/(.*)",
-      "destination": "/api/index.ts"
-    },
-    {
-      "source": "/naverdcc7e03800de1837121ae9c45b5e31db.html",
-      "destination": "/naverdcc7e03800de1837121ae9c45b5e31db.html"
+      "destination": "/api"
     },
     {
       "source": "/(.*)",

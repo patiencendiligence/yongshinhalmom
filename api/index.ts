@@ -1,3 +1,6 @@
+import { Request, Response } from 'express';
 import app from "../app.js";
 
-export default app;
+export default function handler(req: Request, res: Response) {
+  return app(req, res);
+}

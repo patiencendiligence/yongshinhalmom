@@ -110,17 +110,23 @@ export async function getPaymentStatus(userId: string, reportHash?: string) {
       return reportHash ? storageService.isLocalPaid(reportHash) : false;
     }
 
-    const hasPaid = data.some((row: any) => {
-      if (!row.is_premium) return false;
+    const premiumRows = data.filter((row: any) => row.is_premium);
+    const hasPaid = premiumRows.some((row: any) => {
       if (!reportHash) return true;
-      return !row.report_hash || row.report_hash === reportHash || row.report_hash === '*';
+      const rowHash = String(row.report_hash || '').trim();
+      return !rowHash || rowHash === reportHash || rowHash === '*' || rowHash === 'null';
     });
 
-    if (hasPaid && reportHash) {
+    // A user-level premium record should remain valid even when an older row was
+    // overwritten by user_id upsert and its report_hash no longer matches the
+    // current report. This prevents false negatives right after payment.
+    const isPremiumForUser = premiumRows.length > 0;
+
+    if ((hasPaid || isPremiumForUser) && reportHash) {
       storageService.setPaidHash(reportHash);
     }
 
-    return hasPaid || (reportHash ? storageService.isLocalPaid(reportHash) : false);
+    return hasPaid || isPremiumForUser || (reportHash ? storageService.isLocalPaid(reportHash) : false);
   } catch (e: any) {
     console.error(`[Supabase] ${e.message === 'SUPABASE_QUERY_TIMEOUT' ? 'Query Timed Out' : 'Fatal error'} in getPaymentStatus:`, e);
     return reportHash ? storageService.isLocalPaid(reportHash) : false;

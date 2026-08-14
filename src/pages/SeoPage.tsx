@@ -239,6 +239,10 @@ export default function SeoPage({
           <meta property="og:description" content={seoDesc} />
           <meta property="og:site_name" content="용신할멈" />
           <meta property="og:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
+          <meta name="twitter:card" content="summary_large_image" />
+          <meta name="twitter:title" content={`${seoTitle} - ${lang === "en" ? "Yongshin Halmeom" : "용신할멈"}`} />
+          <meta name="twitter:description" content={seoDesc} />
+          <meta name="twitter:image" content="https://yongshinhalmom.vercel.app/assets/yongshin.png" />
           <link
             rel="canonical"
             href={`https://yongshinhalmom.vercel.app/${category}/${slug}`}
@@ -246,29 +250,63 @@ export default function SeoPage({
           
           
       {seoTitle && (
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Article",
-              "headline": seoTitle,
-              "description": seoDesc,
-              "url": `https://yongshinhalmom.vercel.app/${category}/${slug}`,
-              "author": {
-                "@type": "Organization",
-                "name": "용신할멈"
-              },
-              "publisher": {
-                "@type": "Organization",
-                "name": "용신할멈"
-              },
-              "inLanguage": lang,
-              "mainEntityOfPage": {
-                "@type": "WebPage",
-                "@id": `https://yongshinhalmom.vercel.app/${category}/${slug}`
-              }
-            })}
-          </script>
-          
+          <>
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": seoTitle,
+                "description": seoDesc,
+                "image": "https://yongshinhalmom.vercel.app/assets/yongshin.png",
+                "datePublished": new Date(2024, 0, 1).toISOString(),
+                "dateModified": new Date().toISOString(),
+                "url": `https://yongshinhalmom.vercel.app/${category}/${slug}`,
+                "author": {
+                  "@type": "Organization",
+                  "name": "용신할멈"
+                },
+                "publisher": {
+                  "@type": "Organization",
+                  "name": "용신할멈",
+                  "logo": {
+                    "@type": "ImageObject",
+                    "url": "https://yongshinhalmom.vercel.app/favicon-192.png"
+                  }
+                },
+                "inLanguage": lang,
+                "mainEntityOfPage": {
+                  "@type": "WebPage",
+                  "@id": `https://yongshinhalmom.vercel.app/${category}/${slug}`
+                }
+              })}
+            </script>
+            <script type="application/ld+json">
+              {JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "BreadcrumbList",
+                "itemListElement": [
+                  {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "name": lang === "en" ? "Home" : "홈",
+                    "item": "https://yongshinhalmom.vercel.app"
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 2,
+                    "name": category ? category.charAt(0).toUpperCase() + category.slice(1) : "Category",
+                    "item": `https://yongshinhalmom.vercel.app/${category}`
+                  },
+                  {
+                    "@type": "ListItem",
+                    "position": 3,
+                    "name": seoTitle,
+                    "item": `https://yongshinhalmom.vercel.app/${category}/${slug}`
+                  }
+                ]
+              })}
+            </script>
+          </>
       )}
       <link rel="manifest" href="/manifest.json" />
       <link rel="icon" href="/favicon-192.png" />

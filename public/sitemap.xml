@@ -1,192 +1,315 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-
 <url>
   <loc>https://yongshinhalmom.vercel.app</loc>
+  <priority>1.0</priority>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/pricing</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/policies</loc>
+  <priority>0.5</priority>
+  <changefreq>yearly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/example/rich-ceo</loc>
+  <priority>0.8</priority>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/example/pop-star</loc>
+  <priority>0.8</priority>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/example/king-josun</loc>
+  <priority>0.8</priority>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-daewoon</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-gongmang</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-gunghap</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-ilgan</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-saju</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-samjae</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-seun</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-singang</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-sipsin</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/basic/what-is-yongshin</loc>
+  <priority>0.8</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-dream-interpretation</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-lucky-dream</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-nightmare</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-precognitive-dream</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-pregnancy-dream</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/dream/what-is-unlucky-dream</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/element/earth</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/element/fire</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/element/metal</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/element/water</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/element/wood</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/byeonghwa</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/eulmock</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/gapmock</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/gito</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/gyeonggeum</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/gyesu</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/imsu</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/junghwa</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/muto</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilgan/singeum</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/byeongin</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/eulchuk</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/eulhae</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/gapja</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/gapsul</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/gisa</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/gyeongo</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/gyeyu</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/jeonghae</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/jeongmyo</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/ilju/mujin</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sinsal/what-is-dohwasal</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sinsal/what-is-hwagaesal</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sinsal/what-is-sinsal</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sinsal/what-is-yeokmasal</loc>
+  <priority>0.7</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/bigyeon</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/geopjae</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/jeonggwan</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/jeongin</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/jeongjae</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/pyeongwan</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/pyeonin</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/pyeonjae</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/sanggwan</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 <url>
   <loc>https://yongshinhalmom.vercel.app/sipseong/siksin</loc>
+  <priority>0.6</priority>
+  <changefreq>monthly</changefreq>
 </url>
 
 </urlset>

@@ -6,6 +6,56 @@ import { getTodaysFortune, ReportResult, ReportSection } from "../services/gemin
 import { getManseRyeok } from "../lib/manseRyeok";
 import { Language } from "../lib/translations";
 
+function stringifyContentLikeText(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value == null) return "";
+
+  if (Array.isArray(value)) {
+    return value
+      .map(item => stringifyContentLikeText(item))
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  if (typeof value === "object") {
+    const obj = value as Record<string, any>;
+
+    const priorityKeys = ["content", "text", "summary", "description", "message", "analysis", "answer", "fortune"];
+    for (const key of priorityKeys) {
+      const nested = obj[key];
+      const nestedText = stringifyContentLikeText(nested);
+      if (nestedText.trim()) {
+        return nestedText;
+      }
+    }
+
+    if (Array.isArray(obj.sections)) {
+      return obj.sections
+        .map((section: any) => {
+          const title = section?.title ? `### ${section.title}` : "";
+          const body = stringifyContentLikeText(section?.content ?? section?.text ?? section?.summary ?? section);
+          return [title, body].filter(Boolean).join("\n\n");
+        })
+        .filter(Boolean)
+        .join("\n\n");
+    }
+
+    const flattened = Object.entries(obj)
+      .filter(([key]) => !["id", "title", "type", "status", "createdAt", "updatedAt", "userId", "language", "level", "zodiac", "luckInfo", "todaysFortune"].includes(key))
+      .map(([key, entry]) => {
+        const text = stringifyContentLikeText(entry);
+        return text ? `- ${key}: ${text}` : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+
+    if (flattened.trim()) return flattened;
+    return "";
+  }
+
+  return String(value);
+}
+
 function parseLuckInfo(luckInfo: any): { color: string; item: string; food: string; location?: string } | null {
   if (!luckInfo) return null;
   if (typeof luckInfo === "object") {
@@ -101,21 +151,21 @@ export function useReportResult({
             let contentStr = "";
             if (typeof cachedResponse.content === "string") {
               contentStr = cachedResponse.content;
-            } else if (typeof cachedResponse.content === "object" && cachedResponse.content !== null) {
-              contentStr = JSON.stringify(cachedResponse.content);
+            } else if (cachedResponse.content != null) {
+              contentStr = stringifyContentLikeText(cachedResponse.content);
             } else if (typeof cachedResponse === "string") {
               contentStr = cachedResponse;
             } else if (typeof cachedResponse.todaysFortune?.content === "string") {
               contentStr = cachedResponse.todaysFortune.content;
-            } else if (typeof cachedResponse.todaysFortune === "string") {
-              contentStr = cachedResponse.todaysFortune;
+            } else if (cachedResponse.todaysFortune != null) {
+              contentStr = stringifyContentLikeText(cachedResponse.todaysFortune);
             } else {
               const keys = Object.keys(cachedResponse);
               const contentKey = keys.find(k => k.toLowerCase().includes("content") || k.toLowerCase().includes("fortune") || k.toLowerCase().includes("text"));
-              if (contentKey && typeof cachedResponse[contentKey] === "string") {
-                contentStr = cachedResponse[contentKey];
+              if (contentKey && cachedResponse[contentKey] != null) {
+                contentStr = stringifyContentLikeText(cachedResponse[contentKey]);
               } else {
-                contentStr = JSON.stringify(cachedResponse);
+                contentStr = stringifyContentLikeText(cachedResponse);
               }
             }
 
@@ -201,21 +251,21 @@ export function useReportResult({
           let contentStr = "";
           if (typeof fresh.content === "string") {
             contentStr = fresh.content;
-          } else if (typeof (fresh as any).content === "object" && (fresh as any).content !== null) {
-            contentStr = JSON.stringify((fresh as any).content);
+          } else if ((fresh as any).content != null) {
+            contentStr = stringifyContentLikeText((fresh as any).content);
           } else if (typeof fresh === "string") {
             contentStr = fresh;
           } else if (typeof (fresh as any).todaysFortune?.content === "string") {
             contentStr = (fresh as any).todaysFortune.content;
-          } else if (typeof (fresh as any).todaysFortune === "string") {
-            contentStr = (fresh as any).todaysFortune;
+          } else if ((fresh as any).todaysFortune != null) {
+            contentStr = stringifyContentLikeText((fresh as any).todaysFortune);
           } else {
             const keys = Object.keys(fresh);
             const contentKey = keys.find(k => k.toLowerCase().includes("content") || k.toLowerCase().includes("fortune") || k.toLowerCase().includes("text"));
-            if (contentKey && typeof (fresh as any)[contentKey] === "string") {
-              contentStr = (fresh as any)[contentKey];
+            if (contentKey && (fresh as any)[contentKey] != null) {
+              contentStr = stringifyContentLikeText((fresh as any)[contentKey]);
             } else {
-              contentStr = JSON.stringify(fresh);
+              contentStr = stringifyContentLikeText(fresh);
             }
           }
 
